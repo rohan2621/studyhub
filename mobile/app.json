@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "StudyHub",
+    "slug": "studyhub",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "studyhub",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.studyhub.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
