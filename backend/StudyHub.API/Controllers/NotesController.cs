@@ -18,21 +18,32 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
         [FromQuery] NoteType? type,
         [FromQuery] string? subject,
         [FromQuery] string? chapter,
+        [FromQuery] string? grade,
+        [FromQuery] string? section,
+        [FromQuery] Guid? schoolId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
-        var grade = User.FindFirstValue("grade") ?? "";
+        var claimsSchoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        var userGrade = User.FindFirstValue("grade") ?? "";
+        var userSection = User.FindFirstValue("section") ?? "";
         var isAdmin = User.IsInRole("Admin");
 
-        // Students only see notes for their grade; admins see all (or use query param)
-        var targetGrade = Request.Query.ContainsKey("grade")
-            ? Request.Query["grade"].ToString()
-            : (isAdmin ? null : grade);
+        var targetSchoolId = isAdmin && schoolId.HasValue ? schoolId.Value : claimsSchoolId;
 
-        var query = db.Notes.Where(n => n.SchoolId == schoolId);
-        if (targetGrade is not null) query = query.Where(n => n.Grade == targetGrade);
+        var query = db.Notes.Where(n => n.SchoolId == targetSchoolId);
+
+        if (!isAdmin)
+        {
+            query = query.Where(n => n.Grade == userGrade && (n.Section == null || n.Section == userSection));
+        }
+        else
+        {
+            if (!string.IsNullOrEmpty(grade)) query = query.Where(n => n.Grade == grade);
+            if (!string.IsNullOrEmpty(section)) query = query.Where(n => n.Section == section);
+        }
+
         if (type.HasValue) query = query.Where(n => n.Type == type.Value);
         if (subject is not null) query = query.Where(n => n.Subject == subject);
         if (chapter is not null) query = query.Where(n => n.Chapter.ToLower().Contains(chapter.ToLower()));
@@ -48,6 +59,7 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
             {
                 n.Id,
                 n.Grade,
+                n.Section,
                 n.Subject,
                 n.Chapter,
                 n.Title,
@@ -80,6 +92,8 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
         return Ok(new
         {
             note.Id,
+            note.Grade,
+            note.Section,
             note.Subject,
             note.Chapter,
             note.Title,
@@ -109,10 +123,16 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
         if (!new[] { "8", "9", "10", "11", "12" }.Contains(req.Grade))
             return BadRequest(new { error = "Grade must be 8–12." });
 
+        // Validate section if provided
+        var section = req.Section?.Trim().ToUpper();
+        if (!string.IsNullOrEmpty(section) && !new[] { "A", "B", "C", "D", "E" }.Contains(section))
+            return BadRequest(new { error = "Section must be A–E." });
+
         var note = new Note
         {
             SchoolId   = schoolId,
             Grade      = req.Grade,
+            Section    = string.IsNullOrEmpty(section) ? null : section,
             Subject    = req.Subject,
             Chapter    = req.Chapter,
             Title      = req.Title,
@@ -129,10 +149,11 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
         {
             try
             {
+                var targetClass = $"Class {req.Grade}{(string.IsNullOrEmpty(section) ? "" : section)}";
                 await notificationService.CreateForSchoolAsync(
                     schoolId,
                     NotificationType.NewNote,
-                    $"New {req.Type} — Class {req.Grade}: {req.Title}",
+                    $"New {req.Type} — {targetClass}: {req.Title}",
                     $"New {req.Subject} content uploaded in {req.Chapter}",
                     $"/notes/{note.Id}");
             }
@@ -176,7 +197,17 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
         var note = await db.Notes.FindAsync(id);
         if (note is null) return NotFound();
 
+        // Validate grade
+        if (!new[] { "8", "9", "10", "11", "12" }.Contains(req.Grade))
+            return BadRequest(new { error = "Grade must be 8–12." });
+
+        // Validate section if provided
+        var section = req.Section?.Trim().ToUpper();
+        if (!string.IsNullOrEmpty(section) && !new[] { "A", "B", "C", "D", "E" }.Contains(section))
+            return BadRequest(new { error = "Section must be A–E." });
+
         note.Grade   = req.Grade;
+        note.Section = string.IsNullOrEmpty(section) ? null : section;
         note.Subject = req.Subject;
         note.Chapter = req.Chapter;
         note.Title   = req.Title;
@@ -215,4 +246,5 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
 public record CreateNoteRequest(
     string Grade, string Subject, string Chapter,
     string Title, string FileUrl, NoteType Type,
+    string? Section = null,
     Guid? TargetSchoolId = null);

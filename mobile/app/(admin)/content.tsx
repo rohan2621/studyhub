@@ -10,7 +10,7 @@ import Toast from "react-native-toast-message";
 import { format } from "date-fns";
 import {
   ArrowLeft, BookOpen, ClipboardList, FileStack, Calendar,
-  Plus, Trash2, School, X, CheckCircle2,
+  Plus, Trash2, School, X, CheckCircle2, Edit2,
 } from "lucide-react-native";
 import { api } from "../../lib/api";
 import { useThemeStore } from "../../stores/themeStore";
@@ -21,6 +21,8 @@ type Tab = typeof TABS[number];
 const NOTE_TYPES = ["Regular", "Topper"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const TERMS = ["First", "Second", "Third", "Final"];
+const GRADES_OPTIONS = ["8", "9", "10", "11", "12"];
+const SECTIONS_OPTIONS = ["A", "B", "C", "D", "E"];
 
 // Reusable school picker component
 function SchoolPicker({ schools, selectedId, selectedName, onSelect, colors }: any) {
@@ -71,6 +73,7 @@ export default function AdminContentScreen() {
 
   // ── Create form ──
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [targetSchoolId, setTargetSchoolId] = useState("");
   const [targetSchoolName, setTargetSchoolName] = useState("");
 
@@ -80,21 +83,28 @@ export default function AdminContentScreen() {
   const [noteChapter, setNoteChapter] = useState("");
   const [noteFileUrl, setNoteFileUrl] = useState("");
   const [noteType, setNoteType] = useState("Regular");
+  const [noteGrade, setNoteGrade] = useState("10");
+  const [noteSection, setNoteSection] = useState("");
 
   // Homework fields
   const [hwTitle, setHwTitle] = useState("");
   const [hwSubject, setHwSubject] = useState("");
   const [hwDesc, setHwDesc] = useState("");
   const [hwDue, setHwDue] = useState("");
+  const [hwGrade, setHwGrade] = useState("10");
+  const [hwSection, setHwSection] = useState("A");
 
   // Past Paper fields
   const [ppSubject, setPpSubject] = useState("");
   const [ppYear, setPpYear] = useState(String(new Date().getFullYear()));
   const [ppTerm, setPpTerm] = useState("Final");
   const [ppFileUrl, setPpFileUrl] = useState("");
+  const [ppGrade, setPpGrade] = useState("");
+  const [ppSection, setPpSection] = useState("");
 
   // Timetable fields
-  const [ttGrade, setTtGrade] = useState("");
+  const [ttGrade, setTtGrade] = useState("10");
+  const [ttSection, setTtSection] = useState("A");
   const [ttDay, setTtDay] = useState("Monday");
   const [ttPeriod, setTtPeriod] = useState("1");
   const [ttSubject, setTtSubject] = useState("");
@@ -127,15 +137,18 @@ export default function AdminContentScreen() {
 
   const { data: papers, isLoading: papersLoading, refetch: refetchPapers } = useQuery({
     queryKey: ["adminPapers", viewSchoolId],
-    queryFn: async () => (await api.get("/past-papers")).data ?? [],
+    queryFn: async () => {
+      const params = viewSchoolId ? `?schoolId=${viewSchoolId}` : "";
+      return (await api.get(`/past-papers${params}`)).data ?? [];
+    },
     enabled: activeTab === "Papers",
   });
 
   const { data: slots, isLoading: slotsLoading, refetch: refetchSlots } = useQuery({
     queryKey: ["adminSlots", viewSchoolId],
     queryFn: async () => {
-      const params = viewSchoolId ? `?grade=` : "";
-      return (await api.get(`/timetable`)).data ?? [];
+      const params = viewSchoolId ? `?schoolId=${viewSchoolId}` : "";
+      return (await api.get(`/timetable${params}`)).data ?? [];
     },
     enabled: activeTab === "Timetable",
   });
@@ -145,48 +158,117 @@ export default function AdminContentScreen() {
 
   const resetModal = () => {
     setShowModal(false);
+    setEditingId(null);
     setTargetSchoolId(""); setTargetSchoolName("");
     setNoteTitle(""); setNoteSubject(""); setNoteChapter(""); setNoteFileUrl(""); setNoteType("Regular");
+    setNoteGrade("10"); setNoteSection("");
     setHwTitle(""); setHwSubject(""); setHwDesc(""); setHwDue("");
+    setHwGrade("10"); setHwSection("A");
     setPpSubject(""); setPpYear(String(new Date().getFullYear())); setPpTerm("Final"); setPpFileUrl("");
-    setTtGrade(""); setTtDay("Monday"); setTtPeriod("1"); setTtSubject(""); setTtStart("08:00"); setTtEnd("09:00");
+    setPpGrade(""); setPpSection("");
+    setTtGrade("10"); setTtSection("A"); setTtDay("Monday"); setTtPeriod("1"); setTtSubject(""); setTtStart("08:00"); setTtEnd("09:00");
   };
 
-  const createNoteMutation = useMutation({
-    mutationFn: async () => (await api.post("/notes", {
-      title: noteTitle, subject: noteSubject, chapter: noteChapter, fileUrl: noteFileUrl, type: noteType,
-      targetSchoolId: targetSchoolId || null,
-    })).data,
-    onSuccess: () => { Toast.show({ type: "success", text1: "Note created!" }); resetModal(); refetchNotes(); },
+  const saveNoteMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        title: noteTitle,
+        subject: noteSubject,
+        chapter: noteChapter,
+        fileUrl: noteFileUrl,
+        type: noteType === "Topper" ? "TopperNote" : "Note",
+        grade: noteGrade,
+        section: noteSection || null,
+        targetSchoolId: targetSchoolId || null,
+      };
+      if (editingId) {
+        return (await api.put(`/notes/${editingId}`, payload)).data;
+      } else {
+        return (await api.post("/notes", payload)).data;
+      }
+    },
+    onSuccess: () => {
+      Toast.show({ type: "success", text1: editingId ? "Note updated!" : "Note created!" });
+      resetModal();
+      refetchNotes();
+    },
     onError: (e: any) => Toast.show({ type: "error", text1: e.response?.data?.error ?? "Failed" }),
   });
 
-  const createHwMutation = useMutation({
-    mutationFn: async () => (await api.post("/homework", {
-      title: hwTitle, subject: hwSubject, description: hwDesc,
-      dueAt: new Date(hwDue).toISOString(), attachmentUrl: null,
-      targetSchoolId: targetSchoolId || null,
-    })).data,
-    onSuccess: () => { Toast.show({ type: "success", text1: "Homework created!" }); resetModal(); refetchHw(); },
+  const saveHwMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        title: hwTitle,
+        subject: hwSubject,
+        description: hwDesc,
+        dueAt: new Date(hwDue).toISOString(),
+        grade: hwGrade,
+        section: hwSection,
+        attachmentUrl: null,
+        targetSchoolId: targetSchoolId || null,
+      };
+      if (editingId) {
+        return (await api.put(`/homework/${editingId}`, payload)).data;
+      } else {
+        return (await api.post("/homework", payload)).data;
+      }
+    },
+    onSuccess: () => {
+      Toast.show({ type: "success", text1: editingId ? "Homework updated!" : "Homework created!" });
+      resetModal();
+      refetchHw();
+    },
     onError: (e: any) => Toast.show({ type: "error", text1: e.response?.data?.error ?? "Failed" }),
   });
 
-  const createPaperMutation = useMutation({
-    mutationFn: async () => (await api.post("/past-papers", {
-      subject: ppSubject, year: parseInt(ppYear), term: ppTerm, fileUrl: ppFileUrl,
-      targetSchoolId: targetSchoolId || null,
-    })).data,
-    onSuccess: () => { Toast.show({ type: "success", text1: "Past paper added!" }); resetModal(); refetchPapers(); },
+  const savePaperMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        subject: ppSubject,
+        year: parseInt(ppYear),
+        term: ppTerm,
+        fileUrl: ppFileUrl,
+        grade: ppGrade || null,
+        section: ppSection || null,
+        targetSchoolId: targetSchoolId || null,
+      };
+      if (editingId) {
+        return (await api.put(`/past-papers/${editingId}`, payload)).data;
+      } else {
+        return (await api.post("/past-papers", payload)).data;
+      }
+    },
+    onSuccess: () => {
+      Toast.show({ type: "success", text1: editingId ? "Past paper updated!" : "Past paper added!" });
+      resetModal();
+      refetchPapers();
+    },
     onError: (e: any) => Toast.show({ type: "error", text1: e.response?.data?.error ?? "Failed" }),
   });
 
-  const createSlotMutation = useMutation({
-    mutationFn: async () => (await api.post("/timetable", {
-      grade: ttGrade, day: ttDay, period: parseInt(ttPeriod), subject: ttSubject,
-      startTime: ttStart + ":00", endTime: ttEnd + ":00",
-      targetSchoolId: targetSchoolId || null,
-    })).data,
-    onSuccess: () => { Toast.show({ type: "success", text1: "Slot added!" }); resetModal(); refetchSlots(); },
+  const saveSlotMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        grade: ttGrade,
+        section: ttSection,
+        day: ttDay,
+        period: parseInt(ttPeriod),
+        subject: ttSubject,
+        startTime: ttStart.length === 5 ? ttStart + ":00" : ttStart,
+        endTime: ttEnd.length === 5 ? ttEnd + ":00" : ttEnd,
+        targetSchoolId: targetSchoolId || null,
+      };
+      if (editingId) {
+        return (await api.put(`/timetable/${editingId}`, payload)).data;
+      } else {
+        return (await api.post("/timetable", payload)).data;
+      }
+    },
+    onSuccess: () => {
+      Toast.show({ type: "success", text1: editingId ? "Slot updated!" : "Slot added!" });
+      resetModal();
+      refetchSlots();
+    },
     onError: (e: any) => Toast.show({ type: "error", text1: e.response?.data?.error ?? "Failed" }),
   });
 
@@ -207,14 +289,60 @@ export default function AdminContentScreen() {
     onSuccess: () => { Toast.show({ type: "success", text1: "Deleted" }); refetchSlots(); },
   });
 
-  const handleCreate = () => {
-    if (activeTab === "Notes") createNoteMutation.mutate();
-    else if (activeTab === "Homework") createHwMutation.mutate();
-    else if (activeTab === "Papers") createPaperMutation.mutate();
-    else createSlotMutation.mutate();
+  const handleEditNote = (n: any) => {
+    setEditingId(n.id);
+    setNoteTitle(n.title);
+    setNoteSubject(n.subject);
+    setNoteChapter(n.chapter);
+    setNoteFileUrl(n.fileUrl);
+    setNoteType(n.type === "TopperNote" || n.type === "Topper" ? "Topper" : "Regular");
+    setNoteGrade(n.grade || "10");
+    setNoteSection(n.section || "");
+    setShowModal(true);
   };
 
-  const isPending = createNoteMutation.isPending || createHwMutation.isPending || createPaperMutation.isPending || createSlotMutation.isPending;
+  const handleEditHw = (h: any) => {
+    setEditingId(h.id);
+    setHwTitle(h.title);
+    setHwSubject(h.subject);
+    setHwDesc(h.description || "");
+    setHwDue(h.dueAt ? format(new Date(h.dueAt), "yyyy-MM-dd") : "");
+    setHwGrade(h.grade || "10");
+    setHwSection(h.section || "A");
+    setShowModal(true);
+  };
+
+  const handleEditPaper = (p: any) => {
+    setEditingId(p.id);
+    setPpSubject(p.subject);
+    setPpYear(String(p.year));
+    setPpTerm(p.term || "Final");
+    setPpFileUrl(p.fileUrl);
+    setPpGrade(p.grade || "");
+    setPpSection(p.section || "");
+    setShowModal(true);
+  };
+
+  const handleEditSlot = (s: any) => {
+    setEditingId(s.id);
+    setTtGrade(s.grade || "10");
+    setTtSection(s.section || "A");
+    setTtDay(s.day || "Monday");
+    setTtPeriod(String(s.period));
+    setTtSubject(s.subject);
+    setTtStart(s.startTime?.slice(0, 5) || "08:00");
+    setTtEnd(s.endTime?.slice(0, 5) || "09:00");
+    setShowModal(true);
+  };
+
+  const handleCreate = () => {
+    if (activeTab === "Notes") saveNoteMutation.mutate();
+    else if (activeTab === "Homework") saveHwMutation.mutate();
+    else if (activeTab === "Papers") savePaperMutation.mutate();
+    else saveSlotMutation.mutate();
+  };
+
+  const isPending = saveNoteMutation.isPending || saveHwMutation.isPending || savePaperMutation.isPending || saveSlotMutation.isPending;
 
   const TAB_ICONS: Record<Tab, any> = {
     Notes: BookOpen, Homework: ClipboardList, Papers: FileStack, Timetable: Calendar,
@@ -236,11 +364,16 @@ export default function AdminContentScreen() {
               <View style={{ flex: 1, marginRight: 10 }}>
                 <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15 }}>{n.title}</Text>
                 <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{n.subject} · {n.chapter}</Text>
-                <Text style={{ color: colors.muted, fontSize: 11, marginTop: 2 }}>{n.type} · {n.upvotes ?? 0} upvotes</Text>
+                <Text style={{ color: colors.muted, fontSize: 11, marginTop: 2 }}>{n.type === "TopperNote" ? "Topper" : "Regular"} · Class {n.grade}{n.section ? n.section : " (All)"} · {n.upvotes ?? 0} upvotes</Text>
               </View>
-              <TouchableOpacity onPress={() => deleteNoteMutation.mutate(n.id)} style={{ backgroundColor: colors.danger + "18", borderRadius: 10, padding: 8 }}>
-                <Trash2 size={14} color={colors.danger} />
-              </TouchableOpacity>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <TouchableOpacity onPress={() => handleEditNote(n)} style={{ backgroundColor: colors.primary + "18", borderRadius: 10, padding: 8 }}>
+                  <Edit2 size={14} color={colors.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteNoteMutation.mutate(n.id)} style={{ backgroundColor: colors.danger + "18", borderRadius: 10, padding: 8 }}>
+                  <Trash2 size={14} color={colors.danger} />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         ));
@@ -255,12 +388,17 @@ export default function AdminContentScreen() {
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
               <View style={{ flex: 1, marginRight: 10 }}>
                 <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15 }}>{h.title}</Text>
-                <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{h.subject}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{h.subject} · Class {h.grade}{h.section}</Text>
                 <Text style={{ color: colors.muted, fontSize: 11, marginTop: 2 }}>Due: {h.dueAt ? format(new Date(h.dueAt), "MMM dd, yyyy") : "—"}</Text>
               </View>
-              <TouchableOpacity onPress={() => deleteHwMutation.mutate(h.id)} style={{ backgroundColor: colors.danger + "18", borderRadius: 10, padding: 8 }}>
-                <Trash2 size={14} color={colors.danger} />
-              </TouchableOpacity>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <TouchableOpacity onPress={() => handleEditHw(h)} style={{ backgroundColor: colors.primary + "18", borderRadius: 10, padding: 8 }}>
+                  <Edit2 size={14} color={colors.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteHwMutation.mutate(h.id)} style={{ backgroundColor: colors.danger + "18", borderRadius: 10, padding: 8 }}>
+                  <Trash2 size={14} color={colors.danger} />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         ));
@@ -275,11 +413,16 @@ export default function AdminContentScreen() {
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
               <View style={{ flex: 1, marginRight: 10 }}>
                 <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15 }}>{p.subject}</Text>
-                <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{p.year} · {p.term}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{p.year} · {p.term} · Class {p.grade ?? "School-wide"}{p.section ? ` (${p.section})` : ""}</Text>
               </View>
-              <TouchableOpacity onPress={() => deletePaperMutation.mutate(p.id)} style={{ backgroundColor: colors.danger + "18", borderRadius: 10, padding: 8 }}>
-                <Trash2 size={14} color={colors.danger} />
-              </TouchableOpacity>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <TouchableOpacity onPress={() => handleEditPaper(p)} style={{ backgroundColor: colors.primary + "18", borderRadius: 10, padding: 8 }}>
+                  <Edit2 size={14} color={colors.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deletePaperMutation.mutate(p.id)} style={{ backgroundColor: colors.danger + "18", borderRadius: 10, padding: 8 }}>
+                  <Trash2 size={14} color={colors.danger} />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         ));
@@ -294,12 +437,17 @@ export default function AdminContentScreen() {
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
             <View style={{ flex: 1, marginRight: 10 }}>
               <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15 }}>{s.subject}</Text>
-              <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{s.day} · Period {s.period} · Grade {s.grade}</Text>
-              <Text style={{ color: colors.muted, fontSize: 11, marginTop: 2 }}>{s.startTime} – {s.endTime}</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{s.day} · Period {s.period} · Class {s.grade}{s.section}</Text>
+              <Text style={{ color: colors.muted, fontSize: 11, marginTop: 2 }}>{s.startTime?.slice(0, 5)} – {s.endTime?.slice(0, 5)}</Text>
             </View>
-            <TouchableOpacity onPress={() => deleteSlotMutation.mutate(s.id)} style={{ backgroundColor: colors.danger + "18", borderRadius: 10, padding: 8 }}>
-              <Trash2 size={14} color={colors.danger} />
-            </TouchableOpacity>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <TouchableOpacity onPress={() => handleEditSlot(s)} style={{ backgroundColor: colors.primary + "18", borderRadius: 10, padding: 8 }}>
+                <Edit2 size={14} color={colors.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => deleteSlotMutation.mutate(s.id)} style={{ backgroundColor: colors.danger + "18", borderRadius: 10, padding: 8 }}>
+                <Trash2 size={14} color={colors.danger} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       ));
@@ -374,7 +522,7 @@ export default function AdminContentScreen() {
               {/* Header */}
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: colors.border }}>
                 <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800" }}>
-                  Add {activeTab === "Notes" ? "Note" : activeTab === "Homework" ? "Homework" : activeTab === "Papers" ? "Past Paper" : "Timetable Slot"}
+                  {editingId ? "Edit" : "Add"} {activeTab === "Notes" ? "Note" : activeTab === "Homework" ? "Homework" : activeTab === "Papers" ? "Past Paper" : "Timetable Slot"}
                 </Text>
                 <TouchableOpacity onPress={resetModal} style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: colors.inputBg, justifyContent: "center", alignItems: "center" }}>
                   <X size={18} color={colors.muted} />
@@ -405,6 +553,31 @@ export default function AdminContentScreen() {
                         </TouchableOpacity>
                       ))}
                     </View>
+
+                    <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }}>CLASS (GRADE)</Text>
+                    <View style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}>
+                      {GRADES_OPTIONS.map((g) => (
+                        <TouchableOpacity key={g} onPress={() => setNoteGrade(g)}
+                          style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: "center", backgroundColor: noteGrade === g ? TAB_COLORS.Notes : colors.inputBg, borderWidth: 1, borderColor: noteGrade === g ? TAB_COLORS.Notes : colors.border }}>
+                          <Text style={{ color: noteGrade === g ? "#fff" : colors.textMuted, fontWeight: "700" }}>{g}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }}>SECTION</Text>
+                    <View style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}>
+                      {["All", ...SECTIONS_OPTIONS].map((s) => {
+                        const isAll = s === "All";
+                        const active = isAll ? noteSection === "" : noteSection === s;
+                        return (
+                          <TouchableOpacity key={s} onPress={() => setNoteSection(isAll ? "" : s)}
+                            style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: "center", backgroundColor: active ? TAB_COLORS.Notes : colors.inputBg, borderWidth: 1, borderColor: active ? TAB_COLORS.Notes : colors.border }}>
+                            <Text style={{ color: active ? "#fff" : colors.textMuted, fontWeight: "700" }}>{s}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+
                     {[["Title", noteTitle, setNoteTitle, "Note title"], ["Subject", noteSubject, setNoteSubject, "e.g. Mathematics"], ["Chapter", noteChapter, setNoteChapter, "e.g. Algebra"], ["File URL", noteFileUrl, setNoteFileUrl, "https://drive.google.com/..."]].map(([label, val, setter, ph]: any) => (
                       <View key={label}>
                         <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 6 }}>{(label as string).toUpperCase()}</Text>
@@ -418,6 +591,26 @@ export default function AdminContentScreen() {
                 {/* ── HOMEWORK FORM ── */}
                 {activeTab === "Homework" && (
                   <>
+                    <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }}>CLASS (GRADE)</Text>
+                    <View style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}>
+                      {GRADES_OPTIONS.map((g) => (
+                        <TouchableOpacity key={g} onPress={() => setHwGrade(g)}
+                          style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: "center", backgroundColor: hwGrade === g ? TAB_COLORS.Homework : colors.inputBg, borderWidth: 1, borderColor: hwGrade === g ? TAB_COLORS.Homework : colors.border }}>
+                          <Text style={{ color: hwGrade === g ? "#fff" : colors.textMuted, fontWeight: "700" }}>{g}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }}>SECTION</Text>
+                    <View style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}>
+                      {SECTIONS_OPTIONS.map((s) => (
+                        <TouchableOpacity key={s} onPress={() => setHwSection(s)}
+                          style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: "center", backgroundColor: hwSection === s ? TAB_COLORS.Homework : colors.inputBg, borderWidth: 1, borderColor: hwSection === s ? TAB_COLORS.Homework : colors.border }}>
+                          <Text style={{ color: hwSection === s ? "#fff" : colors.textMuted, fontWeight: "700" }}>{s}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
                     {[["Title", hwTitle, setHwTitle, "e.g. Chapter 5 exercises"], ["Subject", hwSubject, setHwSubject, "e.g. Mathematics"], ["Description", hwDesc, setHwDesc, "Describe the homework..."]].map(([label, val, setter, ph]: any) => (
                       <View key={label}>
                         <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 6 }}>{(label as string).toUpperCase()}</Text>
@@ -435,6 +628,34 @@ export default function AdminContentScreen() {
                 {/* ── PAST PAPERS FORM ── */}
                 {activeTab === "Papers" && (
                   <>
+                    <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }}>CLASS (GRADE)</Text>
+                    <View style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}>
+                      {["All", ...GRADES_OPTIONS].map((g) => {
+                        const isAll = g === "All";
+                        const active = isAll ? ppGrade === "" : ppGrade === g;
+                        return (
+                          <TouchableOpacity key={g} onPress={() => setPpGrade(isAll ? "" : g)}
+                            style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: "center", backgroundColor: active ? TAB_COLORS.Papers : colors.inputBg, borderWidth: 1, borderColor: active ? TAB_COLORS.Papers : colors.border }}>
+                            <Text style={{ color: active ? "#fff" : colors.textMuted, fontWeight: "700" }}>{g}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+
+                    <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }}>SECTION</Text>
+                    <View style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}>
+                      {["All", ...SECTIONS_OPTIONS].map((s) => {
+                        const isAll = s === "All";
+                        const active = isAll ? ppSection === "" : ppSection === s;
+                        return (
+                          <TouchableOpacity key={s} onPress={() => setPpSection(isAll ? "" : s)}
+                            style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: "center", backgroundColor: active ? TAB_COLORS.Papers : colors.inputBg, borderWidth: 1, borderColor: active ? TAB_COLORS.Papers : colors.border }}>
+                            <Text style={{ color: active ? "#fff" : colors.textMuted, fontWeight: "700" }}>{s}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+
                     <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 6 }}>SUBJECT</Text>
                     <TextInput value={ppSubject} onChangeText={setPpSubject} placeholder="e.g. Mathematics" placeholderTextColor={colors.muted}
                       style={{ backgroundColor: colors.inputBg, borderRadius: 12, padding: 14, color: colors.text, borderWidth: 1, borderColor: ppSubject ? TAB_COLORS.Papers : colors.border, marginBottom: 16, fontSize: 14 }} />
@@ -470,7 +691,28 @@ export default function AdminContentScreen() {
                         ))}
                       </View>
                     </ScrollView>
-                    {[["Grade", ttGrade, setTtGrade, "e.g. 10"], ["Period #", ttPeriod, setTtPeriod, "e.g. 1"], ["Subject", ttSubject, setTtSubject, "e.g. Mathematics"], ["Start (HH:MM)", ttStart, setTtStart, "08:00"], ["End (HH:MM)", ttEnd, setTtEnd, "09:00"]].map(([label, val, setter, ph]: any) => (
+
+                    <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }}>CLASS (GRADE)</Text>
+                    <View style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}>
+                      {GRADES_OPTIONS.map((g) => (
+                        <TouchableOpacity key={g} onPress={() => setTtGrade(g)}
+                          style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: "center", backgroundColor: ttGrade === g ? TAB_COLORS.Timetable : colors.inputBg, borderWidth: 1, borderColor: ttGrade === g ? TAB_COLORS.Timetable : colors.border }}>
+                          <Text style={{ color: ttGrade === g ? "#fff" : colors.textMuted, fontWeight: "700" }}>{g}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }}>SECTION</Text>
+                    <View style={{ flexDirection: "row", gap: 6, marginBottom: 16 }}>
+                      {SECTIONS_OPTIONS.map((s) => (
+                        <TouchableOpacity key={s} onPress={() => setTtSection(s)}
+                          style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: "center", backgroundColor: ttSection === s ? TAB_COLORS.Timetable : colors.inputBg, borderWidth: 1, borderColor: ttSection === s ? TAB_COLORS.Timetable : colors.border }}>
+                          <Text style={{ color: ttSection === s ? "#fff" : colors.textMuted, fontWeight: "700" }}>{s}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    {[["Period #", ttPeriod, setTtPeriod, "e.g. 1"], ["Subject", ttSubject, setTtSubject, "e.g. Mathematics"], ["Start (HH:MM)", ttStart, setTtStart, "08:00"], ["End (HH:MM)", ttEnd, setTtEnd, "09:00"]].map(([label, val, setter, ph]: any) => (
                       <View key={label}>
                         <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1, marginBottom: 6 }}>{(label as string).toUpperCase()}</Text>
                         <TextInput value={val} onChangeText={setter} placeholder={ph} placeholderTextColor={colors.muted}
@@ -498,7 +740,9 @@ export default function AdminContentScreen() {
                   {isPending ? <ActivityIndicator color="#fff" /> : (
                     <>
                       <Plus size={18} color="#fff" />
-                      <Text style={{ color: "#fff", fontWeight: "800", fontSize: 17 }}>Create {activeTab === "Notes" ? "Note" : activeTab === "Homework" ? "Homework" : activeTab === "Papers" ? "Paper" : "Slot"}</Text>
+                      <Text style={{ color: "#fff", fontWeight: "800", fontSize: 17 }}>
+                        {editingId ? "Save Changes" : `Create ${activeTab === "Notes" ? "Note" : activeTab === "Homework" ? "Homework" : activeTab === "Papers" ? "Paper" : "Slot"}`}
+                      </Text>
                     </>
                   )}
                 </TouchableOpacity>

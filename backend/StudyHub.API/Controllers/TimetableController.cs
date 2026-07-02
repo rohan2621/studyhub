@@ -20,8 +20,10 @@ public class TimetableController(AppDbContext db) : ControllerBase
         var section = User.FindFirstValue("section") ?? "A";
         var isAdmin = User.IsInRole("Admin");
 
-        var query = db.TimetableSlots.Where(t => t.SchoolId == schoolId);
-
+        var targetSchoolId = isAdmin && Request.Query.ContainsKey("schoolId") && Guid.TryParse(Request.Query["schoolId"], out var sId)
+            ? sId
+            : schoolId;
+        var query = db.TimetableSlots.Where(t => t.SchoolId == targetSchoolId);
         if (!isAdmin)
         {
             // Students auto-scoped to their grade + section

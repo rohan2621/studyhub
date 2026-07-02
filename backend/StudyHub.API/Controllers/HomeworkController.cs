@@ -26,7 +26,10 @@ public class HomeworkController(AppDbContext db, NotificationService notificatio
         var isAdmin = User.IsInRole("Admin");
 
         // Students see only their class section's homework; admins can see all
-        var query = db.Homeworks.Where(h => h.SchoolId == schoolId);
+        var targetSchoolId = isAdmin && Request.Query.ContainsKey("schoolId") && Guid.TryParse(Request.Query["schoolId"], out var sId)
+            ? sId
+            : schoolId;
+        var query = db.Homeworks.Where(h => h.SchoolId == targetSchoolId);
         if (!isAdmin)
         {
             query = query.Where(h => h.Grade == grade && h.Section == section);
