@@ -1,18 +1,33 @@
 import { useState } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
-  TextInput, ActivityIndicator, RefreshControl
+  TextInput, ActivityIndicator, RefreshControl, Alert
 } from "react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   FadeInDown, useSharedValue, useAnimatedStyle, withSpring,
 } from "react-native-reanimated";
+import * as Linking from "expo-linking";
 import {
   Search, FileText, Star, Heart, Download, Lock,
 } from "lucide-react-native";
 import { api } from "../../lib/api";
 import { useThemeStore } from "../../stores/themeStore";
+import { useAuthStore } from "../../stores/authStore";
+
+const openFile = async (url: string) => {
+  try {
+    const supported = await Linking.canOpenURL(url);
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert("Cannot open file", "No app found to open this file.");
+    }
+  } catch {
+    Alert.alert("Error", "Failed to open the file.");
+  }
+};
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -25,10 +40,23 @@ function NoteCard({ note, type, index, colors, onUpvote }: any) {
       entering={FadeInDown.delay(index * 50).springify().damping(14)}
       style={{ backgroundColor: colors.card, borderRadius: 20, padding: 18, borderWidth: 1, borderColor: colors.border }}
     >
+      {/* Title + type badge */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <View style={{ flex: 1, marginRight: 12 }}>
           <Text style={{ color: colors.text, fontWeight: "700", fontSize: 16, marginBottom: 4 }}>{note.title}</Text>
-          <Text style={{ color: colors.textMuted, fontSize: 13 }}>{note.subject} • {note.chapter}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+            <Text style={{ color: colors.textMuted, fontSize: 12 }}>{note.subject}</Text>
+            {note.chapter && <Text style={{ color: colors.muted, fontSize: 12 }}>• {note.chapter}</Text>}
+            {note.grade && (
+              <View style={{
+                backgroundColor: colors.accent + "18", borderRadius: 8,
+                paddingHorizontal: 7, paddingVertical: 2,
+                borderWidth: 1, borderColor: colors.accent + "40",
+              }}>
+                <Text style={{ color: colors.accent, fontSize: 11, fontWeight: "800" }}>Class {note.grade}</Text>
+              </View>
+            )}
+          </View>
         </View>
         <View style={{
           backgroundColor: type === "TopperNote" ? colors.warning + "20" : colors.primary + "20",
@@ -59,7 +87,10 @@ function NoteCard({ note, type, index, colors, onUpvote }: any) {
           </AnimatedTouchable>
 
           {note.fileUrl ? (
-            <TouchableOpacity style={{ backgroundColor: colors.primary, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <TouchableOpacity
+              onPress={() => openFile(note.fileUrl)}
+              style={{ backgroundColor: colors.primary, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 6 }}
+            >
               <Download size={13} color="#fff" />
               <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>Download</Text>
             </TouchableOpacity>
@@ -77,10 +108,13 @@ function NoteCard({ note, type, index, colors, onUpvote }: any) {
 
 export default function NotesScreen() {
   const { colors } = useThemeStore();
+  const { user } = useAuthStore();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [subject, setSubject] = useState("");
   const [type, setType] = useState<"Note" | "TopperNote">("Note");
+
+  const classLabel = user?.grade ? `Class ${user.grade}${user.section ?? ""}` : "";
 
   const { data: notes, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["notes", type, subject],
@@ -104,12 +138,17 @@ export default function NotesScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LinearGradient colors={colors.backgroundGrad} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
+      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
         <Animated.View entering={FadeInDown.springify().damping(14)} style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 }}>
           {type === "Note" ? <FileText size={24} color={colors.text} /> : <Star size={24} color={colors.text} />}
-          <Text style={{ color: colors.text, fontSize: 26, fontWeight: "800" }}>
-            {type === "Note" ? "Notes" : "Topper Notes"}
-          </Text>
+          <View>
+            <Text style={{ color: colors.text, fontSize: 24, fontWeight: "800", lineHeight: 28 }}>
+              {type === "Note" ? "Notes" : "Topper Notes"}
+            </Text>
+            {classLabel ? (
+              <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>{classLabel}</Text>
+            ) : null}
+          </View>
         </Animated.View>
 
         <Animated.View

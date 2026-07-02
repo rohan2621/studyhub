@@ -10,7 +10,8 @@ public class User
     public string PasswordHash { get; set; } = null!;
     public UserRole Role { get; set; } = UserRole.Student;
     public Guid SchoolId { get; set; }
-    public string Grade { get; set; } = null!;
+    public string Grade { get; set; } = null!;   // "8"–"12"
+    public string Section { get; set; } = "A";    // "A"–"E"
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public School School { get; set; } = null!;

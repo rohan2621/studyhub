@@ -8,6 +8,7 @@ interface User {
   role: string;
   schoolId: string;
   grade: string;
+  section: string;
   school?: string;
 }
 

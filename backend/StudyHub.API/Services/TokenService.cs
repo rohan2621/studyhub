@@ -22,6 +22,8 @@ public class TokenService(IConfiguration config)
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim("schoolId", user.SchoolId.ToString()),
+            new Claim("grade", user.Grade),
+            new Claim("section", user.Section),
             new Claim("name", user.Name)
         };
 

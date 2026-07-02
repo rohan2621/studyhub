@@ -30,8 +30,17 @@ export default function LoginScreen() {
       (await api.post("/auth/login", { email: email.trim().toLowerCase(), password })).data,
     onSuccess: async (data) => {
       await login(data.accessToken, data.user);
-      Toast.show({ type: "success", text1: `Welcome back, ${data.user.name}!` });
-      router.replace("/(tabs)/home");
+    
+      Toast.show({
+        type: "success",
+        text1: `Welcome back, ${data.user.name}!`,
+      });
+    
+      if (data.user.role === 3) {
+        router.replace("/(admin)");
+      } else {
+        router.replace("/(tabs)/home");
+      }
     },
     onError: (e: any) => {
       const status = e.response?.status;
@@ -45,7 +54,7 @@ export default function LoginScreen() {
 
   return (
     <LinearGradient
-      colors={colors.backgroundGrad}
+      colors={colors.backgroundGrad as any}
       style={{ flex: 1 }}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}

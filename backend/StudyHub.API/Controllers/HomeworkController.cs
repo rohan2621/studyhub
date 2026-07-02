@@ -21,9 +21,22 @@ public class HomeworkController(AppDbContext db, NotificationService notificatio
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
-        var isPreview = HttpContext.Items["previewOnly"] is true;
+        var grade = User.FindFirstValue("grade") ?? "";
+        var section = User.FindFirstValue("section") ?? "A";
+        var isAdmin = User.IsInRole("Admin");
 
+        // Students see only their class section's homework; admins can see all
         var query = db.Homeworks.Where(h => h.SchoolId == schoolId);
+        if (!isAdmin)
+        {
+            query = query.Where(h => h.Grade == grade && h.Section == section);
+        }
+        else
+        {
+            // Admin can optionally filter
+            if (Request.Query.ContainsKey("grade")) query = query.Where(h => h.Grade == Request.Query["grade"].ToString());
+            if (Request.Query.ContainsKey("section")) query = query.Where(h => h.Section == Request.Query["section"].ToString());
+        }
         if (subject is not null) query = query.Where(h => h.Subject == subject);
 
         var total = await query.CountAsync();
@@ -35,12 +48,14 @@ public class HomeworkController(AppDbContext db, NotificationService notificatio
             .Select(h => new
             {
                 h.Id,
+                h.Grade,
+                h.Section,
                 h.Subject,
                 h.Title,
                 h.DueAt,
                 h.CreatedAt,
-                Description = isPreview ? null : h.Description,
-                AttachmentUrl = isPreview ? null : h.AttachmentUrl,
+                h.Description,
+                h.AttachmentUrl,
                 Assigner = h.Assigner.Name,
                 HasSubmitted = h.Submissions.Any(s => s.StudentId == userId),
                 SubmissionCount = h.Submissions.Count,
@@ -69,12 +84,14 @@ public class HomeworkController(AppDbContext db, NotificationService notificatio
         return Ok(new
         {
             hw.Id,
+            hw.Grade,
+            hw.Section,
             hw.Subject,
             hw.Title,
             hw.DueAt,
             hw.CreatedAt,
-            Description = isPreview ? null : hw.Description,
-            AttachmentUrl = isPreview ? null : hw.AttachmentUrl,
+            hw.Description,
+            hw.AttachmentUrl,
             Assigner = hw.Assigner.Name,
             MySubmission = hw.Submissions.FirstOrDefault() is { } sub
                 ? new { sub.Id, sub.FileUrl, sub.SubmittedAt, sub.Grade }
@@ -87,23 +104,38 @@ public class HomeworkController(AppDbContext db, NotificationService notificatio
     public async Task<IActionResult> Create([FromBody] CreateHomeworkRequest req)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        var claimsSchoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        var isAdmin = User.IsInRole("Admin");
+
+        // Admin can post homework to any school
+        var schoolId = isAdmin && req.TargetSchoolId.HasValue
+            ? req.TargetSchoolId.Value
+            : claimsSchoolId;
+
+        // Validate grade and section
+        if (!new[] { "8", "9", "10", "11", "12" }.Contains(req.Grade))
+            return BadRequest(new { error = "Grade must be 8–12." });
+        var sec = req.Section.Trim().ToUpper();
+        if (!new[] { "A", "B", "C", "D", "E" }.Contains(sec))
+            return BadRequest(new { error = "Section must be A–E." });
 
         var hw = new Homework
         {
-            SchoolId = schoolId,
-            Subject = req.Subject,
-            Title = req.Title,
-            Description = req.Description,
-            DueAt = req.DueAt,
-            AssignedBy = userId,
+            SchoolId      = schoolId,
+            Grade         = req.Grade,
+            Section       = sec,
+            Subject       = req.Subject,
+            Title         = req.Title,
+            Description   = req.Description,
+            DueAt         = req.DueAt,
+            AssignedBy    = userId,
             AttachmentUrl = req.AttachmentUrl
         };
 
         db.Homeworks.Add(hw);
         await db.SaveChangesAsync();
 
-        // Notify all students in school
+        // Notify all students in that specific class section
         _ = Task.Run(async () =>
         {
             try
@@ -111,8 +143,8 @@ public class HomeworkController(AppDbContext db, NotificationService notificatio
                 await notificationService.CreateForSchoolAsync(
                     schoolId,
                     NotificationType.NewHomework,
-                    $"New Homework: {req.Title}",
-                    $"{req.Subject} homework due {req.DueAt:MMM dd}",
+                    $"New Homework — Class {req.Grade}{sec}: {req.Title}",
+                    $"{req.Subject} due {req.DueAt:MMM dd}",
                     $"/homework/{hw.Id}");
             }
             catch { }
@@ -128,10 +160,12 @@ public class HomeworkController(AppDbContext db, NotificationService notificatio
         var hw = await db.Homeworks.FindAsync(id);
         if (hw is null) return NotFound();
 
-        hw.Subject = req.Subject;
-        hw.Title = req.Title;
-        hw.Description = req.Description;
-        hw.DueAt = req.DueAt;
+        hw.Grade         = req.Grade;
+        hw.Section       = req.Section.Trim().ToUpper();
+        hw.Subject       = req.Subject;
+        hw.Title         = req.Title;
+        hw.Description   = req.Description;
+        hw.DueAt         = req.DueAt;
         hw.AttachmentUrl = req.AttachmentUrl;
 
         await db.SaveChangesAsync();
@@ -230,6 +264,9 @@ public class HomeworkController(AppDbContext db, NotificationService notificatio
     }
 }
 
-public record CreateHomeworkRequest(string Subject, string Title, string Description, DateTime DueAt, string? AttachmentUrl);
+public record CreateHomeworkRequest(
+    string Grade, string Section, string Subject,
+    string Title, string Description, DateTime DueAt,
+    string? AttachmentUrl, Guid? TargetSchoolId = null);
 public record SubmitHomeworkRequest(string FileUrl);
 public record GradeRequest(string Grade);

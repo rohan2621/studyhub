@@ -8,6 +8,7 @@ public class Device
     public Guid UserId { get; set; }
     public string DeviceFingerprint { get; set; } = null!;
     public DevicePlatform Platform { get; set; }
+    public string? PushToken { get; set; }          // Expo push token
     public DateTime FirstSeenAt { get; set; } = DateTime.UtcNow;
     public DateTime LastSeenAt { get; set; } = DateTime.UtcNow;
 

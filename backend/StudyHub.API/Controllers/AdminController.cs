@@ -18,6 +18,8 @@ public class AdminController(AppDbContext db) : ControllerBase
         [FromQuery] string? search,
         [FromQuery] Guid? schoolId,
         [FromQuery] UserRole? role,
+        [FromQuery] string? grade,
+        [FromQuery] string? section,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
@@ -26,12 +28,16 @@ public class AdminController(AppDbContext db) : ControllerBase
         if (search is not null)
             query = query.Where(u => u.Name.ToLower().Contains(search.ToLower()) ||
                                      u.Email.ToLower().Contains(search.ToLower()));
-        if (schoolId.HasValue) query = query.Where(u => u.SchoolId == schoolId.Value);
-        if (role.HasValue) query = query.Where(u => u.Role == role.Value);
+        if (schoolId.HasValue)          query = query.Where(u => u.SchoolId == schoolId.Value);
+        if (role.HasValue)              query = query.Where(u => u.Role == role.Value);
+        if (!string.IsNullOrEmpty(grade))   query = query.Where(u => u.Grade == grade);
+        if (!string.IsNullOrEmpty(section)) query = query.Where(u => u.Section == section);
 
         var total = await query.CountAsync();
         var users = await query
-            .OrderByDescending(u => u.CreatedAt)
+            .OrderBy(u => u.Grade)
+            .ThenBy(u => u.Section)
+            .ThenBy(u => u.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(u => new
@@ -41,6 +47,8 @@ public class AdminController(AppDbContext db) : ControllerBase
                 u.Email,
                 u.Role,
                 u.Grade,
+                u.Section,
+                ClassLabel = $"Class {u.Grade}{u.Section}",
                 u.CreatedAt,
                 School = new { u.School.Id, u.School.Name },
                 ActiveToken = u.Tokens
@@ -51,6 +59,54 @@ public class AdminController(AppDbContext db) : ControllerBase
             .ToListAsync();
 
         return Ok(new { total, page, pageSize, data = users });
+    }
+
+    // ── Class Roster — students grouped by grade+section ───
+    [HttpGet("class-roster")]
+    public async Task<IActionResult> GetClassRoster(
+        [FromQuery] Guid? schoolId,
+        [FromQuery] string? grade,
+        [FromQuery] string? section)
+    {
+        var query = db.Users
+            .Include(u => u.School)
+            .Where(u => u.Role == UserRole.Student);
+
+        if (schoolId.HasValue)          query = query.Where(u => u.SchoolId == schoolId.Value);
+        if (!string.IsNullOrEmpty(grade))   query = query.Where(u => u.Grade == grade);
+        if (!string.IsNullOrEmpty(section)) query = query.Where(u => u.Section == section);
+
+        var students = await query
+            .OrderBy(u => u.Grade)
+            .ThenBy(u => u.Section)
+            .ThenBy(u => u.Name)
+            .Select(u => new
+            {
+                u.Id,
+                u.Name,
+                u.Email,
+                u.Grade,
+                u.Section,
+                ClassLabel = $"Class {u.Grade}{u.Section}",
+                School = u.School.Name,
+                HasActiveToken = u.Tokens.Any(t => t.Status == TokenStatus.Active)
+            })
+            .ToListAsync();
+
+        // Group by class
+        var grouped = students
+            .GroupBy(s => $"{s.Grade}{s.Section}")
+            .OrderBy(g => g.Key)
+            .Select(g => new
+            {
+                classLabel  = $"Class {g.Key}",
+                grade       = g.First().Grade,
+                section     = g.First().Section,
+                studentCount = g.Count(),
+                students    = g.ToList()
+            });
+
+        return Ok(grouped);
     }
 
     [HttpPost("users")]
@@ -223,7 +279,9 @@ public class AdminController(AppDbContext db) : ControllerBase
         var expiredTokens = await db.Tokens.CountAsync(t => t.Status == TokenStatus.Expired);
         var totalRevenue = await db.PaymentRecords.SumAsync(p => (decimal?)p.Amount) ?? 0;
         var totalNotes = await db.Notes.CountAsync();
+        var totalSchools = await db.Schools.CountAsync(s => s.IsActive);
         var pendingRequests = await db.CustomRequests.CountAsync(c => c.Status == RequestStatus.Open);
+        var pendingRenewalCount = await db.TokenRenewalRequests.CountAsync(r => r.Status == RenewalRequestStatus.Pending);
         var newUsersThisMonth = await db.Users
             .CountAsync(u => u.CreatedAt >= new DateTime(now.Year, now.Month, 1));
         var tokensExpiringIn7Days = await db.Tokens
@@ -236,7 +294,9 @@ public class AdminController(AppDbContext db) : ControllerBase
             expiredTokens,
             totalRevenue,
             totalNotes,
+            totalSchools,
             pendingRequests,
+            pendingRenewalCount,
             newUsersThisMonth,
             tokensExpiringIn7Days
         });

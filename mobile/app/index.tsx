@@ -31,7 +31,7 @@ export default function Index() {
   if (isLoading) {
     return (
       <LinearGradient
-        colors={colors.backgroundGrad}
+        colors={colors.backgroundGrad as any}
         style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}

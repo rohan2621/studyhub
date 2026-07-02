@@ -34,7 +34,7 @@ export default function DeviceMismatchScreen() {
   }));
 
   return (
-    <LinearGradient colors={colors.backgroundGrad} style={{ flex: 1 }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+    <LinearGradient colors={colors.backgroundGrad as any} style={{ flex: 1 }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
       <BackgroundArt />
 
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 24 }}>

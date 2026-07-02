@@ -4,7 +4,8 @@ public class TimetableSlot
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid SchoolId { get; set; }
-    public string Grade { get; set; } = null!;
+    public string Grade { get; set; } = null!;   // "8"–"12"
+    public string Section { get; set; } = "A";   // "A"–"E"
     public string Day { get; set; } = null!;
     public int Period { get; set; }
     public string Subject { get; set; } = null!;

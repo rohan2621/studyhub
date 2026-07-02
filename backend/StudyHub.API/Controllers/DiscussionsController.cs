@@ -18,8 +18,17 @@ public class DiscussionsController(AppDbContext db, IHubContext<DiscussionHub> h
     public async Task<IActionResult> GetThreads([FromQuery] string? subject)
     {
         var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        var grade    = User.FindFirstValue("grade") ?? "";
+        var isAdmin  = User.IsInRole("Admin");
+
+        // Threads are grade-scoped (class-level), not section-specific
         var query = db.DiscussionThreads.Where(t => t.SchoolId == schoolId);
+        if (!isAdmin) query = query.Where(t => t.Grade == grade);
         if (subject is not null) query = query.Where(t => t.Subject == subject);
+
+        // Optional override for admin/search
+        if (Request.Query.ContainsKey("grade"))
+            query = query.Where(t => t.Grade == Request.Query["grade"].ToString());
 
         var threads = await query
             .OrderByDescending(t => t.CreatedAt)
@@ -27,6 +36,7 @@ public class DiscussionsController(AppDbContext db, IHubContext<DiscussionHub> h
             {
                 t.Id,
                 t.Subject,
+                t.Grade,
                 t.Title,
                 t.Body,
                 t.CreatedAt,
@@ -41,8 +51,9 @@ public class DiscussionsController(AppDbContext db, IHubContext<DiscussionHub> h
     [HttpPost]
     public async Task<IActionResult> CreateThread([FromBody] CreateThreadRequest req)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId   = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        var grade    = User.FindFirstValue("grade") ?? "";
 
         if (HttpContext.Items["previewOnly"] is true)
             return Forbid();
@@ -50,9 +61,10 @@ public class DiscussionsController(AppDbContext db, IHubContext<DiscussionHub> h
         var thread = new DiscussionThread
         {
             SchoolId = schoolId,
-            Subject = req.Subject,
-            Title = req.Title,
-            Body = req.Body,
+            Grade    = grade,
+            Subject  = req.Subject,
+            Title    = req.Title,
+            Body     = req.Body,
             AuthorId = userId
         };
 

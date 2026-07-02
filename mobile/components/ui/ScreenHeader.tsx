@@ -15,7 +15,7 @@ export function ScreenHeader({ title, subtitle, showThemeToggle, rightElement }:
 
   return (
     <LinearGradient
-      colors={colors.backgroundGrad}
+      colors={colors.backgroundGrad as any}
       style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>

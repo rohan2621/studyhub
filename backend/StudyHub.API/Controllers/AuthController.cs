@@ -44,6 +44,15 @@ public class AuthController(
         if (school is null)
             return BadRequest(new { error = "Invalid school." });
 
+        // Validate Grade (8 – 12 only)
+        if (!new[] { "8", "9", "10", "11", "12" }.Contains(req.Grade))
+            return BadRequest(new { error = "Grade must be 8, 9, 10, 11, or 12." });
+
+        // Validate Section (A – E only)
+        var section = req.Section?.Trim().ToUpper() ?? "A";
+        if (!new[] { "A", "B", "C", "D", "E" }.Contains(section))
+            return BadRequest(new { error = "Section must be A, B, C, D, or E." });
+
         var user = new User
         {
             Name = name,
@@ -51,7 +60,8 @@ public class AuthController(
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password, workFactor: 12),
             Role = UserRole.Student,
             SchoolId = req.SchoolId,
-            Grade = InputSanitizer.Sanitize(req.Grade)
+            Grade = req.Grade,
+            Section = section
         };
 
         db.Users.Add(user);
@@ -151,6 +161,7 @@ public class AuthController(
                 user.Role,
                 user.SchoolId,
                 user.Grade,
+                user.Section,
                 School = user.School?.Name
             }
         });
@@ -237,6 +248,7 @@ public class AuthController(
             user.Email,
             user.Role,
             user.Grade,
+            user.Section,
             user.CreatedAt,
             School = new { user.School.Id, user.School.Name }
         });
@@ -364,7 +376,7 @@ public class AuthController(
     }
 }
 
-public record SignupRequest(string Name, string Email, string Password, Guid SchoolId, string Grade);
+public record SignupRequest(string Name, string Email, string Password, Guid SchoolId, string Grade, string? Section);
 public record LoginRequest(string Email, string Password);
 public record ForgotPasswordRequest(string Email);
 public record ResetPasswordRequest(string Token, string NewPassword);

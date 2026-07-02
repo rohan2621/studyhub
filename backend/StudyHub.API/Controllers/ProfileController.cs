@@ -11,6 +11,7 @@ namespace StudyHub.API.Controllers;
 [Authorize]
 public class ProfileController(AppDbContext db) : ControllerBase
 {
+    // ── GET /profile ──────────────────────────────────────────────────
     [HttpGet]
     public async Task<IActionResult> GetProfile()
     {
@@ -40,7 +41,9 @@ public class ProfileController(AppDbContext db) : ControllerBase
             user.Email,
             user.Role,
             user.Grade,
+            user.Section,
             user.CreatedAt,
+            ClassLabel = $"Class {user.Grade}{user.Section}",
             School = new { user.School.Id, user.School.Name, user.School.City },
             Token = activeToken is null ? null : new
             {
@@ -62,6 +65,7 @@ public class ProfileController(AppDbContext db) : ControllerBase
         });
     }
 
+    // ── PUT /profile ──────────────────────────────────────────────────
     [HttpPut]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest req)
     {
@@ -69,12 +73,33 @@ public class ProfileController(AppDbContext db) : ControllerBase
         var user = await db.Users.FindAsync(userId);
         if (user is null) return NotFound();
 
-        user.Name = req.Name;
-        user.Grade = req.Grade;
+        // Validate grade (8–12)
+        if (!string.IsNullOrEmpty(req.Grade) &&
+            !new[] { "8", "9", "10", "11", "12" }.Contains(req.Grade))
+            return BadRequest(new { error = "Grade must be 8–12." });
+
+        // Validate section (A–E)
+        var section = req.Section?.Trim().ToUpper();
+        if (!string.IsNullOrEmpty(section) &&
+            !new[] { "A", "B", "C", "D", "E" }.Contains(section))
+            return BadRequest(new { error = "Section must be A–E." });
+
+        if (!string.IsNullOrWhiteSpace(req.Name)) user.Name = req.Name.Trim();
+        if (!string.IsNullOrEmpty(req.Grade))     user.Grade   = req.Grade;
+        if (!string.IsNullOrEmpty(section))        user.Section = section;
+
         await db.SaveChangesAsync();
-        return Ok(new { user.Id, user.Name, user.Grade });
+        return Ok(new
+        {
+            user.Id,
+            user.Name,
+            user.Grade,
+            user.Section,
+            ClassLabel = $"Class {user.Grade}{user.Section}"
+        });
     }
 
+    // ── POST /profile/change-password ─────────────────────────────────
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest req)
     {
@@ -85,11 +110,48 @@ public class ProfileController(AppDbContext db) : ControllerBase
         if (!BCrypt.Net.BCrypt.Verify(req.CurrentPassword, user.PasswordHash))
             return BadRequest(new { error = "Current password is incorrect." });
 
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.NewPassword);
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.NewPassword, workFactor: 12);
         await db.SaveChangesAsync();
-        return Ok(new { message = "Password updated." });
+        return Ok(new { message = "Password updated successfully." });
+    }
+
+    // ── POST /profile/push-token ──────────────────────────────────────
+    [HttpPost("push-token")]
+    public async Task<IActionResult> RegisterPushToken([FromBody] PushTokenRequest req)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var device = await db.Devices
+            .FirstOrDefaultAsync(d => d.UserId == userId && d.DeviceFingerprint == req.DeviceFingerprint);
+
+        var platform = req.Platform.ToLower() switch
+        {
+            "ios"     => Models.DevicePlatform.iOS,
+            "android" => Models.DevicePlatform.Android,
+            _         => Models.DevicePlatform.Web
+        };
+
+        if (device is not null)
+        {
+            device.PushToken  = req.PushToken;
+            device.LastSeenAt = DateTime.UtcNow;
+        }
+        else
+        {
+            db.Devices.Add(new Models.Device
+            {
+                UserId            = userId,
+                DeviceFingerprint = req.DeviceFingerprint,
+                Platform          = platform,
+                PushToken         = req.PushToken
+            });
+        }
+
+        await db.SaveChangesAsync();
+        return Ok(new { message = "Push token registered." });
     }
 }
 
-public record UpdateProfileRequest(string Name, string Grade);
+public record UpdateProfileRequest(string? Name, string? Grade, string? Section);
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
+public record PushTokenRequest(string PushToken, string DeviceFingerprint, string Platform);

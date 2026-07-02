@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { TouchableOpacity, Text, ActivityIndicator, ViewStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useThemeStore } from "../../stores/themeStore";
@@ -8,7 +9,7 @@ interface Props {
   loading?: boolean;
   disabled?: boolean;
   style?: ViewStyle;
-  icon?: string;
+  icon?: ReactNode;
 }
 
 export function GradientButton({ title, onPress, loading, disabled, style, icon }: Props) {
@@ -17,7 +18,7 @@ export function GradientButton({ title, onPress, loading, disabled, style, icon 
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled || loading} style={style}>
       <LinearGradient
-        colors={colors.primaryGrad}
+        colors={colors.primaryGrad as any}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={{
@@ -35,8 +36,8 @@ export function GradientButton({ title, onPress, loading, disabled, style, icon 
         {loading
           ? <ActivityIndicator color="#fff" />
           : <>
+            {icon}
             <Text style={{ color: "#fff", fontWeight: "800", fontSize: 17, letterSpacing: 0.5 }}>{title}</Text>
-            {icon && <Text style={{ color: "#fff", fontSize: 20 }}>{icon}</Text>}
           </>
         }
       </LinearGradient>

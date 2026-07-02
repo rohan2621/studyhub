@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import {
   View,
   Text,
@@ -10,8 +10,8 @@ import { useThemeStore } from "../../stores/themeStore";
 
 interface Props extends TextInputProps {
   label: string;
-  icon: string;
-  rightIcon?: string;
+  icon: ReactNode;
+  rightIcon?: ReactNode;
   onRightIconPress?: () => void;
   error?: string;
 }
@@ -19,7 +19,7 @@ interface Props extends TextInputProps {
 export function FloatingInput({
   label,
   icon,
- rightIcon,
+  rightIcon,
   onRightIconPress,
   error,
   ...props
@@ -41,41 +41,48 @@ export function FloatingInput({
         {label}
       </Text>
 
-      {/* Input */}
+      {/* Input Container */}
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           backgroundColor: colors.card,
           borderRadius: 14,
-          borderWidth: 1,
+          borderWidth: 1.5,
           borderColor: error
             ? colors.danger
             : focused
             ? colors.primary
             : colors.border,
           paddingHorizontal: 14,
-          height: 54,
+          height: 56,
         }}
       >
         {/* Left Icon */}
-        <Text
+        <View
           style={{
-            fontSize: 18,
             marginRight: 12,
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
           {icon}
-        </Text>
+        </View>
 
+        {/* Text Input */}
         <TextInput
           style={{
             flex: 1,
             color: colors.text,
             fontSize: 16,
+            paddingVertical: 0,
           }}
           placeholder={props.placeholder}
           placeholderTextColor={colors.textMuted}
+          cursorColor={colors.primary}      // Android
+          selectionColor={colors.primary}   // Android & iOS
+          caretHidden={false}
+          underlineColorAndroid="transparent"
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           {...props}
@@ -83,8 +90,15 @@ export function FloatingInput({
 
         {/* Right Icon */}
         {rightIcon && (
-          <TouchableOpacity onPress={onRightIconPress}>
-            <Text style={{ fontSize: 18 }}>{rightIcon}</Text>
+          <TouchableOpacity
+            onPress={onRightIconPress}
+            activeOpacity={0.7}
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {rightIcon}
           </TouchableOpacity>
         )}
       </View>

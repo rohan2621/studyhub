@@ -15,10 +15,9 @@ interface ThemeState {
   syncSystemTheme: () => void;
 }
 
-const getSystemDark = () => Appearance.getColorScheme() === "dark";
+const getSystemDark = () => true;
 const getTheme = (mode: ThemeMode) => {
-  const dark = mode === "system" ? getSystemDark() : mode === "dark";
-  return { isDark: dark, colors: dark ? DarkColors : LightColors };
+  return { isDark: true, colors: DarkColors };
 };
 
 export const useThemeStore = create<ThemeState>((set, get) => ({

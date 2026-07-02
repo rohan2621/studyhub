@@ -31,6 +31,7 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false, animation: "slide_from_right" }}>
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(admin)" />
           <Stack.Screen name="device-mismatch" />
         </Stack>
         <Toast />

@@ -23,9 +23,16 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
-        var isPreview = HttpContext.Items["previewOnly"] is true;
+        var grade = User.FindFirstValue("grade") ?? "";
+        var isAdmin = User.IsInRole("Admin");
+
+        // Students only see notes for their grade; admins see all (or use query param)
+        var targetGrade = Request.Query.ContainsKey("grade")
+            ? Request.Query["grade"].ToString()
+            : (isAdmin ? null : grade);
 
         var query = db.Notes.Where(n => n.SchoolId == schoolId);
+        if (targetGrade is not null) query = query.Where(n => n.Grade == targetGrade);
         if (type.HasValue) query = query.Where(n => n.Type == type.Value);
         if (subject is not null) query = query.Where(n => n.Subject == subject);
         if (chapter is not null) query = query.Where(n => n.Chapter.ToLower().Contains(chapter.ToLower()));
@@ -40,6 +47,7 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
             .Select(n => new
             {
                 n.Id,
+                n.Grade,
                 n.Subject,
                 n.Chapter,
                 n.Title,
@@ -47,7 +55,7 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
                 n.Upvotes,
                 n.CreatedAt,
                 Uploader = n.Uploader.Name,
-                FileUrl = isPreview ? null : n.FileUrl,
+                FileUrl = n.FileUrl,
                 HasUpvoted = n.NoteUpvotesList.Any(u => u.UserId == userId)
             })
             .ToListAsync();
@@ -89,17 +97,28 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
     public async Task<IActionResult> CreateNote([FromBody] CreateNoteRequest req)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        var claimsSchoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        var isAdmin = User.IsInRole("Admin");
+
+        // Admin can target any school; others use their own school
+        var schoolId = isAdmin && req.TargetSchoolId.HasValue
+            ? req.TargetSchoolId.Value
+            : claimsSchoolId;
+
+        // Validate grade
+        if (!new[] { "8", "9", "10", "11", "12" }.Contains(req.Grade))
+            return BadRequest(new { error = "Grade must be 8–12." });
 
         var note = new Note
         {
-            SchoolId = schoolId,
-            Subject = req.Subject,
-            Chapter = req.Chapter,
-            Title = req.Title,
-            FileUrl = req.FileUrl,
+            SchoolId   = schoolId,
+            Grade      = req.Grade,
+            Subject    = req.Subject,
+            Chapter    = req.Chapter,
+            Title      = req.Title,
+            FileUrl    = req.FileUrl,
             UploadedBy = userId,
-            Type = req.Type
+            Type       = req.Type
         };
 
         db.Notes.Add(note);
@@ -113,7 +132,7 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
                 await notificationService.CreateForSchoolAsync(
                     schoolId,
                     NotificationType.NewNote,
-                    $"New {req.Type}: {req.Title}",
+                    $"New {req.Type} — Class {req.Grade}: {req.Title}",
                     $"New {req.Subject} content uploaded in {req.Chapter}",
                     $"/notes/{note.Id}");
             }
@@ -157,11 +176,12 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
         var note = await db.Notes.FindAsync(id);
         if (note is null) return NotFound();
 
+        note.Grade   = req.Grade;
         note.Subject = req.Subject;
         note.Chapter = req.Chapter;
-        note.Title = req.Title;
+        note.Title   = req.Title;
         note.FileUrl = req.FileUrl;
-        note.Type = req.Type;
+        note.Type    = req.Type;
 
         await db.SaveChangesAsync();
         return Ok(new { note.Id });
@@ -192,4 +212,7 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
     }
 }
 
-public record CreateNoteRequest(string Subject, string Chapter, string Title, string FileUrl, NoteType Type);
+public record CreateNoteRequest(
+    string Grade, string Subject, string Chapter,
+    string Title, string FileUrl, NoteType Type,
+    Guid? TargetSchoolId = null);

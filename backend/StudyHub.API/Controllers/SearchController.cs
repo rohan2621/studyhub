@@ -23,17 +23,25 @@ public class SearchController(AppDbContext db) : ControllerBase
             return BadRequest(new { error = "Search query is required." });
 
         var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        var grade   = User.FindFirstValue("grade") ?? "";
+        var section = User.FindFirstValue("section") ?? "A";
+        var isAdmin = User.IsInRole("Admin");
         var term = q.ToLower().Trim();
         var results = new List<object>();
 
         if (type is null or "note")
         {
-            var notes = await db.Notes
+            var notesQ = db.Notes
                 .Where(n => n.SchoolId == schoolId &&
                     (EF.Functions.Like(n.Title.ToLower(), $"%{term}%") ||
                      EF.Functions.Like(n.Subject.ToLower(), $"%{term}%") ||
                      EF.Functions.Like(n.Chapter.ToLower(), $"%{term}%")))
-                .Where(n => subject == null || n.Subject == subject)
+                .Where(n => subject == null || n.Subject == subject);
+
+            // Students only search their grade's notes
+            if (!isAdmin) notesQ = notesQ.Where(n => n.Grade == grade);
+
+            var notes = await notesQ
                 .OrderByDescending(n => n.Upvotes)
                 .ThenByDescending(n => n.CreatedAt)
                 .Skip((page - 1) * pageSize)
@@ -44,6 +52,7 @@ public class SearchController(AppDbContext db) : ControllerBase
                     n.Title,
                     n.Subject,
                     n.Chapter,
+                    n.Grade,
                     Type = n.Type.ToString(),
                     Kind = "note",
                     n.Upvotes,
@@ -56,11 +65,16 @@ public class SearchController(AppDbContext db) : ControllerBase
 
         if (type is null or "homework")
         {
-            var hw = await db.Homeworks
+            var hwQ = db.Homeworks
                 .Where(h => h.SchoolId == schoolId &&
                     (EF.Functions.Like(h.Title.ToLower(), $"%{term}%") ||
                      EF.Functions.Like(h.Subject.ToLower(), $"%{term}%")))
-                .Where(h => subject == null || h.Subject == subject)
+                .Where(h => subject == null || h.Subject == subject);
+
+            // Students only see their section's homework
+            if (!isAdmin) hwQ = hwQ.Where(h => h.Grade == grade && h.Section == section);
+
+            var hw = await hwQ
                 .OrderByDescending(h => h.DueAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -69,6 +83,8 @@ public class SearchController(AppDbContext db) : ControllerBase
                     h.Id,
                     h.Title,
                     h.Subject,
+                    h.Grade,
+                    h.Section,
                     Chapter = "",
                     Type = "homework",
                     Kind = "homework",

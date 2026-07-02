@@ -151,6 +151,9 @@ namespace StudyHub.API.Migrations
                     b.Property<int>("Platform")
                         .HasColumnType("integer");
 
+                    b.Property<string>("PushToken")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
@@ -205,6 +208,10 @@ namespace StudyHub.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Grade")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("SchoolId")
                         .HasColumnType("uuid");
 
@@ -249,8 +256,16 @@ namespace StudyHub.API.Migrations
                     b.Property<DateTime>("DueAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Grade")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("SchoolId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Section")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Subject")
                         .IsRequired()
@@ -285,6 +300,10 @@ namespace StudyHub.API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Grade")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -435,6 +454,9 @@ namespace StudyHub.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Grade")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("SchoolId")
                         .HasColumnType("uuid");
 
@@ -580,6 +602,10 @@ namespace StudyHub.API.Migrations
                     b.Property<Guid>("SchoolId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Section")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("time without time zone");
 
@@ -697,6 +723,10 @@ namespace StudyHub.API.Migrations
 
                     b.Property<Guid>("SchoolId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Section")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
