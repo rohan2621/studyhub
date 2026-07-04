@@ -5,6 +5,7 @@ public class DiscussionThread
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid SchoolId { get; set; }
     public string Grade { get; set; } = null!;   // "8"–"12"
+    public string Section { get; set; } = "A";   // "A"–"E"
     public string Subject { get; set; } = null!;
     public string Title { get; set; } = null!;
     public string Body { get; set; } = null!;

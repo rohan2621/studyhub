@@ -63,6 +63,8 @@ public class AdminTokensController(AppDbContext db) : ControllerBase
         if (token is null) return NotFound();
 
         token.DeviceId = null;
+        token.IpAddress = null;
+        token.IsDevicePermanent = false;
         token.Status = TokenStatus.Unused;
 
         db.AuditLogs.Add(new AuditLog

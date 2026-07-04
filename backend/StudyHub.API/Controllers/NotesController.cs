@@ -150,8 +150,10 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
             try
             {
                 var targetClass = $"Class {req.Grade}{(string.IsNullOrEmpty(section) ? "" : section)}";
-                await notificationService.CreateForSchoolAsync(
+                await notificationService.CreateForClassAsync(
                     schoolId,
+                    req.Grade,
+                    section,
                     NotificationType.NewNote,
                     $"New {req.Type} — {targetClass}: {req.Title}",
                     $"New {req.Subject} content uploaded in {req.Chapter}",

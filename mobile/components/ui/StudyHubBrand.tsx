@@ -22,7 +22,7 @@ export function StudyHubBrand({ size = "md", showTagline = true }: Props) {
         letterSpacing: -0.5,
         marginTop: 8,
       }}>
-        <Text style={{ color: isDark ? colors.text : "#1a1a2e" }}>Study</Text>
+        <Text style={{ color: colors.text }}>Study</Text>
         <Text style={{ color: colors.primary }}>Hub</Text>
       </Text>
       {showTagline && (

@@ -2,28 +2,25 @@ import { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
-import * as Linking from "expo-linking";
-import { FileStack, Download, Lock } from "lucide-react-native";
+import { FileStack, Eye, Lock } from "lucide-react-native";
 import { api } from "../../lib/api";
 import { useThemeStore } from "../../stores/themeStore";
-
-const openFile = async (url: string) => {
-  try {
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      Alert.alert("Cannot open file", "No app found to open this file.");
-    }
-  } catch {
-    Alert.alert("Error", "Failed to open the file.");
-  }
-};
+import InAppViewerModal from "../../components/InAppViewerModal";
 
 export default function PastPapersScreen() {
   const { colors } = useThemeStore();
   const [subject, setSubject] = useState("");
   const [year, setYear] = useState("");
+
+  const [viewerUrl, setViewerUrl] = useState("");
+  const [viewerTitle, setViewerTitle] = useState("");
+  const [viewerVisible, setViewerVisible] = useState(false);
+
+  const onViewFile = (url: string, title: string) => {
+    setViewerUrl(url);
+    setViewerTitle(title);
+    setViewerVisible(true);
+  };
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["pastpapers", subject, year],
@@ -103,22 +100,29 @@ export default function PastPapersScreen() {
               </View>
               {paper.fileUrl ? (
                 <TouchableOpacity
-                  onPress={() => openFile(paper.fileUrl)}
+                  onPress={() => onViewFile(paper.fileUrl, `${paper.subject} (${paper.year} ${paper.term})`)}
                   style={{ backgroundColor: colors.primary, borderRadius: 12, padding: 12, alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 8 }}
                 >
-                  <Download size={16} color="#fff" />
-                  <Text style={{ color: "#fff", fontWeight: "700" }}>Download Paper</Text>
+                  <Eye size={16} color="#fff" />
+                  <Text style={{ color: "#fff", fontWeight: "700" }}>View Paper</Text>
                 </TouchableOpacity>
               ) : (
                 <View style={{ backgroundColor: colors.border, borderRadius: 12, padding: 12, alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 8 }}>
                   <Lock size={16} color={colors.muted} />
-                  <Text style={{ color: colors.muted, fontWeight: "700" }}>Unlock to Download</Text>
+                  <Text style={{ color: colors.muted, fontWeight: "700" }}>Unlock to View</Text>
                 </View>
               )}
             </View>
           ))}
         </ScrollView>
       )}
+
+      <InAppViewerModal
+        visible={viewerVisible}
+        url={viewerUrl}
+        title={viewerTitle}
+        onClose={() => setViewerVisible(false)}
+      />
     </View>
   );
 }

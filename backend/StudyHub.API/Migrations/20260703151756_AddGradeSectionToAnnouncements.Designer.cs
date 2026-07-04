@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudyHub.API.Data;
@@ -11,9 +12,11 @@ using StudyHub.API.Data;
 namespace StudyHub.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260703151756_AddGradeSectionToAnnouncements")]
+    partial class AddGradeSectionToAnnouncements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -221,10 +224,6 @@ namespace StudyHub.API.Migrations
                     b.Property<Guid>("SchoolId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Section")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasColumnType("text");
@@ -242,42 +241,6 @@ namespace StudyHub.API.Migrations
                     b.HasIndex("SchoolId");
 
                     b.ToTable("DiscussionThreads");
-                });
-
-            modelBuilder.Entity("StudyHub.API.Models.HireRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("TopperId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("TopperId");
-
-                    b.ToTable("HireRequests");
                 });
 
             modelBuilder.Entity("StudyHub.API.Models.Homework", b =>
@@ -688,12 +651,6 @@ namespace StudyHub.API.Migrations
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsDevicePermanent")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTime>("IssuedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -872,25 +829,6 @@ namespace StudyHub.API.Migrations
                     b.Navigation("Author");
 
                     b.Navigation("School");
-                });
-
-            modelBuilder.Entity("StudyHub.API.Models.HireRequest", b =>
-                {
-                    b.HasOne("StudyHub.API.Models.User", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("StudyHub.API.Models.User", "Topper")
-                        .WithMany()
-                        .HasForeignKey("TopperId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-
-                    b.Navigation("Topper");
                 });
 
             modelBuilder.Entity("StudyHub.API.Models.Homework", b =>

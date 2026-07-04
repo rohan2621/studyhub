@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using StudyHub.API.Data;
 using StudyHub.API.Helpers;
 using StudyHub.API.Models;
@@ -27,6 +28,7 @@ public class TokenCheckMiddleware(RequestDelegate next)
         "/tokens/history",
         "/tokens/renewal",
         "/tokens/renewal/my",
+        "/tokens/bind-permanent",
 
         // ── Profile & account (change password etc. without a token) ─────
         "/profile",
@@ -50,9 +52,12 @@ public class TokenCheckMiddleware(RequestDelegate next)
         "/swagger",
         "/hubs",
         "/hangfire",
+
+        // ── Feed (bypassed so dashboard metadata loads for inactive users) 
+        "/feed",
     ];
 
-    public async Task InvokeAsync(HttpContext ctx, AppDbContext db)
+    public async Task InvokeAsync(HttpContext ctx, AppDbContext db, IMemoryCache cache)
     {
         if (ctx.User.Identity?.IsAuthenticated != true)
         {
@@ -80,10 +85,19 @@ public class TokenCheckMiddleware(RequestDelegate next)
         var userId = Guid.Parse(ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var deviceHeader = ctx.Request.Headers["X-Device-Id"].ToString();
 
-        var token = await db.Tokens
-            .Where(t => t.UserId == userId && t.Status == TokenStatus.Active)
-            .OrderByDescending(t => t.IssuedAt)
-            .FirstOrDefaultAsync();
+        var cacheKey = $"active_token_{userId}";
+        if (!cache.TryGetValue(cacheKey, out CachedTokenResult? cachedResult))
+        {
+            var dbToken = await db.Tokens
+                .Where(t => t.UserId == userId && t.Status == TokenStatus.Active)
+                .OrderByDescending(t => t.IssuedAt)
+                .FirstOrDefaultAsync();
+
+            cachedResult = new CachedTokenResult { Token = dbToken };
+            cache.Set(cacheKey, cachedResult, TimeSpan.FromSeconds(60));
+        }
+
+        var token = cachedResult?.Token;
 
         // ── No active token ──────────────────────────────────────────────
         if (token is null || token.ExpiresAt < DateTime.UtcNow)
@@ -98,23 +112,42 @@ public class TokenCheckMiddleware(RequestDelegate next)
             return;
         }
 
-        // ── Device binding check ─────────────────────────────────────────
+        // ── Network & Device binding check (Devices in their network or permanent device) ──
+        var clientIp = ctx.Connection.RemoteIpAddress?.ToString();
+        var isSameNetwork = !string.IsNullOrEmpty(token.IpAddress) && token.IpAddress == clientIp;
+
+        var isSameDevice = false;
         if (!string.IsNullOrEmpty(deviceHeader))
         {
             var hashedDevice = DeviceHasher.Hash(deviceHeader);
+            isSameDevice = !string.IsNullOrEmpty(token.DeviceId) && token.DeviceId == hashedDevice;
+        }
 
-            if (token.DeviceId is null)
-            {
-                // Token not yet device-bound (shouldn't happen after activation, but handle gracefully)
-                ctx.Items["previewOnly"] = false;
-            }
-            else if (token.DeviceId != hashedDevice)
+        if (token.IsDevicePermanent)
+        {
+            // If device is permanent, allow access if on the same network OR same device
+            if (!isSameNetwork && !isSameDevice)
             {
                 ctx.Response.StatusCode = 403;
                 await ctx.Response.WriteAsJsonAsync(new
                 {
                     error = "DEVICE_MISMATCH",
-                    message = "This token is active on a different device. Contact your admin to reset the device binding.",
+                    message = "This token is active on a different network and device. Connect to your registered network.",
+                    code = 403
+                });
+                return;
+            }
+        }
+        else
+        {
+            // If not permanent yet, only allow access from the same network
+            if (!isSameNetwork)
+            {
+                ctx.Response.StatusCode = 403;
+                await ctx.Response.WriteAsJsonAsync(new
+                {
+                    error = "DEVICE_MISMATCH",
+                    message = "This token is active on a different network. You can register this device permanently to access it on any network.",
                     code = 403
                 });
                 return;
@@ -134,4 +167,9 @@ public class TokenCheckMiddleware(RequestDelegate next)
         }
         return false;
     }
+}
+
+public class CachedTokenResult
+{
+    public Token? Token { get; set; }
 }

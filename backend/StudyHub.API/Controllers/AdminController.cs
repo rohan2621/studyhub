@@ -53,7 +53,7 @@ public class AdminController(AppDbContext db) : ControllerBase
                 School = new { u.School.Id, u.School.Name },
                 ActiveToken = u.Tokens
                     .Where(t => t.Status == TokenStatus.Active)
-                    .Select(t => new { t.Plan, t.ExpiresAt, t.Status })
+                    .Select(t => new { t.Id, t.Plan, t.ExpiresAt, t.Status })
                     .FirstOrDefault()
             })
             .ToListAsync();
@@ -157,6 +157,22 @@ public class AdminController(AppDbContext db) : ControllerBase
     {
         var user = await db.Users.FindAsync(id);
         if (user is null) return NotFound();
+
+        // Cascade delete all referencing entity records to prevent foreign key errors
+        await db.Tokens.Where(t => t.UserId == id).ExecuteDeleteAsync();
+        await db.Devices.Where(d => d.UserId == id).ExecuteDeleteAsync();
+        await db.Submissions.Where(s => s.StudentId == id).ExecuteDeleteAsync();
+        await db.CustomRequests.Where(c => c.UserId == id).ExecuteDeleteAsync();
+        await db.PaymentRecords.Where(p => p.UserId == id).ExecuteDeleteAsync();
+        await db.DiscussionThreads.Where(d => d.AuthorId == id).ExecuteDeleteAsync();
+        await db.DiscussionReplies.Where(d => d.AuthorId == id).ExecuteDeleteAsync();
+        await db.PasswordResetTokens.Where(p => p.UserId == id).ExecuteDeleteAsync();
+        await db.Notifications.Where(n => n.UserId == id).ExecuteDeleteAsync();
+        await db.NoteUpvotes.Where(n => n.UserId == id).ExecuteDeleteAsync();
+        await db.TokenRenewalRequests.Where(r => r.UserId == id).ExecuteDeleteAsync();
+        await db.HireRequests.Where(r => r.StudentId == id || r.TopperId == id).ExecuteDeleteAsync();
+        await db.Notes.Where(n => n.UploadedBy == id).ExecuteDeleteAsync();
+
         db.Users.Remove(user);
         await db.SaveChangesAsync();
         return NoContent();
@@ -314,13 +330,13 @@ public class AdminController(AppDbContext db) : ControllerBase
             .Select(c => new
             {
                 c.Id,
-                c.Type,
+                type = c.Type.ToString(),
                 c.Subject,
                 c.Chapter,
                 c.Note,
-                c.Status,
+                status = c.Status.ToString(),
                 c.CreatedAt,
-                User = new { c.User.Id, c.User.Name, c.User.Email }
+                user = new { c.User.Id, c.User.Name, c.User.Email }
             })
             .ToListAsync();
 

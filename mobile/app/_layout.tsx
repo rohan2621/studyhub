@@ -8,6 +8,8 @@ import { useAuthStore } from "../stores/authStore";
 import { useThemeStore } from "../stores/themeStore";
 import { getOrCreateDeviceId } from "../lib/storage";
 
+import * as ScreenCapture from "expo-screen-capture";
+
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
 });
@@ -16,18 +18,20 @@ export default function RootLayout() {
   const loadStoredAuth = useAuthStore((s) => s.loadStoredAuth);
   const load = useThemeStore((s) => s.load);
   const syncSystemTheme = useThemeStore((s) => s.syncSystemTheme);
+  const isDark = useThemeStore((s) => s.isDark);
 
   useEffect(() => {
     loadStoredAuth();
     getOrCreateDeviceId();
     load();
     syncSystemTheme();
+    ScreenCapture.preventScreenCaptureAsync().catch(console.error);
   }, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <StatusBar style="light" />
+        <StatusBar style={isDark ? "light" : "dark"} />
         <Stack screenOptions={{ headerShown: false, animation: "slide_from_right" }}>
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />

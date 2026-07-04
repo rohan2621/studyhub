@@ -143,8 +143,10 @@ public class HomeworkController(AppDbContext db, NotificationService notificatio
         {
             try
             {
-                await notificationService.CreateForSchoolAsync(
+                await notificationService.CreateForClassAsync(
                     schoolId,
+                    req.Grade,
+                    sec,
                     NotificationType.NewHomework,
                     $"New Homework — Class {req.Grade}{sec}: {req.Title}",
                     $"{req.Subject} due {req.DueAt:MMM dd}",

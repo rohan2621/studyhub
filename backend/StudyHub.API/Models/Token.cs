@@ -22,6 +22,8 @@ public class Token
     public DateTime? ExpiresAt { get; set; }
     public TokenStatus Status { get; set; } = TokenStatus.Unused;
     public string? DeviceId { get; set; }
+    public string? IpAddress { get; set; }
+    public bool IsDevicePermanent { get; set; } = false;
 
     public User User { get; set; } = null!;
     public PaymentRecord? PaymentRecord { get; set; }

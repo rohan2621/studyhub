@@ -1,12 +1,13 @@
 import { useEffect, useRef } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity, RefreshControl,
-  Animated as RNAnimated, Easing, Pressable,
+  Animated as RNAnimated, Easing, Pressable, DeviceEventEmitter,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { format } from "date-fns";
+import Toast from "react-native-toast-message";
 import Animated, { FadeIn, FadeInDown, SlideInRight, Easing as ReanimatedEasing } from "react-native-reanimated";
 import {
   CheckCircle2, AlertTriangle, Ticket, ChevronRight, FileText, Star,
@@ -93,14 +94,14 @@ function LoadingSkeleton() {
 }
 
 // ── Quick tile ──────────────────────────────────────────────────────────
-function QuickTile({ item, index, colors }: any) {
+function QuickTile({ item, index, colors, onPress }: any) {
   const Icon = item.icon;
   return (
     <Animated.View
       entering={FadeInDown.delay(index * 55).duration(350).easing(ReanimatedEasing.out(ReanimatedEasing.quad))}
       style={{ width: "31%" }}
     >
-      <PressCard onPress={() => router.push(item.route)} style={{ aspectRatio: 1 }}>
+      <PressCard onPress={onPress} style={{ aspectRatio: 1 }}>
         <View style={{
           flex: 1, backgroundColor: colors.card, borderRadius: 22,
           alignItems: "center", justifyContent: "center",
@@ -142,6 +143,7 @@ function SectionTitle({ icon: Icon, iconColor, title, onSeeAll, delay = 0 }: any
 export default function HomeScreen() {
   const { user } = useAuthStore();
   const { colors } = useThemeStore();
+  const isAdmin = Number(user?.role) === 3 || user?.role === "Admin";
 
   const { data: feed, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["feed"],
@@ -155,6 +157,14 @@ export default function HomeScreen() {
       catch { return null; }
     },
   });
+
+  const handleFeaturePress = (route: string) => {
+    if (!isAdmin && tokenStatus?.hasActiveToken === false) {
+      DeviceEventEmitter.emit("SHOW_LOCK_MODAL");
+      return;
+    }
+    router.push(route);
+  };
 
   const { data: announcements } = useQuery({
     queryKey: ["announcements"],
@@ -209,7 +219,7 @@ export default function HomeScreen() {
             </View>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <PressCard onPress={() => router.push("/(tabs)/notifications")} style={{ position: "relative" }}>
+            <PressCard onPress={() => handleFeaturePress("/(tabs)/notifications")} style={{ position: "relative" }}>
               <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: colors.card, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
                 <Bell size={19} color={colors.text} />
               </View>
@@ -280,13 +290,13 @@ export default function HomeScreen() {
             </Animated.View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", marginBottom: 28, rowGap: 16 }}>
               {quickAccess.map((item, i) => (
-                <QuickTile key={item.label} item={item} index={i} colors={colors} />
+                <QuickTile key={item.label} item={item} index={i} colors={colors} onPress={() => handleFeaturePress(item.route)} />
               ))}
             </View>
 
             {/* ── Search shortcut ──────────────────────────────── */}
             <Animated.View entering={FadeInDown.delay(180).duration(350)} style={{ marginBottom: 28 }}>
-              <PressCard onPress={() => router.push("/(tabs)/search")} style={{}}>
+              <PressCard onPress={() => handleFeaturePress("/(tabs)/search")} style={{}}>
                 <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.card, borderRadius: 18, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 12 }}>
                   <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: colors.primary + "16", justifyContent: "center", alignItems: "center" }}>
                     <Search size={18} color={colors.primary} />
@@ -324,13 +334,13 @@ export default function HomeScreen() {
               <SectionTitle
                 icon={ClipboardList}
                 title="Due Soon"
-                onSeeAll={() => router.push("/(tabs)/homework")}
+                onSeeAll={() => handleFeaturePress("/(tabs)/homework")}
                 delay={230}
               />
               {hasHomework ? (
                 feed.upcomingHomework.slice(0, 3).map((hw: any, i: number) => (
                   <Animated.View key={hw.id} entering={FadeInDown.delay(250 + i * 60).duration(320)} style={{ marginBottom: 10 }}>
-                    <PressCard onPress={() => router.push("/(tabs)/homework")} style={{}}>
+                    <PressCard onPress={() => handleFeaturePress("/(tabs)/homework")} style={{}}>
                       <View style={{ backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                         <View style={{ flex: 1, marginRight: 12 }}>
                           <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15, letterSpacing: -0.2 }}>{hw.title}</Text>
@@ -355,13 +365,13 @@ export default function HomeScreen() {
               <SectionTitle
                 icon={Flame} iconColor={colors.warning}
                 title="Trending Notes"
-                onSeeAll={() => router.push("/(tabs)/notes")}
+                onSeeAll={() => handleFeaturePress("/(tabs)/notes")}
                 delay={290}
               />
               {hasTrending ? (
                 feed.trendingNotes.slice(0, 3).map((note: any, i: number) => (
                   <Animated.View key={note.id} entering={FadeInDown.delay(310 + i * 60).duration(320)} style={{ marginBottom: 10 }}>
-                    <PressCard onPress={() => router.push("/(tabs)/notes")} style={{}}>
+                    <PressCard onPress={() => handleFeaturePress("/(tabs)/notes")} style={{}}>
                       <View style={{ backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                         <View style={{ flex: 1, marginRight: 12 }}>
                           <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15, letterSpacing: -0.2 }}>{note.title}</Text>
@@ -385,13 +395,13 @@ export default function HomeScreen() {
               <SectionTitle
                 icon={Sparkles} iconColor={colors.primary}
                 title="Recent Uploads"
-                onSeeAll={() => router.push("/(tabs)/notes")}
+                onSeeAll={() => handleFeaturePress("/(tabs)/notes")}
                 delay={350}
               />
               {hasRecent ? (
                 feed.recentUploads.slice(0, 3).map((note: any, i: number) => (
                   <Animated.View key={note.id} entering={FadeInDown.delay(370 + i * 60).duration(320)} style={{ marginBottom: 10 }}>
-                    <PressCard onPress={() => router.push("/(tabs)/notes")} style={{}}>
+                    <PressCard onPress={() => handleFeaturePress("/(tabs)/notes")} style={{}}>
                       <View style={{ backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border }}>
                         <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15, letterSpacing: -0.2 }}>{note.title}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 6 }}>

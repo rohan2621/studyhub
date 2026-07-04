@@ -31,17 +31,29 @@ api.interceptors.response.use(
       original._retry = true;
       try {
         const userId = await storage.get("userId");
+        const refreshToken = await storage.get("refreshToken");
         const res = await axios.post(
           `${API_URL}/auth/refresh`,
           {},
-          { headers: { "X-User-Id": userId }, withCredentials: true }
+          { 
+            headers: { 
+              "X-User-Id": userId,
+              "X-Refresh-Token": refreshToken || ""
+            }, 
+            withCredentials: true 
+          }
         );
         const newToken = res.data.accessToken;
+        const newRefreshToken = res.data.refreshToken;
         await storage.set("accessToken", newToken);
+        if (newRefreshToken) {
+          await storage.set("refreshToken", newRefreshToken);
+        }
         original.headers.Authorization = `Bearer ${newToken}`;
         return api(original);
       } catch {
         await storage.delete("accessToken");
+        await storage.delete("refreshToken");
         await storage.delete("userId");
         await storage.delete("user");
         router.replace("/(auth)/login");

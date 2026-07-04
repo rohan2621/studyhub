@@ -8,30 +8,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   FadeInDown, useSharedValue, useAnimatedStyle, withSpring,
 } from "react-native-reanimated";
-import * as Linking from "expo-linking";
 import {
-  Search, FileText, Star, Heart, Download, Lock,
+  Search, FileText, Star, Heart, Eye, Lock,
 } from "lucide-react-native";
 import { api } from "../../lib/api";
 import { useThemeStore } from "../../stores/themeStore";
 import { useAuthStore } from "../../stores/authStore";
-
-const openFile = async (url: string) => {
-  try {
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      Alert.alert("Cannot open file", "No app found to open this file.");
-    }
-  } catch {
-    Alert.alert("Error", "Failed to open the file.");
-  }
-};
+import InAppViewerModal from "../../components/InAppViewerModal";
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
-function NoteCard({ note, type, index, colors, onUpvote }: any) {
+function NoteCard({ note, type, index, colors, onUpvote, onViewFile }: any) {
   const heartScale = useSharedValue(1);
   const animatedHeart = useAnimatedStyle(() => ({ transform: [{ scale: heartScale.value }] }));
 
@@ -88,11 +75,11 @@ function NoteCard({ note, type, index, colors, onUpvote }: any) {
 
           {note.fileUrl ? (
             <TouchableOpacity
-              onPress={() => openFile(note.fileUrl)}
+              onPress={() => onViewFile(note.fileUrl, note.title)}
               style={{ backgroundColor: colors.primary, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 6 }}
             >
-              <Download size={13} color="#fff" />
-              <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>Download</Text>
+              <Eye size={13} color="#fff" />
+              <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>View</Text>
             </TouchableOpacity>
           ) : (
             <View style={{ backgroundColor: colors.border, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -113,6 +100,16 @@ export default function NotesScreen() {
   const [search, setSearch] = useState("");
   const [subject, setSubject] = useState("");
   const [type, setType] = useState<"Note" | "TopperNote">("Note");
+
+  const [viewerUrl, setViewerUrl] = useState("");
+  const [viewerTitle, setViewerTitle] = useState("");
+  const [viewerVisible, setViewerVisible] = useState(false);
+
+  const onViewFile = (url: string, title: string) => {
+    setViewerUrl(url);
+    setViewerTitle(title);
+    setViewerVisible(true);
+  };
 
   const classLabel = user?.grade ? `Class ${user.grade}${user.section ?? ""}` : "";
 
@@ -223,11 +220,18 @@ export default function NotesScreen() {
             </Animated.View>
           ) : (
             filtered.map((note: any, i: number) => (
-              <NoteCard key={note.id} note={note} type={type} index={i} colors={colors} onUpvote={upvoteMutation.mutate} />
+              <NoteCard key={note.id} note={note} type={type} index={i} colors={colors} onViewFile={onViewFile} onUpvote={upvoteMutation.mutate} />
             ))
           )}
         </ScrollView>
       )}
+
+      <InAppViewerModal
+        visible={viewerVisible}
+        url={viewerUrl}
+        title={viewerTitle}
+        onClose={() => setViewerVisible(false)}
+      />
     </View>
   );
 }

@@ -17,10 +17,26 @@ public class AnnouncementsController(AppDbContext db, NotificationService notifi
     public async Task<IActionResult> GetAll()
     {
         var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        var userGrade = User.FindFirstValue("grade") ?? "";
+        var userSection = User.FindFirstValue("section") ?? "";
+        var isAdmin = User.IsInRole("Admin");
 
-        var announcements = await db.Announcements
-            .Where(a => a.Target == AnnouncementTarget.AllSchools ||
-                        (a.Target == AnnouncementTarget.SpecificSchool && a.SchoolId == schoolId))
+        var query = db.Announcements.AsQueryable();
+
+        if (!isAdmin)
+        {
+            query = query.Where(a => a.Target == AnnouncementTarget.AllSchools ||
+                        (a.Target == AnnouncementTarget.SpecificSchool && a.SchoolId == schoolId) ||
+                        (a.Target == AnnouncementTarget.SpecificClass && a.SchoolId == schoolId && 
+                         a.Grade == userGrade && (string.IsNullOrEmpty(a.Section) || a.Section == userSection)));
+        }
+        else
+        {
+            // Admins can see all announcements or filter
+            query = query.Where(a => a.Target == AnnouncementTarget.AllSchools || a.SchoolId == schoolId);
+        }
+
+        var announcements = await query
             .OrderByDescending(a => a.IsPinned)
             .ThenByDescending(a => a.CreatedAt)
             .Select(a => new
@@ -30,6 +46,8 @@ public class AnnouncementsController(AppDbContext db, NotificationService notifi
                 a.Body,
                 a.IsPinned,
                 target = a.Target.ToString(),
+                a.Grade,
+                a.Section,
                 a.CreatedAt
             })
             .ToListAsync();
@@ -50,6 +68,8 @@ public class AnnouncementsController(AppDbContext db, NotificationService notifi
             CreatedByAdminId = adminId,
             Target = req.Target,
             SchoolId = req.SchoolId,
+            Grade = req.Grade,
+            Section = string.IsNullOrEmpty(req.Section) ? null : req.Section.Trim().ToUpper(),
             IsPinned = req.IsPinned
         };
 
@@ -60,9 +80,12 @@ public class AnnouncementsController(AppDbContext db, NotificationService notifi
         if (req.Target == AnnouncementTarget.AllSchools)
             await notificationService.CreateForAllAsync(
                 NotificationType.NewAnnouncement, req.Title, req.Body, "/announcements");
-        else if (req.SchoolId.HasValue)
+        else if (req.Target == AnnouncementTarget.SpecificSchool && req.SchoolId.HasValue)
             await notificationService.CreateForSchoolAsync(
                 req.SchoolId.Value, NotificationType.NewAnnouncement, req.Title, req.Body, "/announcements");
+        else if (req.Target == AnnouncementTarget.SpecificClass && req.SchoolId.HasValue && !string.IsNullOrEmpty(req.Grade))
+            await notificationService.CreateForClassAsync(
+                req.SchoolId.Value, req.Grade, req.Section, NotificationType.NewAnnouncement, req.Title, req.Body, "/announcements");
 
         return Ok(new { announcement.Id });
     }
@@ -84,4 +107,6 @@ public record CreateAnnouncementRequest(
     string Body,
     AnnouncementTarget Target,
     Guid? SchoolId,
-    bool IsPinned);
+    bool IsPinned,
+    string? Grade = null,
+    string? Section = null);

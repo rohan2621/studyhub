@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as signalR from "@microsoft/signalr";
 import { format } from "date-fns";
-import { MessageCircle, Send, Plus, ArrowLeft } from "lucide-react-native";
+import { MessageCircle, Send, Plus, ArrowLeft, X } from "lucide-react-native";
 import { api } from "../../lib/api";
 import { useAuthStore } from "../../stores/authStore";
 import { useThemeStore } from "../../stores/themeStore";
@@ -105,7 +105,16 @@ export default function DiscussionsScreen() {
             </View>
           ))}
         </ScrollView>
-        <View style={{ padding: 16, backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border, flexDirection: "row", gap: 12, alignItems: "flex-end" }}>
+        <View style={{
+          padding: 16,
+          paddingBottom: Platform.OS === "ios" ? 78 + 16 : 60 + 16,
+          backgroundColor: colors.card,
+          borderTopWidth: 1,
+          borderTopColor: colors.border,
+          flexDirection: "row",
+          gap: 12,
+          alignItems: "flex-end"
+        }}>
           <TextInput value={newReply} onChangeText={setNewReply} placeholder="Write a reply..." placeholderTextColor={colors.muted} multiline
             style={{ flex: 1, backgroundColor: colors.inputBg, borderRadius: 14, padding: 12, color: colors.text, borderWidth: 1, borderColor: colors.border, maxHeight: 100 }} />
           <TouchableOpacity onPress={() => replyMutation.mutate()} disabled={!newReply.trim() || replyMutation.isPending}
@@ -138,7 +147,7 @@ export default function DiscussionsScreen() {
           <ActivityIndicator color={colors.primary} size="large" />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 20, gap: 12 }}
+        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: Platform.OS === "ios" ? 78 + 20 : 60 + 20, gap: 12 }}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}>
           {(data ?? []).map((thread: any) => (
             <TouchableOpacity key={thread.id} onPress={() => setSelectedThread(thread)}
@@ -160,30 +169,44 @@ export default function DiscussionsScreen() {
       )}
 
       <Modal visible={showNewThread} animationType="slide" transparent>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={{ flex: 1, backgroundColor: "#000000bb", justifyContent: "flex-end" }}>
-            <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 28 }}>
-              <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800", marginBottom: 20 }}>New Discussion</Text>
-              {[["Subject", newSubject, setNewSubject, "e.g. Mathematics"],
-                ["Title", newTitle, setNewTitle, "What's your question?"]].map(([label, val, setter, ph]: any) => (
-                <View key={label}>
-                  <Text style={{ color: colors.textMuted, marginBottom: 6, fontSize: 14 }}>{label}</Text>
-                  <TextInput value={val} onChangeText={setter} placeholder={ph} placeholderTextColor={colors.muted}
-                    style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 16 }} />
-                </View>
-              ))}
-              <Text style={{ color: colors.textMuted, marginBottom: 6, fontSize: 14 }}>Details</Text>
-              <TextInput value={newBody} onChangeText={setNewBody} placeholder="Describe in detail..." placeholderTextColor={colors.muted}
-                multiline numberOfLines={4}
-                style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 20, height: 100, textAlignVertical: "top" }} />
-              <TouchableOpacity onPress={() => threadMutation.mutate()} disabled={!newTitle || !newBody || !newSubject || threadMutation.isPending}
-                style={{ backgroundColor: colors.primary, borderRadius: 14, padding: 16, alignItems: "center", marginBottom: 12, opacity: !newTitle || !newBody || !newSubject ? 0.5 : 1 }}>
-                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>{threadMutation.isPending ? "Posting..." : "Post Discussion"}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowNewThread(false)}
-                style={{ borderRadius: 14, padding: 16, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
-                <Text style={{ color: colors.textMuted, fontWeight: "600" }}>Cancel</Text>
-              </TouchableOpacity>
+            <View style={{
+              backgroundColor: colors.surface,
+              borderTopLeftRadius: 28, borderTopRightRadius: 28,
+              maxHeight: "92%"
+            }}>
+              {/* Header */}
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+                <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800" }}>New Discussion</Text>
+                <TouchableOpacity onPress={() => setShowNewThread(false)} style={{ padding: 4 }}>
+                  <X size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+
+              {/* Form Body inside ScrollView */}
+              <ScrollView contentContainerStyle={{ padding: 24 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+                {[["Subject", newSubject, setNewSubject, "e.g. Mathematics"],
+                  ["Title", newTitle, setNewTitle, "What's your question?"]].map(([label, val, setter, ph]: any) => (
+                  <View key={label}>
+                    <Text style={{ color: colors.textMuted, marginBottom: 6, fontSize: 14 }}>{label}</Text>
+                    <TextInput value={val} onChangeText={setter} placeholder={ph} placeholderTextColor={colors.muted}
+                      style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 16 }} />
+                  </View>
+                ))}
+                <Text style={{ color: colors.textMuted, marginBottom: 6, fontSize: 14 }}>Details</Text>
+                <TextInput value={newBody} onChangeText={setNewBody} placeholder="Describe in detail..." placeholderTextColor={colors.muted}
+                  multiline numberOfLines={4}
+                  style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 20, height: 100, textAlignVertical: "top" }} />
+                <TouchableOpacity onPress={() => threadMutation.mutate()} disabled={!newTitle || !newBody || !newSubject || threadMutation.isPending}
+                  style={{ backgroundColor: colors.primary, borderRadius: 14, padding: 16, alignItems: "center", marginBottom: 12, opacity: !newTitle || !newBody || !newSubject ? 0.5 : 1 }}>
+                  <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>{threadMutation.isPending ? "Posting..." : "Post Discussion"}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowNewThread(false)}
+                  style={{ borderRadius: 14, padding: 16, alignItems: "center", borderWidth: 1, borderColor: colors.border, marginBottom: 16 }}>
+                  <Text style={{ color: colors.textMuted, fontWeight: "600" }}>Cancel</Text>
+                </TouchableOpacity>
+              </ScrollView>
             </View>
           </View>
         </KeyboardAvoidingView>

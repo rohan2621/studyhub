@@ -61,6 +61,8 @@ public class TokensController(AppDbContext db) : ControllerBase
             hoursLeft,
             isExpiringSoon = daysLeft <= 7,
             deviceBound = token.DeviceId is not null,
+            isDevicePermanent = token.IsDevicePermanent,
+            canBindPermanent = !token.IsDevicePermanent,
             status = token.Status.ToString()
         });
     }
@@ -105,7 +107,7 @@ public class TokensController(AppDbContext db) : ControllerBase
 
         var hashedDevice = DeviceHasher.Hash(deviceHeader);
 
-        var token = req.Code is not null
+        var token = !string.IsNullOrEmpty(req.Code)
             ? await db.Tokens.FirstOrDefaultAsync(t => t.Code == req.Code && t.UserId == userId)
             : await db.Tokens.FirstOrDefaultAsync(t => t.UserId == userId && t.Status == TokenStatus.Unused);
 
@@ -118,17 +120,19 @@ public class TokensController(AppDbContext db) : ControllerBase
         if (token.Status == TokenStatus.Expired)
             return BadRequest(new { error = "This token has expired. Contact support to renew." });
 
-        if (token.Status == TokenStatus.Active && token.DeviceId != hashedDevice)
+        var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+        if (token.Status == TokenStatus.Active && token.IpAddress != clientIp)
             return Conflict(new
             {
                 error = "DEVICE_MISMATCH",
-                message = "This token is already active on another device. Contact support to reset it."
+                message = "This token is already active on another network. Contact support to reset it."
             });
 
-        if (token.Status == TokenStatus.Active && token.DeviceId == hashedDevice)
+        if (token.Status == TokenStatus.Active && token.IpAddress == clientIp)
             return Ok(new
             {
-                message = "Token already active on this device.",
+                message = "Token already active on this network.",
                 expiresAt = token.ExpiresAt,
                 plan = token.Plan.ToString()
             });
@@ -138,6 +142,7 @@ public class TokensController(AppDbContext db) : ControllerBase
 
         token.Status = TokenStatus.Active;
         token.DeviceId = hashedDevice;
+        token.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
         token.ExpiresAt = TokenService.GetPlanExpiry(token.Plan);
 
         // Upsert device record
@@ -179,11 +184,59 @@ public class TokensController(AppDbContext db) : ControllerBase
         return Ok(new
         {
             message = "Token activated successfully.",
+            token = new
+            {
+                id = token.Id,
+                code = token.Code,
+                user_id = token.UserId,
+                plan = token.Plan.ToString().ToLower(),
+                issued_at = token.IssuedAt,
+                expires_at = token.ExpiresAt,
+                status = "active",
+                device_id = token.DeviceId is not null ? "bound" : null,
+                is_device_permanent = token.IsDevicePermanent,
+                can_bind_permanent = !token.IsDevicePermanent
+            },
             plan = token.Plan.ToString(),
             expiresAt = token.ExpiresAt,
             daysLeft = token.ExpiresAt.HasValue
                 ? (int)(token.ExpiresAt.Value - DateTime.UtcNow).TotalDays
                 : 0
+        });
+    }
+
+    [HttpPost("bind-permanent")]
+    public async Task<IActionResult> BindPermanent()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var deviceHeader = Request.Headers["X-Device-Id"].ToString();
+
+        if (string.IsNullOrEmpty(deviceHeader))
+            return BadRequest(new { error = "X-Device-Id header is required." });
+
+        var hashedDevice = DeviceHasher.Hash(deviceHeader);
+
+        var token = await db.Tokens
+            .Where(t => t.UserId == userId && t.Status == TokenStatus.Active)
+            .OrderByDescending(t => t.IssuedAt)
+            .FirstOrDefaultAsync();
+
+        if (token is null)
+            return BadRequest(new { error = "No active token found on your account." });
+
+        if (token.IsDevicePermanent)
+            return BadRequest(new { error = "A permanent device has already been bound to this token." });
+
+        token.DeviceId = hashedDevice;
+        token.IsDevicePermanent = true;
+
+        await db.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = "Device bound permanently to your account.",
+            deviceId = token.DeviceId,
+            isDevicePermanent = token.IsDevicePermanent
         });
     }
 }

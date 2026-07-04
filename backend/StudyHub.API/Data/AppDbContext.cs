@@ -24,6 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<TokenRenewalRequest> TokenRenewalRequests => Set<TokenRenewalRequest>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+    public DbSet<HireRequest> HireRequests => Set<HireRequest>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -159,6 +160,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(p => p.UserId);
             e.HasIndex(p => p.ExpiresAt);
             e.HasOne(p => p.User).WithMany(u => u.PasswordResetTokens).HasForeignKey(p => p.UserId);
+        });
+        b.Entity<HireRequest>(e =>
+        {
+            e.HasIndex(h => h.StudentId);
+            e.HasIndex(h => h.TopperId);
+            e.Property(h => h.Status).HasConversion<string>();
+            e.HasOne(h => h.Student).WithMany().HasForeignKey(h => h.StudentId);
+            e.HasOne(h => h.Topper).WithMany().HasForeignKey(h => h.TopperId);
         });
     }
 }

@@ -24,7 +24,17 @@ public class RateLimitMiddleware(RequestDelegate next)
 
             var count = await db.StringIncrementAsync(key);
             if (count == 1)
+            {
                 await db.KeyExpireAsync(key, TimeSpan.FromSeconds(rule.Value.windowSeconds));
+            }
+            else
+            {
+                var ttl = await db.KeyTimeToLiveAsync(key);
+                if (ttl == null || ttl.Value.TotalSeconds < 0)
+                {
+                    await db.KeyExpireAsync(key, TimeSpan.FromSeconds(rule.Value.windowSeconds));
+                }
+            }
 
             if (count > rule.Value.limit)
             {

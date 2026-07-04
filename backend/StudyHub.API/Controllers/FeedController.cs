@@ -42,17 +42,17 @@ public class FeedController(AppDbContext db) : ControllerBase
             })
             .Take(10).ToListAsync();
 
-        // ── Trending notes (grade-specific, school-isolated) ──────────────
+        // ── Trending notes (grade-specific, section-isolated) ──────────────
         var trendingNotes = await db.Notes
-            .Where(n => n.SchoolId == schoolId && n.Grade == grade)
+            .Where(n => n.SchoolId == schoolId && n.Grade == grade && (n.Section == null || n.Section == section))
             .OrderByDescending(n => n.Upvotes)
             .ThenByDescending(n => n.CreatedAt)
             .Select(n => new { n.Id, n.Title, n.Subject, n.Grade, n.Type, n.Upvotes, n.CreatedAt })
             .Take(6).ToListAsync();
 
-        // ── Recent uploads (grade-specific) ───────────────────────────────
+        // ── Recent uploads (grade-specific, section-isolated) ──────────────
         var recentUploads = await db.Notes
-            .Where(n => n.SchoolId == schoolId && n.Grade == grade)
+            .Where(n => n.SchoolId == schoolId && n.Grade == grade && (n.Section == null || n.Section == section))
             .OrderByDescending(n => n.CreatedAt)
             .Select(n => new
             {

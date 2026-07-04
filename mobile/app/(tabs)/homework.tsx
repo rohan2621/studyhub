@@ -9,11 +9,12 @@ import Toast from "react-native-toast-message";
 import { format, formatDistanceToNow } from "date-fns";
 import {
   ClipboardList, CheckCircle2, Upload, Clock,
-  BookOpen, X, AlertCircle, CalendarDays, ChevronRight
+  BookOpen, X, AlertCircle, CalendarDays, ChevronRight, Eye
 } from "lucide-react-native";
 import { api } from "../../lib/api";
 import { useThemeStore } from "../../stores/themeStore";
 import { useAuthStore } from "../../stores/authStore";
+import InAppViewerModal from "../../components/InAppViewerModal";
 
 const urgencyColor = (colors: any, u: string) =>
   ({ red: colors.danger, amber: colors.warning, green: colors.success }[u] ?? colors.muted);
@@ -25,7 +26,7 @@ const urgencyLabel = (hw: any) => {
   return `${hw.daysUntilDue}d left`;
 };
 
-function HwCard({ hw, colors, onSubmit }: { hw: any; colors: any; onSubmit: () => void }) {
+function HwCard({ hw, colors, onSubmit, onViewFile }: { hw: any; colors: any; onSubmit: () => void; onViewFile: (url: string, title: string) => void }) {
   const uc = urgencyColor(colors, hw.urgency ?? "green");
   const [expanded, setExpanded] = useState(false);
 
@@ -97,14 +98,17 @@ function HwCard({ hw, colors, onSubmit }: { hw: any; colors: any; onSubmit: () =
 
         {/* Attachment link */}
         {hw.attachmentUrl && expanded && (
-          <View style={{
-            flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12,
-            backgroundColor: colors.primary + "10", borderRadius: 12, padding: 12,
-            borderWidth: 1, borderColor: colors.primary + "30",
-          }}>
-            <Upload size={14} color={colors.primary} />
-            <Text style={{ color: colors.primary, fontSize: 13, fontWeight: "600" }}>Attachment available</Text>
-          </View>
+          <TouchableOpacity
+            onPress={() => onViewFile(hw.attachmentUrl, `${hw.title} Attachment`)}
+            style={{
+              flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12,
+              backgroundColor: colors.primary + "15", borderRadius: 12, padding: 12,
+              borderWidth: 1, borderColor: colors.primary + "40",
+            }}
+          >
+            <Eye size={14} color={colors.primary} />
+            <Text style={{ color: colors.primary, fontSize: 13, fontWeight: "700" }}>View Attachment</Text>
+          </TouchableOpacity>
         )}
 
         {/* Submit / Submitted */}
@@ -153,6 +157,16 @@ export default function HomeworkScreen() {
   const [tab, setTab] = useState<"pending" | "submitted">("pending");
   const [submitModal, setSubmitModal] = useState<string | null>(null);
   const [fileUrl, setFileUrl] = useState("");
+
+  const [viewerUrl, setViewerUrl] = useState("");
+  const [viewerTitle, setViewerTitle] = useState("");
+  const [viewerVisible, setViewerVisible] = useState(false);
+
+  const onViewFile = (url: string, title: string) => {
+    setViewerUrl(url);
+    setViewerTitle(title);
+    setViewerVisible(true);
+  };
 
   const classLabel = user?.grade ? `Class ${user.grade}${user.section ?? ""}` : "";
 
@@ -273,6 +287,7 @@ export default function HomeworkScreen() {
                 hw={hw}
                 colors={colors}
                 onSubmit={() => { setSubmitModal(hw.id); setFileUrl(""); }}
+                onViewFile={onViewFile}
               />
             ))
           )}
@@ -336,6 +351,13 @@ export default function HomeworkScreen() {
           </View>
         </View>
       </Modal>
+
+      <InAppViewerModal
+        visible={viewerVisible}
+        url={viewerUrl}
+        title={viewerTitle}
+        onClose={() => setViewerVisible(false)}
+      />
     </View>
   );
 }

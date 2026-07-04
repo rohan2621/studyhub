@@ -1,6 +1,6 @@
 namespace StudyHub.API.Models;
 
-public enum AnnouncementTarget { AllSchools, SpecificSchool }
+public enum AnnouncementTarget { AllSchools, SpecificSchool, SpecificClass }
 
 public class Announcement
 {
@@ -10,6 +10,8 @@ public class Announcement
     public Guid CreatedByAdminId { get; set; }
     public AnnouncementTarget Target { get; set; }
     public Guid? SchoolId { get; set; }
+    public string? Grade { get; set; }
+    public string? Section { get; set; }
     public bool IsPinned { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

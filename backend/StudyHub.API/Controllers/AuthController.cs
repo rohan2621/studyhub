@@ -145,7 +145,7 @@ public class AuthController(
         Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = Request.IsHttps,
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
@@ -153,6 +153,7 @@ public class AuthController(
         return Ok(new
         {
             accessToken,
+            refreshToken,
             user = new
             {
                 user.Id,
@@ -172,6 +173,11 @@ public class AuthController(
     public async Task<IActionResult> Refresh()
     {
         var refreshToken = Request.Cookies["refresh_token"];
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            refreshToken = Request.Headers["X-Refresh-Token"].ToString();
+        }
+
         if (string.IsNullOrEmpty(refreshToken))
             return Unauthorized(new { error = "No refresh token." });
 
@@ -199,12 +205,16 @@ public class AuthController(
         Response.Cookies.Append("refresh_token", newRefreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = Request.IsHttps,
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
 
-        return Ok(new { accessToken = tokenService.GenerateAccessToken(user) });
+        return Ok(new 
+        { 
+            accessToken = tokenService.GenerateAccessToken(user),
+            refreshToken = newRefreshToken
+        });
     }
 
     // ── Logout ────────────────────────────────────────────
@@ -213,6 +223,10 @@ public class AuthController(
     public async Task<IActionResult> Logout()
     {
         var refreshToken = Request.Cookies["refresh_token"];
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            refreshToken = Request.Headers["X-Refresh-Token"].ToString();
+        }
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (!string.IsNullOrEmpty(refreshToken) && userId is not null)

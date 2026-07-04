@@ -29,14 +29,15 @@ export default function LoginScreen() {
     mutationFn: async () =>
       (await api.post("/auth/login", { email: email.trim().toLowerCase(), password })).data,
     onSuccess: async (data) => {
-      await login(data.accessToken, data.user);
-    
+      await login(data.accessToken, data.user, data.refreshToken);
+
       Toast.show({
         type: "success",
         text1: `Welcome back, ${data.user.name}!`,
       });
-    
-      if (data.user.role === 3) {
+      console.log(data.user);
+
+      if (data.user.role === 3 || data.user.role === "Admin") {
         router.replace("/(admin)");
       } else {
         router.replace("/(tabs)/home");

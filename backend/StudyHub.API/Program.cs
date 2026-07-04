@@ -80,6 +80,7 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<FileService>();
@@ -130,6 +131,10 @@ builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
      .WithOrigins(
          "http://localhost:3000",
          "http://localhost:3001",
+         "http://localhost:8080",
+            "http://192.168.191.1:8080/",
+            "http://192.168.18.11:8080/",
+
          "https://yourdomain.com"
      )));
 

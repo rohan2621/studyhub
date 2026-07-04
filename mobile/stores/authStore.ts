@@ -17,8 +17,8 @@ interface AuthState {
   accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, user: User) => Promise<void>;
-  setAuth: (user: User, token: string) => Promise<void>;
+  login: (token: string, user: User, refreshToken?: string) => Promise<void>;
+  setAuth: (user: User, token: string, refreshToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   loadStoredAuth: () => Promise<void>;
 }
@@ -29,16 +29,22 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   isLoading: true,
 
-  login: async (token, user) => {
+  login: async (token, user, refreshToken) => {
     await storage.set("accessToken", token);
+    if (refreshToken) {
+      await storage.set("refreshToken", refreshToken);
+    }
     await storage.set("userId", user.id);
     await storage.set("user", JSON.stringify(user));
     set({ user, accessToken: token, isAuthenticated: true });
   },
 
   // alias so both naming conventions work across screens
-  setAuth: async (user, token) => {
+  setAuth: async (user, token, refreshToken) => {
     await storage.set("accessToken", token);
+    if (refreshToken) {
+      await storage.set("refreshToken", refreshToken);
+    }
     await storage.set("userId", user.id);
     await storage.set("user", JSON.stringify(user));
     set({ user, accessToken: token, isAuthenticated: true });
@@ -46,6 +52,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     await storage.delete("accessToken");
+    await storage.delete("refreshToken");
     await storage.delete("userId");
     await storage.delete("user");
     set({ user: null, accessToken: null, isAuthenticated: false });

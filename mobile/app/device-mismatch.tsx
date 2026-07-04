@@ -6,7 +6,10 @@ import Animated, {
   FadeIn, FadeInDown, useSharedValue, useAnimatedStyle,
   withRepeat, withSequence, withTiming, Easing,
 } from "react-native-reanimated";
-import { ShieldAlert, LogOut, MessageCircle } from "lucide-react-native";
+import { ShieldAlert, LogOut, MessageCircle, Shield } from "lucide-react-native";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import Toast from "react-native-toast-message";
+import { api } from "../lib/api";
 import { useAuthStore } from "../stores/authStore";
 import { useThemeStore } from "../stores/themeStore";
 import { StudyHubBrand } from "../components/ui/StudyHubBrand";
@@ -17,6 +20,36 @@ export default function DeviceMismatchScreen() {
   const { logout } = useAuthStore();
   const { colors } = useThemeStore();
   const pulse = useSharedValue(1);
+
+  const { data: tokenStatus } = useQuery({
+    queryKey: ["tokenStatusBypass"],
+    queryFn: async () => {
+      try {
+        return (await api.get("/tokens/me")).data;
+      } catch {
+        return null;
+      }
+    },
+  });
+
+  const bindMutation = useMutation({
+    mutationFn: async () => (await api.post("/tokens/bind-permanent")).data,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Device bound successfully!",
+        text2: "Your license is locked to this device.",
+      });
+      router.replace("/(tabs)/home");
+    },
+    onError: (e: any) => {
+      Toast.show({
+        type: "error",
+        text1: "Binding failed",
+        text2: e.response?.data?.error ?? "An error occurred",
+      });
+    },
+  });
 
   useEffect(() => {
     pulse.value = withRepeat(
@@ -67,12 +100,25 @@ export default function DeviceMismatchScreen() {
 
         <Animated.Text
           entering={FadeInDown.delay(320).springify().damping(14)}
-          style={{ color: colors.textMuted, fontSize: 14, textAlign: "center", lineHeight: 21, marginBottom: 36 }}
+          style={{ color: colors.textMuted, fontSize: 14, textAlign: "center", lineHeight: 21, marginBottom: 36, paddingHorizontal: 10 }}
         >
-          Your token is active on another device. Contact us to reset your device binding.
+          {tokenStatus?.canBindPermanent
+            ? "Your license token is active, but this device is not registered. Register this device permanently to access StudyHub on any network."
+            : "Your token is active on another device. Contact support to reset your device binding."}
         </Animated.Text>
 
-        <Animated.View entering={FadeInDown.delay(400).springify().damping(14)} style={{ width: "100%" }}>
+        {tokenStatus?.canBindPermanent && (
+          <Animated.View entering={FadeInDown.delay(380).springify().damping(14)} style={{ width: "100%", marginBottom: 12 }}>
+            <GradientButton
+              title="Register Device Permanently"
+              icon={<Shield size={18} color="#fff" />}
+              loading={bindMutation.isPending}
+              onPress={() => bindMutation.mutate()}
+            />
+          </Animated.View>
+        )}
+
+        <Animated.View entering={FadeInDown.delay(440).springify().damping(14)} style={{ width: "100%" }}>
           <GradientButton
             title="Contact Support on WhatsApp"
             icon={<MessageCircle size={18} color="#fff" />}
@@ -80,7 +126,7 @@ export default function DeviceMismatchScreen() {
           />
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(470).springify().damping(14)} style={{ width: "100%" }}>
+        <Animated.View entering={FadeInDown.delay(500).springify().damping(14)} style={{ width: "100%" }}>
           <TouchableOpacity
             onPress={async () => {
               await logout();

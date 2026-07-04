@@ -203,7 +203,7 @@ export default function AdminTokensScreen() {
                 {/* Dropdown results */}
                 {userEmail.length > 2 && !selectedUserId && (
                   <View style={{ backgroundColor: colors.card, borderRadius: 14, marginBottom: 12, borderWidth: 1, borderColor: colors.border, overflow: "hidden" }}>
-                    {(userSearch?.data ?? []).slice(0, 6).map((u: any) => (
+                    {(userSearch?.users ?? []).slice(0, 6).map((u: any) => (
                       <TouchableOpacity key={u.id}
                         onPress={() => { setSelectedUserId(u.id); setSelectedUserName(u.name); setUserEmail(`${u.name} (${u.email})`); }}
                         style={{ padding: 14, borderBottomWidth: 1, borderBottomColor: colors.border }}>
@@ -211,7 +211,7 @@ export default function AdminTokensScreen() {
                         <Text style={{ color: colors.textMuted, fontSize: 12 }}>{u.email} • Grade {u.grade}</Text>
                       </TouchableOpacity>
                     ))}
-                    {(userSearch?.data ?? []).length === 0 && userEmail.length > 2 && (
+                    {(userSearch?.users ?? []).length === 0 && userEmail.length > 2 && (
                       <Text style={{ color: colors.textMuted, padding: 14, textAlign: "center" }}>No users found</Text>
                     )}
                   </View>

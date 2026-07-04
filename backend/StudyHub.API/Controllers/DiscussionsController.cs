@@ -19,16 +19,24 @@ public class DiscussionsController(AppDbContext db, IHubContext<DiscussionHub> h
     {
         var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
         var grade    = User.FindFirstValue("grade") ?? "";
+        var section  = User.FindFirstValue("section") ?? "A";
         var isAdmin  = User.IsInRole("Admin");
 
-        // Threads are grade-scoped (class-level), not section-specific
         var query = db.DiscussionThreads.Where(t => t.SchoolId == schoolId);
-        if (!isAdmin) query = query.Where(t => t.Grade == grade);
-        if (subject is not null) query = query.Where(t => t.Subject == subject);
+        if (!isAdmin)
+        {
+            query = query.Where(t => t.Grade == grade && t.Section == section);
+        }
+        else
+        {
+            // Optional overrides for admin/search
+            if (Request.Query.ContainsKey("grade"))
+                query = query.Where(t => t.Grade == Request.Query["grade"].ToString());
+            if (Request.Query.ContainsKey("section"))
+                query = query.Where(t => t.Section == Request.Query["section"].ToString());
+        }
 
-        // Optional override for admin/search
-        if (Request.Query.ContainsKey("grade"))
-            query = query.Where(t => t.Grade == Request.Query["grade"].ToString());
+        if (subject is not null) query = query.Where(t => t.Subject == subject);
 
         var threads = await query
             .OrderByDescending(t => t.CreatedAt)
@@ -37,6 +45,7 @@ public class DiscussionsController(AppDbContext db, IHubContext<DiscussionHub> h
                 t.Id,
                 t.Subject,
                 t.Grade,
+                t.Section,
                 t.Title,
                 t.Body,
                 t.CreatedAt,
@@ -54,6 +63,7 @@ public class DiscussionsController(AppDbContext db, IHubContext<DiscussionHub> h
         var userId   = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var schoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
         var grade    = User.FindFirstValue("grade") ?? "";
+        var section  = User.FindFirstValue("section") ?? "A";
 
         if (HttpContext.Items["previewOnly"] is true)
             return Forbid();
@@ -62,6 +72,7 @@ public class DiscussionsController(AppDbContext db, IHubContext<DiscussionHub> h
         {
             SchoolId = schoolId,
             Grade    = grade,
+            Section  = section,
             Subject  = req.Subject,
             Title    = req.Title,
             Body     = req.Body,

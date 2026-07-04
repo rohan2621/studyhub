@@ -39,6 +39,29 @@ public class NotificationService(AppDbContext db)
         await db.SaveChangesAsync();
     }
 
+    public async Task CreateForClassAsync(Guid schoolId, string grade, string? section, NotificationType type, string title, string body, string? actionUrl = null)
+    {
+        var query = db.Users.Where(u => u.SchoolId == schoolId && u.Grade == grade);
+        if (!string.IsNullOrEmpty(section))
+        {
+            query = query.Where(u => u.Section == section);
+        }
+
+        var userIds = await query.Select(u => u.Id).ToListAsync();
+
+        var notifications = userIds.Select(uid => new Notification
+        {
+            UserId = uid,
+            Type = type,
+            Title = title,
+            Body = body,
+            ActionUrl = actionUrl
+        });
+
+        db.Notifications.AddRange(notifications);
+        await db.SaveChangesAsync();
+    }
+
     public async Task CreateForAllAsync(NotificationType type, string title, string body, string? actionUrl = null)
     {
         var userIds = await db.Users
