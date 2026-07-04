@@ -1,14 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
+import * as Notifications from "expo-notifications";
 import { useAuthStore } from "../stores/authStore";
 import { useThemeStore } from "../stores/themeStore";
 import { getOrCreateDeviceId } from "../lib/storage";
+import { LoadingIntro } from "../components/ui/LoadingIntro";
 
 import * as ScreenCapture from "expo-screen-capture";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
@@ -19,6 +31,10 @@ export default function RootLayout() {
   const load = useThemeStore((s) => s.load);
   const syncSystemTheme = useThemeStore((s) => s.syncSystemTheme);
   const isDark = useThemeStore((s) => s.isDark);
+  const isLoading = useAuthStore((s) => s.isLoading);
+
+  const [introVisible, setIntroVisible] = useState(true);
+  const [introMounted, setIntroMounted] = useState(true);
 
   useEffect(() => {
     loadStoredAuth();
@@ -26,7 +42,27 @@ export default function RootLayout() {
     load();
     syncSystemTheme();
     ScreenCapture.preventScreenCaptureAsync().catch(console.error);
+
+    async function requestPermissions() {
+      try {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+      } catch (err) {
+        console.error("Failed to request notification permission:", err);
+      }
+    }
+    requestPermissions();
   }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIntroVisible(false);
+    }
+  }, [isLoading]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -39,6 +75,13 @@ export default function RootLayout() {
           <Stack.Screen name="device-mismatch" />
         </Stack>
         <Toast />
+        
+        {introMounted && (
+          <LoadingIntro
+            visible={introVisible}
+            onFinished={() => setIntroMounted(false)}
+          />
+        )}
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

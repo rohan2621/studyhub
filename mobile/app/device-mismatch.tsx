@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { View, Text, TouchableOpacity, Linking } from "react-native";
+import { View, Text, TouchableOpacity, Linking, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import Animated, {
@@ -70,7 +70,7 @@ export default function DeviceMismatchScreen() {
     <LinearGradient colors={colors.backgroundGrad as any} style={{ flex: 1 }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
       <BackgroundArt />
 
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 24 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 24, paddingVertical: 40 }} showsVerticalScrollIndicator={false}>
         <Animated.View entering={FadeInDown.springify().damping(14)} style={{ alignItems: "center", marginBottom: 28 }}>
           <StudyHubBrand size="lg" showTagline={false} />
         </Animated.View>
@@ -149,7 +149,7 @@ export default function DeviceMismatchScreen() {
             <Text style={{ color: colors.textMuted, fontWeight: "700", fontSize: 15 }}>Sign Out</Text>
           </TouchableOpacity>
         </Animated.View>
-      </View>
+      </ScrollView>
     </LinearGradient>
   );
 }

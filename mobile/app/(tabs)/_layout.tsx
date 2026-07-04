@@ -54,7 +54,7 @@ function CustomTabBar({ state, descriptors, navigation, colors }: any) {
 
         const { user } = useAuthStore();
         const isAdmin = Number(user?.role) === 3 || user?.role === "Admin";
-        const { data: tokenStatus } = useQuery({ queryKey: ["tokenStatus"], enabled: !!user });
+        const { data: tokenStatus } = useQuery<any>({ queryKey: ["tokenStatus"], enabled: !!user });
 
         const onPress = () => {
           if (!isAdmin && tokenStatus !== undefined && tokenStatus?.hasActiveToken === false && route.name !== "home" && route.name !== "profile") {

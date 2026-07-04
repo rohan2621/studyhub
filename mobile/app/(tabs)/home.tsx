@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { format } from "date-fns";
 import Toast from "react-native-toast-message";
+import * as Notifications from "expo-notifications";
+import { storage } from "../../lib/storage";
 import Animated, { FadeIn, FadeInDown, SlideInRight, Easing as ReanimatedEasing } from "react-native-reanimated";
 import {
   CheckCircle2, AlertTriangle, Ticket, ChevronRight, FileText, Star,
@@ -163,13 +165,60 @@ export default function HomeScreen() {
       DeviceEventEmitter.emit("SHOW_LOCK_MODAL");
       return;
     }
-    router.push(route);
+    router.push(route as any);
   };
 
   const { data: announcements } = useQuery({
     queryKey: ["announcements"],
     queryFn: async () => (await api.get("/announcements")).data,
   });
+
+  useEffect(() => {
+    if (!announcements || announcements.length === 0) return;
+
+    const checkNewAnnouncements = async () => {
+      try {
+        const lastNotifiedId = await storage.get("lastNotifiedAnnouncementId");
+        
+        let newAnnouncements = [];
+        if (lastNotifiedId) {
+          const lastIdx = announcements.findIndex((a: any) => a.id === lastNotifiedId);
+          if (lastIdx !== -1) {
+            newAnnouncements = announcements.slice(0, lastIdx);
+          } else {
+            // fallback: check if the first one is different
+            newAnnouncements = [announcements[0]];
+          }
+        } else {
+          // first load: seed current latest ID
+          if (announcements.length > 0) {
+            await storage.set("lastNotifiedAnnouncementId", announcements[0].id);
+          }
+          return;
+        }
+
+        const toNotify = newAnnouncements.slice(0, 3).reverse();
+        for (const ann of toNotify) {
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: `📣 New Announcement: ${ann.title}`,
+              body: ann.content.length > 80 ? `${ann.content.substring(0, 80)}...` : ann.content,
+              data: { route: "/(tabs)/home" },
+            },
+            trigger: null, // show immediately
+          });
+        }
+
+        if (announcements.length > 0) {
+          await storage.set("lastNotifiedAnnouncementId", announcements[0].id);
+        }
+      } catch (err) {
+        console.error("Failed to process announcement notifications:", err);
+      }
+    };
+
+    checkNewAnnouncements();
+  }, [announcements]);
 
   const { data: notifications } = useQuery({
     queryKey: ["notifications"],
