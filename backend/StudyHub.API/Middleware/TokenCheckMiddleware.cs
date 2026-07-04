@@ -112,46 +112,29 @@ public class TokenCheckMiddleware(RequestDelegate next)
             return;
         }
 
-        // ── Network & Device binding check (Devices in their network or permanent device) ──
+        // ── Network & Device binding check ──────────────────────────────
+        if (token.IsDevicePermanent)
+        {
+            // Permanent device = unrestricted access from any device/network
+            ctx.Items["previewOnly"] = false;
+            await next(ctx);
+            return;
+        }
+
+        // Non-permanent tokens: only allow access from the same network
         var clientIp = ctx.Connection.RemoteIpAddress?.ToString();
         var isSameNetwork = !string.IsNullOrEmpty(token.IpAddress) && token.IpAddress == clientIp;
 
-        var isSameDevice = false;
-        if (!string.IsNullOrEmpty(deviceHeader))
+        if (!isSameNetwork)
         {
-            var hashedDevice = DeviceHasher.Hash(deviceHeader);
-            isSameDevice = !string.IsNullOrEmpty(token.DeviceId) && token.DeviceId == hashedDevice;
-        }
-
-        if (token.IsDevicePermanent)
-        {
-            // If device is permanent, allow access if on the same network OR same device
-            if (!isSameNetwork && !isSameDevice)
+            ctx.Response.StatusCode = 403;
+            await ctx.Response.WriteAsJsonAsync(new
             {
-                ctx.Response.StatusCode = 403;
-                await ctx.Response.WriteAsJsonAsync(new
-                {
-                    error = "DEVICE_MISMATCH",
-                    message = "This token is active on a different network and device. Connect to your registered network.",
-                    code = 403
-                });
-                return;
-            }
-        }
-        else
-        {
-            // If not permanent yet, only allow access from the same network
-            if (!isSameNetwork)
-            {
-                ctx.Response.StatusCode = 403;
-                await ctx.Response.WriteAsJsonAsync(new
-                {
-                    error = "DEVICE_MISMATCH",
-                    message = "This token is active on a different network. You can register this device permanently to access it on any network.",
-                    code = 403
-                });
-                return;
-            }
+                error = "DEVICE_MISMATCH",
+                message = "This token is active on a different network. You can register this device permanently to access it on any network.",
+                code = 403
+            });
+            return;
         }
 
         ctx.Items["previewOnly"] = false;
