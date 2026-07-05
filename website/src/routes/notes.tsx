@@ -8,7 +8,7 @@ import { useAuthStore, getTokenState } from "@/stores/auth";
 import { api } from "@/lib/api";
 import { School } from "@/lib/api-types";
 import { SecureFileViewer } from "@/components/ui/SecureFileViewer";
-import { SkeletonCard } from "@/components/ui/Skeleton";
+import { SkeletonCard } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/notes")({
   head: () => ({
