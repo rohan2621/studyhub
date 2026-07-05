@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
-import { useThemeStore } from "../../stores/themeStore";
 import { StudyHubLogo } from "./StudyHubLogo";
+import { useThemeStore } from "../../stores/themeStore";
 
 interface Props {
   size?: "sm" | "md" | "lg";
@@ -10,8 +10,8 @@ interface Props {
 export function StudyHubBrand({ size = "md", showTagline = true }: Props) {
   const { colors, isDark } = useThemeStore();
 
-  const logoSize = { sm: 48, md: 72, lg: 100 }[size];
-  const titleSize = { sm: 20, md: 28, lg: 36 }[size];
+  const logoSize = { sm: 64, md: 96, lg: 128 }[size];
+  const titleSize = { sm: 24, md: 32, lg: 40 }[size];
 
   return (
     <View style={{ alignItems: "center" }}>

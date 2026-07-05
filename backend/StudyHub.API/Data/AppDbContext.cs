@@ -26,6 +26,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<HireRequest> HireRequests => Set<HireRequest>();
     public DbSet<RevenueAdjustment> RevenueAdjustments => Set<RevenueAdjustment>();
+    public DbSet<AppRelease> AppReleases => Set<AppRelease>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {

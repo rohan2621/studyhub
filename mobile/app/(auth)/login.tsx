@@ -68,7 +68,7 @@ export default function LoginScreen() {
           contentContainerStyle={{
             flexGrow: 1,
             paddingHorizontal: 24,
-            paddingTop: 80,
+            paddingTop: 40,
             paddingBottom: 36,
           }}
           keyboardShouldPersistTaps="handled"
@@ -148,7 +148,7 @@ export default function LoginScreen() {
                     justifyContent: "center",
                   }}
                 >
-                  {remember && <Check size={13} color="#fff" strokeWidth={3.5} />}
+                  {remember && <Check size={13} color={colors.background} strokeWidth={3.5} />}
                 </View>
                 <Text style={{ color: colors.textMuted, fontSize: 14 }}>Remember me</Text>
               </TouchableOpacity>
@@ -163,7 +163,7 @@ export default function LoginScreen() {
             {/* Login button */}
             <GradientButton
               title="Sign In"
-              icon={<ArrowRight size={18} color="#fff" />}
+              icon={<ArrowRight size={18} color={isDark ? "#000000" : "#ffffff"} />}
               loading={mutation.isPending}
               onPress={() => mutation.mutate()}
               disabled={!email || !password}

@@ -156,6 +156,7 @@ using (var scope = app.Services.CreateScope())
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseSerilogRequestLogging();
+app.UseStaticFiles();
 app.UseCors();
 app.UseSwagger();
 app.UseSwaggerUI(c =>

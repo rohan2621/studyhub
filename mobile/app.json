@@ -5,12 +5,13 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "studyhub",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "package": "com.studyhub.app"
+      "package": "com.studyhub.app",
+      "versionCode": 1
     },
     "plugins": [
       "expo-router",
@@ -19,6 +20,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
     }
   }
 }

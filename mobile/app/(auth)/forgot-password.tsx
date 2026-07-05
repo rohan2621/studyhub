@@ -13,7 +13,7 @@ import { StudyHubBrand } from "../../components/ui/StudyHubBrand";
 import { BackgroundArt } from "../../components/ui/BackgroundArt";
 
 export default function ForgotPasswordScreen() {
-  const { colors } = useThemeStore();
+  const { colors, isDark } = useThemeStore();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
 
@@ -77,7 +77,7 @@ export default function ForgotPasswordScreen() {
               </View>
               <GradientButton
                 title="Back to Login"
-                icon={<ArrowRight size={18} color="#fff" />}
+                icon={<ArrowRight size={18} color={isDark ? "#000000" : "#ffffff"} />}
                 onPress={() => router.replace("/(auth)/login")}
               />
             </View>
@@ -94,7 +94,7 @@ export default function ForgotPasswordScreen() {
               />
               <GradientButton
                 title="Send Reset Link"
-                icon={<ArrowRight size={18} color="#fff" />}
+                icon={<ArrowRight size={18} color={isDark ? "#000000" : "#ffffff"} />}
                 onPress={() => mutation.mutate()}
                 loading={mutation.isPending}
                 disabled={!email}

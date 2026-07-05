@@ -10,7 +10,7 @@ import { useThemeStore } from "../../stores/themeStore";
 import { useAuthStore } from "../../stores/authStore";
 import { api } from "../../lib/api";
 
-function CustomTabBar({ state, descriptors, navigation, colors }: any) {
+function CustomTabBar({ state, descriptors, navigation, colors, tokenStatus, user, isAdmin }: any) {
   const { isDark } = useThemeStore();
   // Sort and filter for the 4 main visible routes to guarantee perfect layout order
   const visibleRoutes = ["home", "search", "content", "profile"];
@@ -43,10 +43,6 @@ function CustomTabBar({ state, descriptors, navigation, colors }: any) {
             : options.title !== undefined
               ? options.title
               : route.name;
-
-        const { user } = useAuthStore();
-        const isAdmin = Number(user?.role) === 3 || user?.role === "Admin";
-        const { data: tokenStatus } = useQuery<any>({ queryKey: ["tokenStatus"], enabled: !!user });
 
         const onPress = () => {
           if (!isAdmin && tokenStatus !== undefined && tokenStatus?.hasActiveToken === false && route.name !== "home" && route.name !== "profile") {
@@ -136,9 +132,11 @@ export default function TabsLayout() {
   return (
     <View style={{ flex: 1 }}>
       <Tabs
-        tabBar={(props) => <CustomTabBar {...props} colors={colors} />}
+        tabBar={(props) => <CustomTabBar {...props} colors={colors} tokenStatus={tokenStatus} user={user} isAdmin={isAdmin} />}
+        sceneContainerStyle={{ backgroundColor: colors.background }}
         screenOptions={{
           headerShown: false,
+          sceneStyle: { backgroundColor: colors.background }
         }}
       >
         <Tabs.Screen name="home" options={{ title: "Home" }} />

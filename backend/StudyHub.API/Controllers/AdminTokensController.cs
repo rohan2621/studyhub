@@ -13,6 +13,31 @@ namespace StudyHub.API.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminTokensController(AppDbContext db) : ControllerBase
 {
+    [HttpGet]
+    public async Task<IActionResult> GetAllTokens()
+    {
+        var tokens = await db.Tokens
+            .Include(t => t.User)
+            .OrderByDescending(t => t.IssuedAt)
+            .Select(t => new
+            {
+                t.Id,
+                t.Code,
+                UserName = t.User.Name,
+                UserEmail = t.User.Email,
+                t.Plan,
+                t.IssuedAt,
+                t.ExpiresAt,
+                t.Status,
+                t.DeviceId,
+                t.IpAddress,
+                t.IsDevicePermanent
+            })
+            .ToListAsync();
+
+        return Ok(tokens);
+    }
+
     [HttpPost]
     public async Task<IActionResult> IssueToken([FromBody] IssueTokenRequest req)
     {

@@ -41,7 +41,7 @@ function PasswordStrength({ password }: { password: string }) {
 }
 
 export default function RegisterScreen() {
-  const { colors } = useThemeStore();
+  const { colors, isDark } = useThemeStore();
   const qc = useQueryClient();
 
   const [name, setName] = useState("");
@@ -185,7 +185,7 @@ export default function RegisterScreen() {
           <FloatingInput label="Password" icon={<Lock size={18} color={colors.textMuted} />} value={password} onChangeText={setPassword} placeholder="Min 8 chars, uppercase, number, symbol" secureTextEntry={!showPw} rightIcon={showPw ? <EyeOff size={18} color={colors.textMuted} /> : <Eye size={18} color={colors.textMuted} />} onRightIconPress={() => setShowPw((v) => !v)} />
           <PasswordStrength password={password} />
 
-          <GradientButton title="Create Account" icon={<ArrowRight size={18} color="#fff" />} onPress={() => mutation.mutate()} loading={mutation.isPending} disabled={!name || !email || !password || !schoolId || !grade || !section} />
+          <GradientButton title="Create Account" icon={<ArrowRight size={18} color={isDark ? "#000000" : "#ffffff"} />} onPress={() => mutation.mutate()} loading={mutation.isPending} disabled={!name || !email || !password || !schoolId || !grade || !section} />
 
           <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 24 }}>
             <Text style={{ color: colors.textMuted, fontSize: 14 }}>Already have an account? </Text>

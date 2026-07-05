@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { StyleSheet, View, Text, Dimensions } from "react-native";
+import { StyleSheet, View, Text, Dimensions, ActivityIndicator } from "react-native";
 import Animated, {
   useSharedValue, useAnimatedStyle, withTiming,
   withRepeat, withSequence, withDelay, Easing, runOnJS,
@@ -128,10 +128,17 @@ export function LoadingIntro({ visible, onFinished }: Props) {
               borderRadius: 0,
             }, progressBarStyle]}>
               <View
-                style={{ flex: 1, borderRadius: 0, }}
+                style={{ flex: 1, borderRadius: 0, backgroundColor: isDark ? "#ffffff" : "#000000" }}
               />
             </Animated.View>
           </View>
+
+          {/* Spinner */}
+          <Animated.View style={tagStyle}>
+            <View style={{ marginTop: 24, marginBottom: -4 }}>
+              <ActivityIndicator color={isDark ? "#ffffff" : "#000000"} size="large" />
+            </View>
+          </Animated.View>
 
           {/* Tagline */}
           <Animated.View style={tagStyle}>

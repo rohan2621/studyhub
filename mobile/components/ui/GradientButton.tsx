@@ -12,26 +12,28 @@ interface Props {
 }
 
 export function GradientButton({ title, onPress, loading, disabled, style, icon }: Props) {
-  const { colors } = useThemeStore();
+  const { colors, isDark } = useThemeStore();
 
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled || loading} style={style} activeOpacity={0.85}>
       <View
         style={{
+          backgroundColor: isDark ? "#ffffff" : "#000000",
+          borderWidth: 1,
+          borderColor: isDark ? "#ffffff" : "#000000",
           borderRadius: 0,
           padding: 17,
           flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
           gap: 10,
-          opacity: disabled || loading ? 0.55 : 1,
         }}
       >
         {loading
-          ? <ActivityIndicator color="#fff" />
+          ? <ActivityIndicator color={isDark ? "#000000" : "#ffffff"} />
           : <>
             {icon}
-            <Text style={{ color: "#fff", fontWeight: "800", fontSize: 16, letterSpacing: 0.3 }}>{title}</Text>
+            <Text style={{ color: isDark ? "#000000" : "#ffffff", fontWeight: "800", fontSize: 16, letterSpacing: 0.3 }}>{title}</Text>
           </>
         }
       </View>
