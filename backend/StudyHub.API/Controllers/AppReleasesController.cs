@@ -19,6 +19,7 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env) : C
     {
         var latest = await db.AppReleases
             .OrderByDescending(x => x.VersionCode)
+            .ThenByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync();
 
         if (latest == null)
