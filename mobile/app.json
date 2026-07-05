@@ -26,6 +26,13 @@
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5f1430f1-02bd-40b8-baa9-0c15692c5f52"
+      }
+    },
+    "owner": "studysub"
   }
 }
