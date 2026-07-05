@@ -91,8 +91,8 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env) : C
         var release = new AppRelease
         {
             VersionCode = dto.VersionCode,
-            VersionName = dto.VersionName,
-            ReleaseNotes = dto.ReleaseNotes,
+            VersionName = dto.VersionName ?? "1.0.0",
+            ReleaseNotes = dto.ReleaseNotes ?? string.Empty,
             IsMandatory = dto.IsMandatory,
             FileUrl = $"/apps/{fileName}" // This works with UseStaticFiles
         };
