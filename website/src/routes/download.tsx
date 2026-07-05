@@ -78,7 +78,7 @@ function DownloadPage() {
 
             {latestRelease && (
               <a
-                href={api.defaults.baseURL?.replace('/api', '') + latestRelease.fileUrl}
+                href={`${(api.defaults.baseURL || '').replace(/\/api\/?$/, '').replace(/\/$/, '')}${latestRelease.fileUrl}`}
                 download
                 className="shrink-0 flex items-center gap-3 rounded-xl bg-black px-8 py-4 font-bold text-white transition-transform hover:scale-105 active:scale-95"
               >
