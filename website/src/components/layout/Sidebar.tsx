@@ -149,6 +149,10 @@ export function Sidebar() {
           <LogOut className="h-4.5 w-4.5 text-gray-500 group-hover:text-black" aria-hidden="true" />
           Log out
         </button>
+
+        <div className="mt-6 text-center text-xs font-semibold text-gray-500">
+          Made by <a href="https://rohantimalsina.lovable.app/" target="_blank" rel="noopener noreferrer" className="text-black hover:underline underline-offset-2 decoration-2 decoration-[#ff90e8]">Rohan Timalsina</a>
+        </div>
       </div>
     </aside>
   );

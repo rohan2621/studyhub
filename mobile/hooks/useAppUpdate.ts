@@ -24,6 +24,12 @@ export function useAppUpdate() {
       return;
     }
 
+    // Do not check for updates in development mode (Expo Go testing)
+    if (__DEV__) {
+      setIsChecking(false);
+      return;
+    }
+
     const checkUpdate = async () => {
       try {
         const res = await api.get<AppRelease>('/api/appreleases/latest');

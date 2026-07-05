@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, KeyboardAvoidingView, Platform, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, KeyboardAvoidingView, Platform, Alert, Linking } from "react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { format } from "date-fns";
@@ -351,6 +351,12 @@ export default function ProfileScreen() {
             <LogOut size={20} color={colors.danger} />
             <Text style={{ color: colors.danger, fontWeight: "800", fontSize: 16 }}>Sign Out</Text>
           </TouchableOpacity>
+          
+          <View style={{ alignItems: "center", marginBottom: 20 }}>
+            <Text style={{ color: colors.textMuted, fontSize: 13, fontWeight: "600" }}>
+              Made by <Text onPress={() => Linking.openURL("https://rohantimalsina.lovable.app/")} style={{ color: colors.primary, textDecorationLine: "underline" }}>Rohan Timalsina</Text>
+            </Text>
+          </View>
         </View>
       </ScrollView>
 

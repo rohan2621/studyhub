@@ -16,6 +16,13 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
   const { user } = useAuthStore();
+  const [latestRelease, setLatestRelease] = useState<any>(null);
+
+  useEffect(() => {
+    api.get("/api/appreleases/latest")
+      .then(res => setLatestRelease(res.data))
+      .catch(() => {});
+  }, []);
   
   return (
     <div className="min-h-screen bg-white text-black font-[family-name:var(--font-sans)]">
@@ -27,6 +34,12 @@ function LandingPage() {
             <span className="font-extrabold text-xl tracking-tight">StudyHub</span>
           </div>
           <div className="flex items-center gap-6 font-bold text-sm">
+            {latestRelease && (
+              <a href={latestRelease.downloadUrl} className="hidden sm:flex items-center gap-2 hover:text-gray-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                App (v{latestRelease.version})
+              </a>
+            )}
             {user ? (
               <Link to="/dashboard" className="px-5 py-2.5 bg-black text-white hover:bg-gray-800 transition-colors">
                 Dashboard
@@ -243,6 +256,70 @@ function LandingPage() {
           </div>
         </div>
 
+        {/* App Download Section */}
+        <div className="mx-auto max-w-[1400px] px-6 py-20 lg:py-32">
+          <div className="border-4 border-black bg-[#ff90e8] p-8 md:p-16 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12">
+            
+            {/* Background decoration */}
+            <div className="absolute -right-20 -top-20 opacity-20 pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+            </div>
+
+            <div className="relative z-10 max-w-2xl">
+              <div className="inline-block bg-black text-white font-bold px-4 py-1.5 text-sm uppercase tracking-widest mb-6">
+                Mobile App
+              </div>
+              <h2 className="text-4xl md:text-6xl font-black tracking-tight font-[family-name:var(--font-heading)] mb-6 leading-tight">
+                Take your study materials anywhere.
+              </h2>
+              <p className="text-xl font-medium text-black/80 mb-8 max-w-xl">
+                We distribute our Android app directly to you, bypassing the Play Store to keep things 100% free. 
+                Get offline access, instant notifications, and a distraction-free environment.
+              </p>
+              
+              <Link 
+                to="/download" 
+                className="inline-flex items-center gap-3 border-2 border-black bg-white text-black px-8 py-4 font-black text-lg transition-transform shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                Download APK Now
+              </Link>
+            </div>
+            
+            <div className="relative z-10 hidden lg:block shrink-0">
+              <div className="border-4 border-black bg-white w-[280px] h-[580px] rounded-[2rem] p-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rotate-3">
+                <div className="w-full h-full border-2 border-black rounded-[1.25rem] bg-gray-50 flex flex-col overflow-hidden relative">
+                  {/* Mock App Header */}
+                  <div className="bg-black text-white p-4 flex items-center justify-between">
+                    <span className="font-bold">StudyHub</span>
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 rounded-full bg-white/50" />
+                      <div className="w-2 h-2 rounded-full bg-white/50" />
+                      <div className="w-2 h-2 rounded-full bg-white/50" />
+                    </div>
+                  </div>
+                  {/* Mock App Content */}
+                  <div className="p-4 space-y-4">
+                    <div className="h-8 w-3/4 bg-gray-200 rounded border border-gray-300" />
+                    <div className="h-32 w-full bg-[#f8f9fa] rounded-xl border-2 border-black flex items-center justify-center">
+                      <div className="text-gray-400 font-bold">Latest Notes</div>
+                    </div>
+                    <div className="h-32 w-full bg-[#f8f9fa] rounded-xl border-2 border-black flex items-center justify-center">
+                      <div className="text-gray-400 font-bold">Homework</div>
+                    </div>
+                  </div>
+                  {/* Mock Update Notification popup */}
+                  <div className="absolute bottom-4 left-4 right-4 bg-white border-2 border-black p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="font-bold text-sm mb-1 text-emerald-600">Update Available</div>
+                    <div className="text-xs text-gray-600">v1.0.5 is ready to install!</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
         {/* Divider */}
         <div className="w-full h-[1px] bg-black"></div>
 
@@ -267,9 +344,14 @@ function LandingPage() {
             <img src="/logo.png?v=12" alt="StudyHub" width="32" height="32" loading="lazy" className="h-[32px] w-[32px] dark:invert" />
             <span className="font-extrabold text-xl font-[family-name:var(--font-heading)]">StudyHub</span>
           </div>
-          <p className="text-sm text-gray-500 font-bold tracking-wide">
-            &copy; {new Date().getFullYear()} StudyHub. All rights reserved.
-          </p>
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            <p className="text-sm text-gray-500 font-bold tracking-wide">
+              &copy; {new Date().getFullYear()} StudyHub. All rights reserved.
+            </p>
+            <p className="text-sm text-gray-600 font-bold">
+              Made by <a href="https://rohantimalsina.lovable.app/" target="_blank" rel="noopener noreferrer" className="text-black hover:underline underline-offset-4 decoration-2 decoration-[#ff90e8]">Rohan Timalsina</a>
+            </p>
+          </div>
         </div>
       </footer>
     </div>
