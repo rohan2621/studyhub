@@ -47,7 +47,7 @@ export function AppShell({ children, requireAuth = true }: AppShellProps) {
         Skip to content
       </a>
       {requireAuth && <Sidebar />}
-      <main id="main-content" tabIndex={-1} className={`flex-1 p-8 outline-none ${requireAuth ? "ml-64" : ""}`}>
+      <main id="main-content" tabIndex={-1} className={`flex-1 min-w-0 p-8 outline-none ${requireAuth ? "ml-64" : ""}`}>
         {isLockedOut ? (
           <div className="flex h-full min-h-[70vh] flex-col items-center justify-center border border-black bg-white p-12 text-center">
             <div className="mb-6 flex h-20 w-20 items-center justify-center border border-black bg-gray-50">

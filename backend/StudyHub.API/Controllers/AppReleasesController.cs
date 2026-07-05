@@ -31,7 +31,7 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env) : C
     /// Gets all app releases. Used by the admin dashboard.
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public async Task<ActionResult<List<AppRelease>>> GetAllReleases()
     {
         var releases = await db.AppReleases
@@ -62,7 +62,7 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env) : C
     /// Uploads a new app release.
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public async Task<ActionResult<AppRelease>> UploadRelease([FromForm] UploadReleaseDto dto)
     {
         if (dto.File == null || dto.File.Length == 0)

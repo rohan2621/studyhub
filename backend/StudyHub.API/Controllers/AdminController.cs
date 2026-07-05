@@ -231,38 +231,7 @@ public class AdminController(AppDbContext db, IMemoryCache cache) : ControllerBa
         return Ok(new { school.Id, school.IsActive });
     }
 
-    // ── Tokens ────────────────────────────────────────────
-    [HttpGet("tokens")]
-    public async Task<IActionResult> GetAllTokens(
-        [FromQuery] TokenStatus? status,
-        [FromQuery] Guid? userId,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20)
-    {
-        var query = db.Tokens.Include(t => t.User).AsQueryable();
-        if (status.HasValue) query = query.Where(t => t.Status == status.Value);
-        if (userId.HasValue) query = query.Where(t => t.UserId == userId.Value);
 
-        var total = await query.CountAsync();
-        var tokens = await query
-            .OrderByDescending(t => t.IssuedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(t => new
-            {
-                t.Id,
-                t.Code,
-                t.Plan,
-                t.Status,
-                t.IssuedAt,
-                t.ExpiresAt,
-                DeviceBound = t.DeviceId != null,
-                User = new { t.User.Id, t.User.Name, t.User.Email }
-            })
-            .ToListAsync();
-
-        return Ok(new { total, page, pageSize, data = tokens });
-    }
 
     // ── Audit Logs ────────────────────────────────────────
     [HttpGet("audit-logs")]
