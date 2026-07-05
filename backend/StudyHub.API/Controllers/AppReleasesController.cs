@@ -49,7 +49,6 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env) : C
         [Required]
         public string VersionName { get; set; } = string.Empty;
         
-        [Required]
         public string ReleaseNotes { get; set; } = string.Empty;
         
         public bool IsMandatory { get; set; }
@@ -63,6 +62,8 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env) : C
     /// </summary>
     [HttpPost]
     [Authorize(Roles = "Admin,SuperAdmin")]
+    [DisableRequestSizeLimit]
+    [RequestFormLimits(MultipartBodyLengthLimit = 536870912)] // 512 MB
     public async Task<ActionResult<AppRelease>> UploadRelease([FromForm] UploadReleaseDto dto)
     {
         if (dto.File == null || dto.File.Length == 0)
