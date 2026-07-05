@@ -69,7 +69,7 @@ function SignupPage() {
       <div className="w-full max-w-md">
         <div className="border border-black bg-white p-8">
           <div className="mb-6 flex items-center justify-center">
-            <img src="/logo.svg" alt="StudyHub" width="64" height="64" loading="eager" className="h-16 w-16 dark:invert" />
+            <img src="/logo.png?v=12" alt="StudyHub" width="61" height="61" loading="eager" className="h-[61px] w-[61px] dark:invert" />
           </div>
 
           <h1 className="mb-1 text-center font-[family-name:var(--font-heading)] text-2xl font-extrabold">
