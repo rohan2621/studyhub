@@ -228,15 +228,19 @@ public class AuthController(
             refreshToken = Request.Headers["X-Refresh-Token"].ToString();
         }
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var jti = User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti);
 
         if (!string.IsNullOrEmpty(refreshToken) && userId is not null)
         {
             var cache = redis.GetDatabase();
             await cache.KeyDeleteAsync($"refresh:{userId}:{refreshToken}");
-            await cache.StringSetAsync(
-                $"blacklist:{userId}",
-                "revoked",
-                TimeSpan.FromMinutes(16));
+            if (jti is not null)
+            {
+                await cache.StringSetAsync(
+                    $"blacklist:{jti}",
+                    "revoked",
+                    TimeSpan.FromMinutes(16));
+            }
         }
 
         Response.Cookies.Delete("refresh_token");

@@ -81,7 +81,7 @@ api.interceptors.response.use(
         if (!user) throw new Error("No user to refresh");
         
         const res = await axios.post(
-          `${API_URL}/auth/refresh`,
+          `${API_URL.replace(/\/$/, "")}/auth/refresh`,
           {},
           { 
             headers: { 

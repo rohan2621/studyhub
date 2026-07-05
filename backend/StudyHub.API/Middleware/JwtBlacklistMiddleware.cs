@@ -9,7 +9,7 @@ public class JwtBlacklistMiddleware(RequestDelegate next)
     {
         if (ctx.User.Identity?.IsAuthenticated == true)
         {
-            var jti = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var jti = ctx.User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti);
             if (jti is not null)
             {
                 var db = redis.GetDatabase();
