@@ -11,7 +11,7 @@ export function StudyHubLogo({ size = 180 }) {
         width: size,
         height: size,
         resizeMode: "contain",
-        tintColor: isDark ? "#FFFFFF" : "#000000",
+        borderRadius: size / 4,
       }}
     />
   );

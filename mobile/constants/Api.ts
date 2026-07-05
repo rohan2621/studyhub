@@ -1,4 +1,4 @@
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.18.11:5244";
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || "https://studyhub-api-mpor.onrender.com";
 
 export const PLANS = [
   { key: "OneWeek", label: "1 Week", days: 7 },
