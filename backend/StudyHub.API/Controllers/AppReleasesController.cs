@@ -73,7 +73,8 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env) : C
             return BadRequest("File must be an APK (.apk).");
 
         // Ensure wwwroot/apps exists
-        var appsPath = Path.Combine(env.WebRootPath, "apps");
+        var webRootPath = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
+        var appsPath = Path.Combine(webRootPath, "apps");
         if (!Directory.Exists(appsPath))
             Directory.CreateDirectory(appsPath);
 
