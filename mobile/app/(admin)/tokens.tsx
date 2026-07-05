@@ -3,7 +3,6 @@ import {
   View, Text, ScrollView, TouchableOpacity, ActivityIndicator,
   RefreshControl, Modal, TextInput, KeyboardAvoidingView, Platform,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
@@ -83,7 +82,7 @@ export default function AdminTokensScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
+      <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
         <TouchableOpacity onPress={() => router.back()} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 }}>
           <ArrowLeft size={18} color={colors.primary} />
           <Text style={{ color: colors.primary, fontWeight: "600" }}>Admin</Text>
@@ -94,7 +93,7 @@ export default function AdminTokensScreen() {
             <Text style={{ color: colors.text, fontSize: 24, fontWeight: "800" }}>Tokens</Text>
           </View>
           <TouchableOpacity onPress={() => setShowIssueModal(true)}
-            style={{ backgroundColor: colors.primary, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 10, flexDirection: "row", alignItems: "center", gap: 6 }}>
+            style={{ backgroundColor: colors.primary, borderRadius: 0, paddingHorizontal: 16, paddingVertical: 10, flexDirection: "row", alignItems: "center", gap: 6 }}>
             <Plus size={16} color="#fff" />
             <Text style={{ color: "#fff", fontWeight: "700" }}>Issue Token</Text>
           </TouchableOpacity>
@@ -103,13 +102,13 @@ export default function AdminTokensScreen() {
           <View style={{ flexDirection: "row", gap: 8 }}>
             {["", "Active", "Pending", "Expired", "Revoked"].map((s) => (
               <TouchableOpacity key={s} onPress={() => setStatusFilter(s)}
-                style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: statusFilter === s ? colors.primary : colors.card, borderWidth: 1, borderColor: statusFilter === s ? colors.primary : colors.border }}>
+                style={{ paddingHorizontal: 14, paddingVertical: 7, borderRadius: 0, backgroundColor: statusFilter === s ? colors.primary : colors.card, borderWidth: 1, borderColor: statusFilter === s ? colors.primary : colors.border }}>
                 <Text style={{ color: statusFilter === s ? "#fff" : colors.textMuted, fontSize: 13, fontWeight: "600" }}>{s || "All"}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </ScrollView>
-      </LinearGradient>
+      </View>
 
       {isLoading ? (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -126,13 +125,13 @@ export default function AdminTokensScreen() {
           ) : tokens.map((t: any) => {
             const sc = STATUS_COLOR[t.status] ?? colors.muted;
             return (
-              <View key={t.id} style={{ backgroundColor: colors.card, borderRadius: 20, padding: 18, borderWidth: 1, borderColor: colors.border }}>
+              <View key={t.id} style={{ backgroundColor: colors.card, borderRadius: 0, padding: 18, borderWidth: 1, borderColor: colors.border }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15 }}>{t.userName ?? t.user ?? "—"}</Text>
                     <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{t.userEmail}</Text>
                   </View>
-                  <View style={{ backgroundColor: sc + "22", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: sc + "60" }}>
+                  <View style={{ backgroundColor: sc + "22", borderRadius: 0, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: sc + "60" }}>
                     <Text style={{ color: sc, fontSize: 12, fontWeight: "700" }}>{t.status}</Text>
                   </View>
                 </View>
@@ -146,13 +145,13 @@ export default function AdminTokensScreen() {
                 </View>
                 <View style={{ flexDirection: "row", gap: 8 }}>
                   <TouchableOpacity onPress={() => resetDeviceMutation.mutate(t.id)}
-                    style={{ flex: 1, backgroundColor: colors.accent + "18", borderRadius: 12, padding: 10, alignItems: "center", borderWidth: 1, borderColor: colors.accent + "40", flexDirection: "row", justifyContent: "center", gap: 6 }}>
+                    style={{ flex: 1, backgroundColor: colors.accent + "18", borderRadius: 0, padding: 10, alignItems: "center", borderWidth: 1, borderColor: colors.accent + "40", flexDirection: "row", justifyContent: "center", gap: 6 }}>
                     <Smartphone size={14} color={colors.accent} />
                     <Text style={{ color: colors.accent, fontSize: 13, fontWeight: "700" }}>Reset Device</Text>
                   </TouchableOpacity>
                   {t.status === "Active" && (
                     <TouchableOpacity onPress={() => revokeMutation.mutate(t.id)}
-                      style={{ flex: 1, backgroundColor: colors.danger + "18", borderRadius: 12, padding: 10, alignItems: "center", borderWidth: 1, borderColor: colors.danger + "40", flexDirection: "row", justifyContent: "center", gap: 6 }}>
+                      style={{ flex: 1, backgroundColor: colors.danger + "18", borderRadius: 0, padding: 10, alignItems: "center", borderWidth: 1, borderColor: colors.danger + "40", flexDirection: "row", justifyContent: "center", gap: 6 }}>
                       <XCircle size={14} color={colors.danger} />
                       <Text style={{ color: colors.danger, fontSize: 13, fontWeight: "700" }}>Revoke</Text>
                     </TouchableOpacity>
@@ -170,13 +169,13 @@ export default function AdminTokensScreen() {
           <View style={{ flex: 1, backgroundColor: "#000000cc", justifyContent: "flex-end" }}>
             <View style={{
               backgroundColor: colors.surface,
-              borderTopLeftRadius: 28, borderTopRightRadius: 28,
+              borderTopLeftRadius: 0, borderTopRightRadius: 0,
               maxHeight: "92%",
             }}>
               {/* Fixed header */}
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: colors.border }}>
                 <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800" }}>Issue Token</Text>
-                <TouchableOpacity onPress={resetForm} style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: colors.inputBg, justifyContent: "center", alignItems: "center" }}>
+                <TouchableOpacity onPress={resetForm} style={{ width: 36, height: 36, borderRadius: 0, backgroundColor: colors.inputBg, justifyContent: "center", alignItems: "center" }}>
                   <X size={18} color={colors.muted} />
                 </TouchableOpacity>
               </View>
@@ -193,7 +192,7 @@ export default function AdminTokensScreen() {
                   placeholderTextColor={colors.muted}
                   autoCapitalize="none"
                   style={{
-                    backgroundColor: colors.inputBg, borderRadius: 14, padding: 14,
+                    backgroundColor: colors.inputBg, borderRadius: 0, padding: 14,
                     color: colors.text, fontSize: 15,
                     borderWidth: 1.5, borderColor: selectedUserId ? colors.success : colors.border,
                     marginBottom: 8,
@@ -202,7 +201,7 @@ export default function AdminTokensScreen() {
 
                 {/* Dropdown results */}
                 {userEmail.length > 2 && !selectedUserId && (
-                  <View style={{ backgroundColor: colors.card, borderRadius: 14, marginBottom: 12, borderWidth: 1, borderColor: colors.border, overflow: "hidden" }}>
+                  <View style={{ backgroundColor: colors.card, borderRadius: 0, marginBottom: 12, borderWidth: 1, borderColor: colors.border, overflow: "hidden" }}>
                     {(userSearch?.users ?? []).slice(0, 6).map((u: any) => (
                       <TouchableOpacity key={u.id}
                         onPress={() => { setSelectedUserId(u.id); setSelectedUserName(u.name); setUserEmail(`${u.name} (${u.email})`); }}
@@ -218,7 +217,7 @@ export default function AdminTokensScreen() {
                 )}
 
                 {selectedUserId && (
-                  <View style={{ backgroundColor: colors.success + "18", borderRadius: 12, padding: 12, marginBottom: 20, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderWidth: 1, borderColor: colors.success + "40" }}>
+                  <View style={{ backgroundColor: colors.success + "18", borderRadius: 0, padding: 12, marginBottom: 20, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderWidth: 1, borderColor: colors.success + "40" }}>
                     <Text style={{ color: colors.success, fontWeight: "700" }}>✓ {selectedUserName}</Text>
                     <TouchableOpacity onPress={() => { setSelectedUserId(""); setSelectedUserName(""); setUserEmail(""); }}>
                       <X size={16} color={colors.success} />
@@ -232,7 +231,7 @@ export default function AdminTokensScreen() {
                   {PLANS.map((p) => (
                     <TouchableOpacity key={p.key} onPress={() => setSelectedPlan(p.key)}
                       style={{
-                        paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20,
+                        paddingHorizontal: 16, paddingVertical: 10, borderRadius: 0,
                         backgroundColor: selectedPlan === p.key ? colors.primary : colors.inputBg,
                         borderWidth: 1.5, borderColor: selectedPlan === p.key ? colors.primary : colors.border,
                       }}>
@@ -250,7 +249,7 @@ export default function AdminTokensScreen() {
                   placeholderTextColor={colors.muted}
                   keyboardType="numeric"
                   style={{
-                    backgroundColor: colors.inputBg, borderRadius: 14, padding: 14,
+                    backgroundColor: colors.inputBg, borderRadius: 0, padding: 14,
                     color: colors.text, fontSize: 16, fontWeight: "600",
                     borderWidth: 1.5, borderColor: amount ? colors.primary : colors.border,
                     marginBottom: 20,
@@ -263,7 +262,7 @@ export default function AdminTokensScreen() {
                   {CHANNELS.map((c) => (
                     <TouchableOpacity key={c} onPress={() => setChannel(c)}
                       style={{
-                        paddingHorizontal: 18, paddingVertical: 10, borderRadius: 20,
+                        paddingHorizontal: 18, paddingVertical: 10, borderRadius: 0,
                         backgroundColor: channel === c ? colors.accent : colors.inputBg,
                         borderWidth: 1.5, borderColor: channel === c ? colors.accent : colors.border,
                       }}>
@@ -274,7 +273,7 @@ export default function AdminTokensScreen() {
 
                 {/* Summary before submit */}
                 {canIssue && (
-                  <View style={{ backgroundColor: colors.primary + "12", borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.primary + "30" }}>
+                  <View style={{ backgroundColor: colors.primary + "12", borderRadius: 0, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.primary + "30" }}>
                     <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 13, marginBottom: 4 }}>Summary</Text>
                     <Text style={{ color: colors.textMuted, fontSize: 13 }}>User: {selectedUserName}</Text>
                     <Text style={{ color: colors.textMuted, fontSize: 13 }}>Plan: {PLANS.find(p => p.key === selectedPlan)?.label}</Text>
@@ -286,7 +285,7 @@ export default function AdminTokensScreen() {
                   onPress={() => issueMutation.mutate()}
                   disabled={!canIssue || issueMutation.isPending}
                   style={{
-                    backgroundColor: colors.primary, borderRadius: 16, padding: 18,
+                    backgroundColor: colors.primary, borderRadius: 0, padding: 18,
                     alignItems: "center", marginBottom: 12,
                     opacity: !canIssue ? 0.4 : 1,
                     flexDirection: "row", justifyContent: "center", gap: 8,
@@ -300,7 +299,7 @@ export default function AdminTokensScreen() {
                       </>
                   }
                 </TouchableOpacity>
-                <TouchableOpacity onPress={resetForm} style={{ borderRadius: 16, padding: 16, alignItems: "center", borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
+                <TouchableOpacity onPress={resetForm} style={{ borderRadius: 0, padding: 16, alignItems: "center", borderWidth: 1, borderColor: colors.border, marginBottom: 8 }}>
                   <Text style={{ color: colors.textMuted, fontWeight: "600" }}>Cancel</Text>
                 </TouchableOpacity>
               </ScrollView>

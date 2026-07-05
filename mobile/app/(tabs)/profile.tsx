@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, KeyboardAvoidingView, Platform, Alert } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { format } from "date-fns";
@@ -24,7 +23,7 @@ const REQUEST_TYPES = ["MissingNotes", "MissingPaper", "SubjectRequest", "Other"
 function SectionCard({ title, icon: Icon, iconColor, children }: any) {
   const { colors } = useThemeStore();
   return (
-    <View style={{ backgroundColor: colors.card, borderRadius: 24, padding: 20, borderWidth: 1, borderColor: colors.border, marginBottom: 16 }}>
+    <View style={{ backgroundColor: colors.card, borderRadius: 0, padding: 20, borderWidth: 1, borderColor: colors.border, marginBottom: 16 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 16 }}>
         <Icon size={18} color={iconColor ?? colors.text} />
         <Text style={{ color: colors.text, fontSize: 16, fontWeight: "800" }}>{title}</Text>
@@ -150,9 +149,9 @@ export default function ProfileScreen() {
 
   if (isLoading) {
     return (
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator color={colors.primary} size="large" />
-      </LinearGradient>
+      </View>
     );
   }
 
@@ -160,7 +159,7 @@ export default function ProfileScreen() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
         {/* Header */}
-        <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 32 }}>
+        <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 32 }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
             <Text style={{ color: colors.text, fontSize: 26, fontWeight: "800" }}>Profile</Text>
             <ThemeToggle />
@@ -170,7 +169,7 @@ export default function ProfileScreen() {
             <Text style={{ color: colors.text, fontSize: 22, fontWeight: "800", marginTop: 12 }}>{user?.name}</Text>
             <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 4 }}>{user?.email}</Text>
             <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
-              <View style={{ backgroundColor: colors.primary + "20", borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: colors.primary + "40" }}>
+              <View style={{ backgroundColor: colors.primary + "20", borderRadius: 0, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: colors.primary + "40" }}>
                 <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>
                   {typeof user?.role === "number"
                 ? ["Student", "Teacher", "TopperContributor", "Admin"][user.role] ?? "Student"
@@ -178,7 +177,7 @@ export default function ProfileScreen() {
                 </Text>
               </View>
               {user?.grade && (
-                <View style={{ backgroundColor: colors.accent + "20", borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: colors.accent + "40" }}>
+                <View style={{ backgroundColor: colors.accent + "20", borderRadius: 0, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: colors.accent + "40" }}>
                   <Text style={{ color: colors.accent, fontSize: 12, fontWeight: "800" }}>
                     Class {user.grade}{user.section ? ` ${user.section}` : ""}
                   </Text>
@@ -188,13 +187,13 @@ export default function ProfileScreen() {
             {/* Edit profile button */}
             <TouchableOpacity
               onPress={() => { setEditName(user?.name ?? ""); setEditGrade(user?.grade ?? ""); setEditSection(user?.section ?? ""); setShowEditProfile(true); }}
-              style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: colors.card, borderRadius: 20, paddingHorizontal: 18, paddingVertical: 10, borderWidth: 1, borderColor: colors.border }}
+              style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: colors.card, borderRadius: 0, paddingHorizontal: 18, paddingVertical: 10, borderWidth: 1, borderColor: colors.border }}
             >
               <Edit3 size={14} color={colors.primary} />
               <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 14 }}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
-        </LinearGradient>
+        </View>
 
         <View style={{ padding: 20 }}>
 
@@ -212,14 +211,14 @@ export default function ProfileScreen() {
                     <Text style={{ color: colors.text, fontWeight: "700", fontSize: 14 }}>{value}</Text>
                   </View>
                 ))}
-                <View style={{ backgroundColor: colors.success + "18", borderRadius: 14, padding: 14, alignItems: "center", marginTop: 16, borderWidth: 1, borderColor: colors.success + "40", flexDirection: "row", justifyContent: "center", gap: 8 }}>
+                <View style={{ backgroundColor: colors.success + "18", borderRadius: 0, padding: 14, alignItems: "center", marginTop: 16, borderWidth: 1, borderColor: colors.success + "40", flexDirection: "row", justifyContent: "center", gap: 8 }}>
                   <CheckCircle2 size={18} color={colors.success} />
                   <Text style={{ color: colors.success, fontWeight: "800", fontSize: 15 }}>Active & Connected</Text>
                 </View>
                 {/* Renewal request */}
                 <TouchableOpacity
                   onPress={() => setShowRenewalForm(true)}
-                  style={{ marginTop: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: colors.primary + "18", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: colors.primary + "40" }}
+                  style={{ marginTop: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: colors.primary + "18", borderRadius: 0, padding: 14, borderWidth: 1, borderColor: colors.primary + "40" }}
                 >
                   <RefreshCw size={15} color={colors.primary} />
                   <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 14 }}>Request Renewal</Text>
@@ -227,14 +226,14 @@ export default function ProfileScreen() {
               </View>
             ) : (
               <View>
-                <View style={{ backgroundColor: colors.warning + "18", borderRadius: 14, padding: 16, alignItems: "center", marginBottom: 16, borderWidth: 1, borderColor: colors.warning + "40" }}>
+                <View style={{ backgroundColor: colors.warning + "18", borderRadius: 0, padding: 16, alignItems: "center", marginBottom: 16, borderWidth: 1, borderColor: colors.warning + "40" }}>
                   <AlertTriangle size={30} color={colors.warning} style={{ marginBottom: 8 }} />
                   <Text style={{ color: colors.warning, fontWeight: "700", fontSize: 15 }}>No Active Token</Text>
                   <Text style={{ color: colors.textMuted, fontSize: 13, textAlign: "center", marginTop: 4 }}>Enter your token code to unlock access</Text>
                 </View>
                 <TouchableOpacity
                   onPress={() => router.push("/(tabs)/activate-token")}
-                  style={{ backgroundColor: colors.primary, borderRadius: 14, padding: 16, alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 8 }}
+                  style={{ backgroundColor: colors.primary, borderRadius: 0, padding: 16, alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 8 }}
                 >
                   <Key size={18} color="#fff" />
                   <Text style={{ color: "#fff", fontWeight: "800", fontSize: 16 }}>Activate Token</Text>
@@ -252,7 +251,7 @@ export default function ProfileScreen() {
                     <Text style={{ color: colors.text, fontWeight: "600", fontSize: 14 }}>{r.plan}</Text>
                     <Text style={{ color: colors.textMuted, fontSize: 12 }}>{format(new Date(r.createdAt), "MMM dd, yyyy")}</Text>
                   </View>
-                  <View style={{ backgroundColor: statusColor(r.status) + "22", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: statusColor(r.status) + "44" }}>
+                  <View style={{ backgroundColor: statusColor(r.status) + "22", borderRadius: 0, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: statusColor(r.status) + "44" }}>
                     <Text style={{ color: statusColor(r.status), fontSize: 12, fontWeight: "700" }}>{r.status}</Text>
                   </View>
                 </View>
@@ -279,7 +278,7 @@ export default function ProfileScreen() {
           <SectionCard title="Content Requests" icon={ClipboardList} iconColor={colors.accent}>
             <TouchableOpacity
               onPress={() => setShowRequestForm(true)}
-              style={{ backgroundColor: colors.accent + "18", borderRadius: 14, padding: 14, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderColor: colors.accent + "40", marginBottom: 12 }}
+              style={{ backgroundColor: colors.accent + "18", borderRadius: 0, padding: 14, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderColor: colors.accent + "40", marginBottom: 12 }}
             >
               <Plus size={15} color={colors.accent} />
               <Text style={{ color: colors.accent, fontWeight: "700", fontSize: 14 }}>Request Missing Content</Text>
@@ -290,7 +289,7 @@ export default function ProfileScreen() {
                   <Text style={{ color: colors.text, fontWeight: "600", fontSize: 13 }}>{r.type} — {r.subject}</Text>
                   <Text style={{ color: colors.textMuted, fontSize: 11 }}>{r.chapter}</Text>
                 </View>
-                <View style={{ backgroundColor: statusColor(r.status) + "22", borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: statusColor(r.status) + "44" }}>
+                <View style={{ backgroundColor: statusColor(r.status) + "22", borderRadius: 0, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: statusColor(r.status) + "44" }}>
                   <Text style={{ color: statusColor(r.status), fontSize: 11, fontWeight: "700" }}>{r.status}</Text>
                 </View>
               </View>
@@ -306,9 +305,9 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 key={item.label}
                 onPress={() => router.push(item.route as any)}
-                style={{ flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 14, backgroundColor: colors.inputBg, marginBottom: 8 }}
+                style={{ flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 0, backgroundColor: colors.inputBg, marginBottom: 8 }}
               >
-                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: colors.primary + "18", justifyContent: "center", alignItems: "center", marginRight: 12 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 0, backgroundColor: colors.primary + "18", justifyContent: "center", alignItems: "center", marginRight: 12 }}>
                   <item.icon size={18} color={colors.primary} />
                 </View>
                 <Text style={{ color: colors.text, fontWeight: "600", fontSize: 15, flex: 1 }}>{item.label}</Text>
@@ -319,9 +318,9 @@ export default function ProfileScreen() {
             {/* Change Password */}
             <TouchableOpacity
               onPress={() => setShowChangePwd(true)}
-              style={{ flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 14, backgroundColor: colors.inputBg, marginBottom: 8 }}
+              style={{ flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 0, backgroundColor: colors.inputBg, marginBottom: 8 }}
             >
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: colors.warning + "18", justifyContent: "center", alignItems: "center", marginRight: 12 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 0, backgroundColor: colors.warning + "18", justifyContent: "center", alignItems: "center", marginRight: 12 }}>
                 <Lock size={18} color={colors.warning} />
               </View>
               <Text style={{ color: colors.text, fontWeight: "600", fontSize: 15, flex: 1 }}>Change Password</Text>
@@ -333,7 +332,7 @@ export default function ProfileScreen() {
           {isAdmin && (
             <TouchableOpacity
               onPress={() => router.push("/(admin)/" as any)}
-              style={{ backgroundColor: colors.primary + "18", borderRadius: 20, padding: 18, alignItems: "center", borderWidth: 1.5, borderColor: colors.primary + "60", flexDirection: "row", justifyContent: "center", gap: 10, marginBottom: 16 }}
+              style={{ backgroundColor: colors.primary + "18", borderRadius: 0, padding: 18, alignItems: "center", borderWidth: 1.5, borderColor: colors.primary + "60", flexDirection: "row", justifyContent: "center", gap: 10, marginBottom: 16 }}
             >
               <Shield size={20} color={colors.primary} />
               <Text style={{ color: colors.primary, fontWeight: "800", fontSize: 16 }}>Admin Panel</Text>
@@ -347,7 +346,7 @@ export default function ProfileScreen() {
               await logout();
               router.replace("/(auth)/login");
             }}
-            style={{ backgroundColor: colors.danger + "18", borderRadius: 20, padding: 18, alignItems: "center", borderWidth: 1.5, borderColor: colors.danger + "40", marginBottom: 40, flexDirection: "row", justifyContent: "center", gap: 10 }}
+            style={{ backgroundColor: colors.danger + "18", borderRadius: 0, padding: 18, alignItems: "center", borderWidth: 1.5, borderColor: colors.danger + "40", marginBottom: 40, flexDirection: "row", justifyContent: "center", gap: 10 }}
           >
             <LogOut size={20} color={colors.danger} />
             <Text style={{ color: colors.danger, fontWeight: "800", fontSize: 16 }}>Sign Out</Text>
@@ -359,7 +358,7 @@ export default function ProfileScreen() {
       <Modal visible={showEditProfile} animationType="slide" transparent>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <View style={{ flex: 1, backgroundColor: "#000000bb", justifyContent: "flex-end" }}>
-            <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 28 }}>
+            <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 0, borderTopRightRadius: 0, padding: 28 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                 <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800" }}>Edit Profile</Text>
                 <TouchableOpacity onPress={() => setShowEditProfile(false)}>
@@ -372,7 +371,7 @@ export default function ProfileScreen() {
               <TextInput
                 value={editName} onChangeText={setEditName}
                 placeholder="Your full name" placeholderTextColor={colors.muted}
-                style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: editName ? colors.primary : colors.border, marginBottom: 20, fontSize: 15 }}
+                style={{ backgroundColor: colors.inputBg, borderRadius: 0, padding: 14, color: colors.text, borderWidth: 1, borderColor: editName ? colors.primary : colors.border, marginBottom: 20, fontSize: 15 }}
               />
 
               {/* Grade — 8 to 12 */}
@@ -381,7 +380,7 @@ export default function ProfileScreen() {
                 <View style={{ flexDirection: "row", gap: 8 }}>
                   {GRADES.map(g => (
                     <TouchableOpacity key={g} onPress={() => setEditGrade(g)}
-                      style={{ paddingHorizontal: 18, paddingVertical: 10, borderRadius: 20, backgroundColor: editGrade === g ? colors.primary : colors.inputBg, borderWidth: 1.5, borderColor: editGrade === g ? colors.primary : colors.border }}>
+                      style={{ paddingHorizontal: 18, paddingVertical: 10, borderRadius: 0, backgroundColor: editGrade === g ? colors.primary : colors.inputBg, borderWidth: 1.5, borderColor: editGrade === g ? colors.primary : colors.border }}>
                       <Text style={{ color: editGrade === g ? "#fff" : colors.textMuted, fontWeight: "700", fontSize: 14 }}>Class {g}</Text>
                     </TouchableOpacity>
                   ))}
@@ -393,7 +392,7 @@ export default function ProfileScreen() {
               <View style={{ flexDirection: "row", gap: 8, marginBottom: 24 }}>
                 {SECTIONS.map(s => (
                   <TouchableOpacity key={s} onPress={() => setEditSection(s)}
-                    style={{ flex: 1, paddingVertical: 14, borderRadius: 18, alignItems: "center", backgroundColor: editSection === s ? colors.primary : colors.inputBg, borderWidth: 1.5, borderColor: editSection === s ? colors.primary : colors.border }}>
+                    style={{ flex: 1, paddingVertical: 14, borderRadius: 0, alignItems: "center", backgroundColor: editSection === s ? colors.primary : colors.inputBg, borderWidth: 1.5, borderColor: editSection === s ? colors.primary : colors.border }}>
                     <Text style={{ color: editSection === s ? "#fff" : colors.textMuted, fontSize: 16, fontWeight: "900" }}>{s}</Text>
                   </TouchableOpacity>
                 ))}
@@ -402,11 +401,11 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 onPress={() => editProfileMutation.mutate()}
                 disabled={!editName.trim() || !editGrade || !editSection || editProfileMutation.isPending}
-                style={{ backgroundColor: colors.primary, borderRadius: 14, padding: 16, alignItems: "center", marginBottom: 12, opacity: !editName.trim() || !editGrade || !editSection ? 0.5 : 1 }}
+                style={{ backgroundColor: colors.primary, borderRadius: 0, padding: 16, alignItems: "center", marginBottom: 12, opacity: !editName.trim() || !editGrade || !editSection ? 0.5 : 1 }}
               >
                 <Text style={{ color: "#fff", fontWeight: "800", fontSize: 16 }}>{editProfileMutation.isPending ? "Saving..." : "Save Changes"}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowEditProfile(false)} style={{ borderRadius: 14, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
+              <TouchableOpacity onPress={() => setShowEditProfile(false)} style={{ borderRadius: 0, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
                 <Text style={{ color: colors.textMuted, fontWeight: "600" }}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -418,7 +417,7 @@ export default function ProfileScreen() {
       <Modal visible={showChangePwd} animationType="slide" transparent>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <View style={{ flex: 1, backgroundColor: "#000000bb", justifyContent: "flex-end" }}>
-            <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 28 }}>
+            <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 0, borderTopRightRadius: 0, padding: 28 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                 <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800" }}>Change Password</Text>
                 <TouchableOpacity onPress={() => setShowChangePwd(false)}>
@@ -436,7 +435,7 @@ export default function ProfileScreen() {
                     value={val} onChangeText={setter}
                     placeholder={ph} placeholderTextColor={colors.muted}
                     secureTextEntry
-                    style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 16, fontSize: 15 }}
+                    style={{ backgroundColor: colors.inputBg, borderRadius: 0, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 16, fontSize: 15 }}
                   />
                 </View>
               ))}
@@ -446,11 +445,11 @@ export default function ProfileScreen() {
                   changePwdMutation.mutate();
                 }}
                 disabled={!currentPwd || !newPwd || !confirmPwd || changePwdMutation.isPending}
-                style={{ backgroundColor: colors.primary, borderRadius: 14, padding: 16, alignItems: "center", marginBottom: 12, opacity: !currentPwd || !newPwd ? 0.5 : 1 }}
+                style={{ backgroundColor: colors.primary, borderRadius: 0, padding: 16, alignItems: "center", marginBottom: 12, opacity: !currentPwd || !newPwd ? 0.5 : 1 }}
               >
                 <Text style={{ color: "#fff", fontWeight: "800", fontSize: 16 }}>{changePwdMutation.isPending ? "Changing..." : "Change Password"}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowChangePwd(false)} style={{ borderRadius: 14, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
+              <TouchableOpacity onPress={() => setShowChangePwd(false)} style={{ borderRadius: 0, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
                 <Text style={{ color: colors.textMuted, fontWeight: "600" }}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -462,7 +461,7 @@ export default function ProfileScreen() {
       <Modal visible={showRenewalForm} animationType="slide" transparent>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <View style={{ flex: 1, backgroundColor: "#000000bb", justifyContent: "flex-end" }}>
-            <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 28 }}>
+            <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 0, borderTopRightRadius: 0, padding: 28 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                 <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800" }}>Request Renewal</Text>
                 <TouchableOpacity onPress={() => setShowRenewalForm(false)}>
@@ -473,7 +472,7 @@ export default function ProfileScreen() {
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
                 {PLANS.map((p) => (
                   <TouchableOpacity key={p.key} onPress={() => setRenewalPlan(p.key)}
-                    style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: renewalPlan === p.key ? colors.primary : colors.inputBg, borderWidth: 1.5, borderColor: renewalPlan === p.key ? colors.primary : colors.border }}>
+                    style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 0, backgroundColor: renewalPlan === p.key ? colors.primary : colors.inputBg, borderWidth: 1.5, borderColor: renewalPlan === p.key ? colors.primary : colors.border }}>
                     <Text style={{ color: renewalPlan === p.key ? "#fff" : colors.textMuted, fontSize: 13, fontWeight: "700" }}>{p.label}</Text>
                     <Text style={{ color: renewalPlan === p.key ? "#ffffffaa" : colors.muted, fontSize: 11, textAlign: "center" }}>{p.days}d</Text>
                   </TouchableOpacity>
@@ -484,16 +483,16 @@ export default function ProfileScreen() {
                 value={renewalNote} onChangeText={setRenewalNote}
                 placeholder="Any payment method preference..."
                 placeholderTextColor={colors.muted} multiline numberOfLines={3}
-                style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 20, height: 80, textAlignVertical: "top" }}
+                style={{ backgroundColor: colors.inputBg, borderRadius: 0, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 20, height: 80, textAlignVertical: "top" }}
               />
               <TouchableOpacity
                 onPress={() => renewalMutation.mutate()}
                 disabled={!renewalPlan || renewalMutation.isPending}
-                style={{ backgroundColor: colors.primary, borderRadius: 14, padding: 16, alignItems: "center", marginBottom: 12, opacity: !renewalPlan ? 0.5 : 1 }}
+                style={{ backgroundColor: colors.primary, borderRadius: 0, padding: 16, alignItems: "center", marginBottom: 12, opacity: !renewalPlan ? 0.5 : 1 }}
               >
                 <Text style={{ color: "#fff", fontWeight: "800", fontSize: 16 }}>{renewalMutation.isPending ? "Submitting..." : "Submit Request"}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowRenewalForm(false)} style={{ borderRadius: 14, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
+              <TouchableOpacity onPress={() => setShowRenewalForm(false)} style={{ borderRadius: 0, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
                 <Text style={{ color: colors.textMuted, fontWeight: "600" }}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -505,7 +504,7 @@ export default function ProfileScreen() {
       <Modal visible={showRequestForm} animationType="slide" transparent>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <View style={{ flex: 1, backgroundColor: "#000000bb", justifyContent: "flex-end" }}>
-            <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 28 }}>
+            <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 0, borderTopRightRadius: 0, padding: 28 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                 <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800" }}>Request Content</Text>
                 <TouchableOpacity onPress={() => setShowRequestForm(false)}>
@@ -516,7 +515,7 @@ export default function ProfileScreen() {
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
                 {REQUEST_TYPES.map((t) => (
                   <TouchableOpacity key={t} onPress={() => setReqType(t)}
-                    style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: reqType === t ? colors.accent : colors.inputBg, borderWidth: 1, borderColor: reqType === t ? colors.accent : colors.border }}>
+                    style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 0, backgroundColor: reqType === t ? colors.accent : colors.inputBg, borderWidth: 1, borderColor: reqType === t ? colors.accent : colors.border }}>
                     <Text style={{ color: reqType === t ? "#fff" : colors.textMuted, fontSize: 13, fontWeight: "600" }}>{t}</Text>
                   </TouchableOpacity>
                 ))}
@@ -525,20 +524,20 @@ export default function ProfileScreen() {
                 <View key={label}>
                   <Text style={{ color: colors.textMuted, fontSize: 13, marginBottom: 6 }}>{label}</Text>
                   <TextInput value={val} onChangeText={setter} placeholder={ph} placeholderTextColor={colors.muted}
-                    style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 14 }} />
+                    style={{ backgroundColor: colors.inputBg, borderRadius: 0, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 14 }} />
                 </View>
               ))}
               <Text style={{ color: colors.textMuted, fontSize: 13, marginBottom: 6 }}>Additional Note</Text>
               <TextInput value={reqNote} onChangeText={setReqNote} placeholder="Describe what you need..." placeholderTextColor={colors.muted} multiline numberOfLines={3}
-                style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 20, height: 80, textAlignVertical: "top" }} />
+                style={{ backgroundColor: colors.inputBg, borderRadius: 0, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 20, height: 80, textAlignVertical: "top" }} />
               <TouchableOpacity
                 onPress={() => requestMutation.mutate()}
                 disabled={!reqSubject || !reqChapter || requestMutation.isPending}
-                style={{ backgroundColor: colors.accent, borderRadius: 14, padding: 16, alignItems: "center", marginBottom: 12, opacity: !reqSubject || !reqChapter ? 0.5 : 1 }}
+                style={{ backgroundColor: colors.accent, borderRadius: 0, padding: 16, alignItems: "center", marginBottom: 12, opacity: !reqSubject || !reqChapter ? 0.5 : 1 }}
               >
                 <Text style={{ color: "#fff", fontWeight: "800", fontSize: 16 }}>{requestMutation.isPending ? "Submitting..." : "Submit Request"}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowRequestForm(false)} style={{ borderRadius: 14, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
+              <TouchableOpacity onPress={() => setShowRequestForm(false)} style={{ borderRadius: 0, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
                 <Text style={{ color: colors.textMuted, fontWeight: "600" }}>Cancel</Text>
               </TouchableOpacity>
             </View>

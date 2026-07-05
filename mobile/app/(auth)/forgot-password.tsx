@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
@@ -25,12 +24,9 @@ export default function ForgotPasswordScreen() {
   });
 
   return (
-    <LinearGradient
-      colors={colors.backgroundGrad as any}
+    <View
       style={{ flex: 1 }}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
+      >
       <BackgroundArt />
       <View style={{ position: "absolute", top: 56, right: 20, zIndex: 10 }}>
         <ThemeToggle />
@@ -64,12 +60,12 @@ export default function ForgotPasswordScreen() {
           {sent ? (
             <View>
               <View style={{
-                backgroundColor: colors.success + "20", borderRadius: 20, padding: 24,
+                backgroundColor: colors.success + "20", borderRadius: 0, padding: 24,
                 borderWidth: 1, borderColor: colors.success + "40",
                 alignItems: "center", marginBottom: 24,
               }}>
                 <View style={{
-                  width: 64, height: 64, borderRadius: 20,
+                  width: 64, height: 64, borderRadius: 0,
                   backgroundColor: colors.success + "30",
                   justifyContent: "center", alignItems: "center", marginBottom: 12,
                 }}>
@@ -107,6 +103,6 @@ export default function ForgotPasswordScreen() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }

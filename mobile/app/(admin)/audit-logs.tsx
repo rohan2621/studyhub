@@ -1,5 +1,4 @@
 import { View, Text, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { TouchableOpacity } from "react-native";
 import { useQuery } from "@tanstack/react-query";
@@ -20,7 +19,7 @@ export default function AuditLogsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
+      <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
         <TouchableOpacity onPress={() => router.back()} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 }}>
           <ArrowLeft size={18} color={colors.primary} />
           <Text style={{ color: colors.primary, fontWeight: "600" }}>Admin</Text>
@@ -29,7 +28,7 @@ export default function AuditLogsScreen() {
           <Activity size={22} color={colors.text} />
           <Text style={{ color: colors.text, fontSize: 24, fontWeight: "800" }}>Audit Logs</Text>
         </View>
-      </LinearGradient>
+      </View>
 
       {isLoading ? (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -44,8 +43,8 @@ export default function AuditLogsScreen() {
               <Text style={{ color: colors.textMuted, fontSize: 16 }}>No audit logs</Text>
             </View>
           ) : logs.map((log: any) => (
-            <View key={log.id} style={{ backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, flexDirection: "row", gap: 12 }}>
-              <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primary + "18", justifyContent: "center", alignItems: "center" }}>
+            <View key={log.id} style={{ backgroundColor: colors.card, borderRadius: 0, padding: 16, borderWidth: 1, borderColor: colors.border, flexDirection: "row", gap: 12 }}>
+              <View style={{ width: 40, height: 40, borderRadius: 0, backgroundColor: colors.primary + "18", justifyContent: "center", alignItems: "center" }}>
                 <Activity size={18} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>

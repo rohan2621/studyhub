@@ -18,7 +18,7 @@ function CustomTabBar({ state, descriptors, navigation, colors }: any) {
     .filter((r: any) => visibleRoutes.includes(r.name))
     .sort((a: any, b: any) => visibleRoutes.indexOf(a.name) - visibleRoutes.indexOf(b.name));
 
-  const BAR_BG = isDark ? "rgba(8, 8, 17, 0.92)" : "rgba(255, 255, 255, 0.92)";
+  const BAR_BG = isDark ? "#000000" : "#ffffff";
 
   return (
     <View style={{
@@ -27,19 +27,11 @@ function CustomTabBar({ state, descriptors, navigation, colors }: any) {
       left: 0,
       right: 0,
       backgroundColor: BAR_BG,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      height: Platform.OS === "ios" ? 78 : 60,
+      height: Platform.OS === "ios" ? 85 : 65,
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 0, // Set to 0 to ensure mathematically even tab distribution
       borderTopWidth: 1,
       borderTopColor: colors.border,
-      shadowColor: colors.primary, // Glowing shadow matching the primary theme color
-      shadowOpacity: 0.12,
-      shadowRadius: 15,
-      shadowOffset: { width: 0, height: -4 },
-      elevation: 8,
     }}>
       {routes.map((route: any, index: number) => {
         const { options } = descriptors[route.key];
@@ -80,7 +72,7 @@ function CustomTabBar({ state, descriptors, navigation, colors }: any) {
           else if (route.name === "content") name = focused ? "book" : "book-outline";
           else if (route.name === "profile") name = focused ? "person" : "person-outline";
 
-          return <Ionicons name={name as any} size={18} color={color} />;
+          return <Ionicons name={name as any} size={22} color={color} />;
         };
 
         return (
@@ -89,73 +81,24 @@ function CustomTabBar({ state, descriptors, navigation, colors }: any) {
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             onPress={onPress}
-            activeOpacity={0.85}
+            activeOpacity={1}
             style={{
               flex: 1,
               alignItems: "center",
-              justifyContent: "flex-end",
-              paddingBottom: Platform.OS === "ios" ? 18 : 8,
+              justifyContent: "center",
               height: "100%",
-              position: "relative",
+              paddingBottom: Platform.OS === "ios" ? 15 : 0,
             }}
           >
-            {isFocused ? (
-              <>
-                {/* Elevated Circle overlapping top, explicitly centered horizontally */}
-                <View style={{
-                  position: "absolute",
-                  top: -15, // Lowers the circle slightly to sit naturally for height 48
-                  left: "50%",
-                  marginLeft: -24, // Exactly half of the width (48) to center it perfectly
-                  width: 48,
-                  height: 48,
-                  borderRadius: 24,
-                  backgroundColor: isDark ? "#080811" : "#ffffff", // Solid background to cover the bar's top border line
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderWidth: 1,
-                  borderColor: colors.border, // Seamless curved border extension
-                  shadowColor: colors.primary,
-                  shadowOpacity: 0.15,
-                  shadowRadius: 6,
-                  shadowOffset: { width: 0, height: 3 },
-                  elevation: 6,
-                }}>
-                  <View style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 17,
-                    backgroundColor: colors.primary + "18", // Translucent glow background inside circle
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}>
-                    {getIcon(true, colors.primary)}
-                  </View>
-                </View>
-                {/* Label Text at Bottom */}
-                <Text style={{
-                  color: colors.primary,
-                  fontSize: 10,
-                  fontWeight: "800",
-                  letterSpacing: -0.2,
-                }}>
-                  {label}
-                </Text>
-              </>
-            ) : (
-              <>
-                {getIcon(false, isDark ? "#7e7d9c" : "#64748b")}
-                <Text style={{
-                  color: isDark ? "#7e7d9c" : "#64748b",
-                  fontSize: 10,
-                  fontWeight: "600",
-                  marginTop: 3,
-                  letterSpacing: -0.2,
-                }}>
-                  {label}
-                </Text>
-              </>
-            )}
+            {getIcon(isFocused, isFocused ? colors.text : colors.muted)}
+            <Text style={{
+              color: isFocused ? colors.text : colors.muted,
+              fontSize: 10,
+              fontWeight: isFocused ? "700" : "500",
+              marginTop: 4,
+            }}>
+              {label}
+            </Text>
           </TouchableOpacity>
         );
       })}
@@ -232,22 +175,17 @@ export default function TabsLayout() {
           <View style={{
             width: "100%",
             backgroundColor: colors.card,
-            borderRadius: 28,
+            borderRadius: 0,
             padding: 28,
             borderWidth: 1.5,
             borderColor: colors.border,
             alignItems: "center",
-            shadowColor: colors.primary,
-            shadowOffset: { width: 0, height: 10 },
-            shadowOpacity: 0.25,
-            shadowRadius: 20,
-            elevation: 10
-          }}>
+            }}>
             {/* Glowing Icon Wrapper */}
             <View style={{
               width: 72,
               height: 72,
-              borderRadius: 24,
+              borderRadius: 0,
               backgroundColor: colors.primary + "18",
               borderWidth: 1.5,
               borderColor: colors.primary + "30",
@@ -289,7 +227,7 @@ export default function TabsLayout() {
               style={{
                 width: "100%",
                 backgroundColor: colors.primary,
-                borderRadius: 18,
+                borderRadius: 0,
                 padding: 16,
                 alignItems: "center",
                 flexDirection: "row",
@@ -310,7 +248,7 @@ export default function TabsLayout() {
                 width: "100%",
                 borderWidth: 1.5,
                 borderColor: colors.border,
-                borderRadius: 18,
+                borderRadius: 0,
                 padding: 16,
                 alignItems: "center",
                 justifyContent: "center"

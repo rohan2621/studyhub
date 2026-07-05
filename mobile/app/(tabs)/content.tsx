@@ -1,5 +1,4 @@
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
   FileText, Star, ClipboardList, FileStack, Calendar,
@@ -25,7 +24,7 @@ export default function ContentScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 22 }}>
+      <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 22 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <View>
             <Text style={{ color: colors.text, fontSize: 26, fontWeight: "900" }}>Content</Text>
@@ -33,7 +32,7 @@ export default function ContentScreen() {
           </View>
           <ThemeToggle />
         </View>
-      </LinearGradient>
+      </View>
 
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 110 }}>
         {sections.map((s) => {
@@ -43,17 +42,16 @@ export default function ContentScreen() {
               key={s.label}
               onPress={() => router.push(s.route as any)}
               style={{
-                backgroundColor: colors.card, borderRadius: 20, padding: 18,
+                backgroundColor: colors.card, borderRadius: 0, padding: 18,
                 marginBottom: 12, borderWidth: 1, borderColor: colors.border,
                 flexDirection: "row", alignItems: "center", gap: 16,
               }}
             >
-              <LinearGradient
-                colors={[s.color + "33", s.color + "11"]}
-                style={{ width: 54, height: 54, borderRadius: 17, justifyContent: "center", alignItems: "center" }}
+              <View
+                style={{ width: 54, height: 54, borderRadius: 0, justifyContent: "center", alignItems: "center" }}
               >
                 <Icon size={26} color={s.color} />
-              </LinearGradient>
+              </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16 }}>{s.label}</Text>
                 <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 2 }}>{s.desc}</Text>

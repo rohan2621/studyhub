@@ -3,7 +3,6 @@ import {
   View, Text, ScrollView, TouchableOpacity, ActivityIndicator,
   RefreshControl, Modal, TextInput
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 import { format, formatDistanceToNow } from "date-fns";
@@ -35,7 +34,7 @@ function HwCard({ hw, colors, onSubmit, onViewFile }: { hw: any; colors: any; on
       activeOpacity={0.85}
       onPress={() => setExpanded(v => !v)}
       style={{
-        backgroundColor: colors.card, borderRadius: 20,
+        backgroundColor: colors.card, borderRadius: 0,
         borderWidth: 1, borderColor: colors.border,
         marginBottom: 12, overflow: "hidden",
       }}
@@ -55,7 +54,7 @@ function HwCard({ hw, colors, onSubmit, onViewFile }: { hw: any; colors: any; on
               </View>
               {hw.grade && (
                 <View style={{
-                  backgroundColor: colors.primary + "18", borderRadius: 8,
+                  backgroundColor: colors.primary + "18", borderRadius: 0,
                   paddingHorizontal: 7, paddingVertical: 2,
                   borderWidth: 1, borderColor: colors.primary + "30",
                 }}>
@@ -69,7 +68,7 @@ function HwCard({ hw, colors, onSubmit, onViewFile }: { hw: any; colors: any; on
 
           {/* Urgency badge */}
           <View style={{
-            backgroundColor: uc + "18", borderRadius: 12,
+            backgroundColor: uc + "18", borderRadius: 0,
             paddingHorizontal: 10, paddingVertical: 6,
             borderWidth: 1, borderColor: uc + "44",
             alignItems: "center",
@@ -89,7 +88,7 @@ function HwCard({ hw, colors, onSubmit, onViewFile }: { hw: any; colors: any; on
         {/* Description (expandable) */}
         {hw.description && expanded && (
           <View style={{
-            backgroundColor: colors.inputBg, borderRadius: 12, padding: 14,
+            backgroundColor: colors.inputBg, borderRadius: 0, padding: 14,
             marginBottom: 12, borderWidth: 1, borderColor: colors.border,
           }}>
             <Text style={{ color: colors.text, fontSize: 14, lineHeight: 22 }}>{hw.description}</Text>
@@ -102,7 +101,7 @@ function HwCard({ hw, colors, onSubmit, onViewFile }: { hw: any; colors: any; on
             onPress={() => onViewFile(hw.attachmentUrl, `${hw.title} Attachment`)}
             style={{
               flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12,
-              backgroundColor: colors.primary + "15", borderRadius: 12, padding: 12,
+              backgroundColor: colors.primary + "15", borderRadius: 0, padding: 12,
               borderWidth: 1, borderColor: colors.primary + "40",
             }}
           >
@@ -123,7 +122,7 @@ function HwCard({ hw, colors, onSubmit, onViewFile }: { hw: any; colors: any; on
 
           {hw.hasSubmitted ? (
             <View style={{
-              backgroundColor: colors.success + "18", borderRadius: 12,
+              backgroundColor: colors.success + "18", borderRadius: 0,
               paddingHorizontal: 14, paddingVertical: 8,
               flexDirection: "row", alignItems: "center", gap: 6,
               borderWidth: 1, borderColor: colors.success + "40",
@@ -135,7 +134,7 @@ function HwCard({ hw, colors, onSubmit, onViewFile }: { hw: any; colors: any; on
             <TouchableOpacity
               onPress={onSubmit}
               style={{
-                backgroundColor: colors.primary, borderRadius: 12,
+                backgroundColor: colors.primary, borderRadius: 0,
                 paddingHorizontal: 16, paddingVertical: 8,
                 flexDirection: "row", alignItems: "center", gap: 6,
               }}>
@@ -199,11 +198,11 @@ export default function HomeworkScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* ── Header ─────────────────────────────────────────── */}
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
+      <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <View style={{
-              width: 40, height: 40, borderRadius: 12,
+              width: 40, height: 40, borderRadius: 0,
               backgroundColor: colors.primary + "20", justifyContent: "center", alignItems: "center",
             }}>
               <ClipboardList size={20} color={colors.primary} />
@@ -220,7 +219,7 @@ export default function HomeworkScreen() {
           <View style={{ flexDirection: "row", gap: 6 }}>
             {dueToday > 0 && (
               <View style={{
-                backgroundColor: colors.warning + "20", borderRadius: 10,
+                backgroundColor: colors.warning + "20", borderRadius: 0,
                 paddingHorizontal: 10, paddingVertical: 5,
                 borderWidth: 1, borderColor: colors.warning + "40",
                 flexDirection: "row", alignItems: "center", gap: 4,
@@ -231,7 +230,7 @@ export default function HomeworkScreen() {
             )}
             {overdue > 0 && (
               <View style={{
-                backgroundColor: colors.danger + "20", borderRadius: 10,
+                backgroundColor: colors.danger + "20", borderRadius: 0,
                 paddingHorizontal: 10, paddingVertical: 5,
                 borderWidth: 1, borderColor: colors.danger + "40",
                 flexDirection: "row", alignItems: "center", gap: 4,
@@ -244,18 +243,18 @@ export default function HomeworkScreen() {
         </View>
 
         {/* Tabs */}
-        <View style={{ flexDirection: "row", backgroundColor: colors.card, borderRadius: 14, padding: 4, borderWidth: 1, borderColor: colors.border }}>
+        <View style={{ flexDirection: "row", backgroundColor: colors.card, borderRadius: 0, padding: 4, borderWidth: 1, borderColor: colors.border }}>
           {([
             { key: "pending", label: `Pending (${pending.length})` },
             { key: "submitted", label: `Submitted (${submitted.length})` },
           ] as const).map(({ key, label }) => (
             <TouchableOpacity key={key} onPress={() => setTab(key)}
-              style={{ flex: 1, borderRadius: 10, padding: 10, alignItems: "center", backgroundColor: tab === key ? colors.primary : "transparent" }}>
+              style={{ flex: 1, borderRadius: 0, padding: 10, alignItems: "center", backgroundColor: tab === key ? colors.primary : "transparent" }}>
               <Text style={{ color: tab === key ? "#fff" : colors.textMuted, fontWeight: "700", fontSize: 13 }}>{label}</Text>
             </TouchableOpacity>
           ))}
         </View>
-      </LinearGradient>
+      </View>
 
       {/* ── List ─────────────────────────────────────────────── */}
       {isLoading ? (
@@ -285,7 +284,6 @@ export default function HomeworkScreen() {
               <HwCard
                 key={hw.id}
                 hw={hw}
-                colors={colors}
                 onSubmit={() => { setSubmitModal(hw.id); setFileUrl(""); }}
                 onViewFile={onViewFile}
               />
@@ -299,7 +297,7 @@ export default function HomeworkScreen() {
         <View style={{ flex: 1, backgroundColor: "#000000bb", justifyContent: "flex-end" }}>
           <View style={{
             backgroundColor: colors.surface,
-            borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 28,
+            borderTopLeftRadius: 0, borderTopRightRadius: 0, padding: 28,
           }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800" }}>Submit Homework</Text>
@@ -316,7 +314,7 @@ export default function HomeworkScreen() {
               placeholderTextColor={colors.muted}
               autoCapitalize="none"
               style={{
-                backgroundColor: colors.inputBg, borderRadius: 14, padding: 16,
+                backgroundColor: colors.inputBg, borderRadius: 0, padding: 16,
                 color: colors.text, borderWidth: 1,
                 borderColor: fileUrl ? colors.primary : colors.border,
                 marginBottom: 8, fontSize: 14,
@@ -330,7 +328,7 @@ export default function HomeworkScreen() {
               onPress={() => submitMutation.mutate({ id: submitModal!, fileUrl })}
               disabled={!fileUrl.trim() || submitMutation.isPending}
               style={{
-                backgroundColor: colors.primary, borderRadius: 16, padding: 16,
+                backgroundColor: colors.primary, borderRadius: 0, padding: 16,
                 alignItems: "center", marginBottom: 12,
                 opacity: !fileUrl.trim() ? 0.5 : 1,
                 flexDirection: "row", justifyContent: "center", gap: 8,
@@ -344,7 +342,7 @@ export default function HomeworkScreen() {
 
             <TouchableOpacity
               onPress={() => setSubmitModal(null)}
-              style={{ borderRadius: 16, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border }}
+              style={{ borderRadius: 0, padding: 14, alignItems: "center", borderWidth: 1, borderColor: colors.border }}
             >
               <Text style={{ color: colors.textMuted, fontWeight: "600" }}>Cancel</Text>
             </TouchableOpacity>

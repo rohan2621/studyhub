@@ -1,5 +1,4 @@
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -42,10 +41,10 @@ export default function AdminDashboard() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 24 }}>
+      <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 24 }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-            <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: colors.primary + "22", justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: colors.primary + "40" }}>
+            <View style={{ width: 48, height: 48, borderRadius: 0, backgroundColor: colors.primary + "22", justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: colors.primary + "40" }}>
               <Shield size={24} color={colors.primary} />
             </View>
             <View>
@@ -59,17 +58,15 @@ export default function AdminDashboard() {
             onPress={() => router.push("/(admin)/announcements" as any)}
             style={{
               backgroundColor: "#f59e0b",
-              borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10,
+              borderRadius: 0, paddingHorizontal: 14, paddingVertical: 10,
               flexDirection: "row", alignItems: "center", gap: 6,
-              shadowColor: "#f59e0b", shadowOpacity: 0.4, shadowRadius: 8, shadowOffset: { width: 0, height: 4 },
-              elevation: 6,
-            }}
+              }}
           >
             <Megaphone size={16} color="#fff" />
             <Text style={{ color: "#fff", fontWeight: "800", fontSize: 13 }}>Announce</Text>
           </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
 
       <ScrollView contentContainerStyle={{ padding: 20 }}>
 
@@ -81,8 +78,8 @@ export default function AdminDashboard() {
             {tiles.map((t) => {
               const Icon = t.icon;
               return (
-                <View key={t.label} style={{ width: "47%", backgroundColor: colors.card, borderRadius: 20, padding: 18, borderWidth: 1, borderColor: colors.border }}>
-                  <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: t.color + "22", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
+                <View key={t.label} style={{ width: "47%", backgroundColor: colors.card, borderRadius: 0, padding: 18, borderWidth: 1, borderColor: colors.border }}>
+                  <View style={{ width: 36, height: 36, borderRadius: 0, backgroundColor: t.color + "22", justifyContent: "center", alignItems: "center", marginBottom: 10 }}>
                     <Icon size={18} color={t.color} />
                   </View>
                   <Text style={{ color: colors.text, fontSize: 26, fontWeight: "900" }}>{t.value ?? "—"}</Text>
@@ -94,7 +91,7 @@ export default function AdminDashboard() {
         )}
 
         {/* School isolation notice */}
-        <View style={{ backgroundColor: colors.primary + "12", borderRadius: 18, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: colors.primary + "30", flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
+        <View style={{ backgroundColor: colors.primary + "12", borderRadius: 0, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: colors.primary + "30", flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
           <School size={20} color={colors.primary} style={{ marginTop: 2 }} />
           <View style={{ flex: 1 }}>
             <Text style={{ color: colors.primary, fontWeight: "800", fontSize: 14, marginBottom: 4 }}>School Isolation Active</Text>
@@ -109,11 +106,11 @@ export default function AdminDashboard() {
           const Icon = item.icon;
           return (
             <TouchableOpacity key={item.label} onPress={() => router.push(item.route as any)}
-              style={{ backgroundColor: colors.card, borderRadius: 20, padding: 18, marginBottom: 12, borderWidth: 1, borderColor: colors.border, flexDirection: "row", alignItems: "center", gap: 16 }}
+              style={{ backgroundColor: colors.card, borderRadius: 0, padding: 18, marginBottom: 12, borderWidth: 1, borderColor: colors.border, flexDirection: "row", alignItems: "center", gap: 16 }}
             >
-              <LinearGradient colors={[item.color + "33", item.color + "11"]} style={{ width: 54, height: 54, borderRadius: 17, justifyContent: "center", alignItems: "center" }}>
+              <View style={{ width: 54, height: 54, borderRadius: 0, justifyContent: "center", alignItems: "center" }}>
                 <Icon size={26} color={item.color} />
-              </LinearGradient>
+              </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16 }}>{item.label}</Text>
                 <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 2 }}>{item.desc}</Text>
@@ -130,7 +127,7 @@ export default function AdminDashboard() {
             await logout();
             router.replace("/(auth)/login");
           }}
-          style={{ backgroundColor: colors.danger + "18", borderRadius: 20, padding: 18, marginTop: 8, marginBottom: 40, borderWidth: 1, borderColor: colors.danger + "40", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10 }}
+          style={{ backgroundColor: colors.danger + "18", borderRadius: 0, padding: 18, marginTop: 8, marginBottom: 40, borderWidth: 1, borderColor: colors.danger + "40", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10 }}
         >
           <LogOut size={20} color={colors.danger} />
           <Text style={{ color: colors.danger, fontSize: 16, fontWeight: "800" }}>Sign Out</Text>

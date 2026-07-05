@@ -56,7 +56,7 @@ export default function InAppViewerModal({ visible, url, title, onClose }: Props
             style={{
               width: 32,
               height: 32,
-              borderRadius: 16,
+              borderRadius: 0,
               backgroundColor: colors.border,
               alignItems: "center",
               justifyContent: "center"

@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: "Inter", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Inter", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  --radius: 0; /* Relume often uses stark 0px or very slight rounding */
+
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #000000;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #000000;
+  --muted: #f3f4f6;
+  --muted-foreground: #4b5563;
+  --accent: #f3f4f6;
+  --accent-foreground: #000000;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #000000;
+  
+  --chart-1: #000000;
+  --chart-2: #4b5563;
+  --chart-3: #9ca3af;
+  --chart-4: #d1d5db;
+  --chart-5: #f3f4f6;
+  
+  --sidebar: #ffffff;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #000000;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f3f4f6;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #000000;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Base structural utility classes (replacing glassmorphism) */
+
+@utility glass-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@utility glass-card-hover {
+  background-color: #ffffff;
+  border: 1px solid #000000;
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+/* We override the gradient backgrounds to be solid to support existing markup smoothly */
+@utility gradient-bg {
+  background: #ffffff;
+}
+
+@utility gradient-primary {
+  background: #000000;
+  color: #ffffff;
+}
+
+@utility gradient-amber {
+  background: #f59e0b;
+  color: #000000;
+}
+
+@utility gradient-sky {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+@utility text-gradient-primary {
+  color: #000000;
+}
+
+@utility nav-active {
+  background: #f3f4f6;
+  color: #000000;
+  border-left: 2px solid #000000;
+  border-radius: 0;
+}
+
+/* Modern SaaS Form Elements */
+@utility saas-input {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0;
+  padding: 0.5rem 0.75rem;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #000000;
+    box-shadow: 0 0 0 1px #000000;
+  }
+}
+
+@utility saas-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #000000;
+  background-color: #000000;
+  color: #ffffff;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #ffffff;
+    color: #000000;
+  }
+}
+
+@utility saas-button-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: #000000;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #000000;
+    background-color: #f9fafb;
+  }
+}

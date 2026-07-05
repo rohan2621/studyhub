@@ -3,7 +3,6 @@ import {
   View, Text, TouchableOpacity, ScrollView,
   KeyboardAvoidingView, Platform
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
@@ -18,7 +17,7 @@ import { StudyHubBrand } from "../../components/ui/StudyHubBrand";
 import { BackgroundArt } from "../../components/ui/BackgroundArt";
 
 export default function LoginScreen() {
-  const { colors } = useThemeStore();
+  const { colors, isDark } = useThemeStore();
   const login = useAuthStore((s) => s.login);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +34,6 @@ export default function LoginScreen() {
         type: "success",
         text1: `Welcome back, ${data.user.name}!`,
       });
-      console.log(data.user);
 
       if (data.user.role === 3 || data.user.role === "Admin") {
         router.replace("/(admin)");
@@ -54,12 +52,7 @@ export default function LoginScreen() {
   });
 
   return (
-    <LinearGradient
-      colors={colors.backgroundGrad as any}
-      style={{ flex: 1 }}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <BackgroundArt />
 
       {/* Theme toggle */}
@@ -75,115 +68,110 @@ export default function LoginScreen() {
           contentContainerStyle={{
             flexGrow: 1,
             paddingHorizontal: 24,
-            paddingTop: 64,
+            paddingTop: 80,
             paddingBottom: 36,
           }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           {/* Brand */}
-          <View style={{ alignItems: "center", marginBottom: 32 }}>
+          <View style={{ alignItems: "center", marginBottom: 40 }}>
             <StudyHubBrand size="lg" showTagline />
           </View>
 
-          {/* Welcome text */}
-          <View style={{ marginBottom: 24 }}>
-            <Text style={{ fontSize: 22, fontWeight: "800", color: colors.text }}>
-              Welcome back!
-            </Text>
-            <Text style={{ fontSize: 14, color: colors.textMuted, marginTop: 4 }}>
-              Sign in to continue your learning journey
-            </Text>
-          </View>
-
-          {/* Inputs */}
-          <FloatingInput
-            label="Email"
-            icon={<Mail size={18} color={colors.textMuted} />}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="rohan@example.com"
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-          <FloatingInput
-            label="Password"
-            icon={<Lock size={18} color={colors.textMuted} />}
-            rightIcon={
-              showPw
-                ? <EyeOff size={18} color={colors.textMuted} />
-                : <Eye size={18} color={colors.textMuted} />
-            }
-            onRightIconPress={() => setShowPw((v) => !v)}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="••••••••••"
-            secureTextEntry={!showPw}
-          />
-
-          {/* Remember + Forgot */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: 4,
-              marginBottom: 24,
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => setRemember((r) => !r)}
-              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-            >
-              <View
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 6,
-                  backgroundColor: remember ? colors.primary : "transparent",
-                  borderWidth: remember ? 0 : 1.5,
-                  borderColor: colors.border,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {remember && <Check size={12} color="#fff" strokeWidth={3.5} />}
-              </View>
-              <Text style={{ color: colors.text, fontSize: 14 }}>Remember me</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
-              <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 14 }}>
-                Forgot password?
+          {/* Login card */}
+          <View style={{
+            backgroundColor: colors.card,
+            borderRadius: 0,
+            padding: 24,
+            borderWidth: 1,
+            borderColor: colors.border,
+          }}>
+            {/* Welcome text */}
+            <View style={{ marginBottom: 24 }}>
+              <Text style={{ fontSize: 24, fontWeight: "900", color: colors.text, letterSpacing: -0.5 }}>
+                Welcome back!
               </Text>
-            </TouchableOpacity>
-          </View>
+              <Text style={{ fontSize: 14, color: colors.textMuted, marginTop: 6 }}>
+                Sign in to continue your learning journey
+              </Text>
+            </View>
 
-          {/* Login button */}
-          <GradientButton
-            title="Login"
-            icon={<ArrowRight size={18} color="#fff" />}
-            loading={mutation.isPending}
-            onPress={() => mutation.mutate()}
-            disabled={!email || !password}
-          />
+            {/* Inputs */}
+            <FloatingInput
+              label="Email"
+              icon={<Mail size={18} color={colors.muted} />}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="rohan@example.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <FloatingInput
+              label="Password"
+              icon={<Lock size={18} color={colors.muted} />}
+              rightIcon={
+                showPw
+                  ? <EyeOff size={18} color={colors.muted} />
+                  : <Eye size={18} color={colors.muted} />
+              }
+              onRightIconPress={() => setShowPw((v) => !v)}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••••"
+              secureTextEntry={!showPw}
+            />
 
-          {/* Divider */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginVertical: 24,
-              gap: 10,
-            }}
-          >
-            <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
-            <Text style={{ color: colors.textMuted, fontSize: 13 }}>or</Text>
-            <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+            {/* Remember + Forgot */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: 4,
+                marginBottom: 24,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setRemember((r) => !r)}
+                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+              >
+                <View
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 0,
+                    backgroundColor: remember ? colors.primary : "transparent",
+                    borderWidth: remember ? 0 : 1.5,
+                    borderColor: colors.border,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {remember && <Check size={13} color="#fff" strokeWidth={3.5} />}
+                </View>
+                <Text style={{ color: colors.textMuted, fontSize: 14 }}>Remember me</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => router.push("/(auth)/forgot-password")}>
+                <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 14 }}>
+                  Forgot password?
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Login button */}
+            <GradientButton
+              title="Sign In"
+              icon={<ArrowRight size={18} color="#fff" />}
+              loading={mutation.isPending}
+              onPress={() => mutation.mutate()}
+              disabled={!email || !password}
+            />
           </View>
 
           {/* Sign up */}
-          <View style={{ flexDirection: "row", justifyContent: "center" }}>
+          <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 28 }}>
             <Text style={{ color: colors.textMuted, fontSize: 14 }}>
               Don't have an account?{" "}
             </Text>
@@ -195,6 +183,6 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }

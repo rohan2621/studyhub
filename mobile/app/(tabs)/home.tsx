@@ -3,12 +3,11 @@ import {
   View, Text, ScrollView, TouchableOpacity, RefreshControl,
   Animated as RNAnimated, Easing, Pressable, DeviceEventEmitter,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { format } from "date-fns";
 import Toast from "react-native-toast-message";
-import * as Notifications from "expo-notifications";
 import { storage } from "../../lib/storage";
 import Animated, { FadeIn, FadeInDown, SlideInRight, Easing as ReanimatedEasing } from "react-native-reanimated";
 import {
@@ -105,17 +104,15 @@ function QuickTile({ item, index, colors, onPress }: any) {
     >
       <PressCard onPress={onPress} style={{ aspectRatio: 1 }}>
         <View style={{
-          flex: 1, backgroundColor: colors.card, borderRadius: 22,
+          flex: 1, backgroundColor: colors.card, borderRadius: 0,
           alignItems: "center", justifyContent: "center",
           borderWidth: 1, borderColor: colors.border,
-          shadowColor: item.color, shadowOpacity: 0.12, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 2,
         }}>
-          <LinearGradient
-            colors={[item.color + "30", item.color + "08"] as any}
-            style={{ width: 52, height: 52, borderRadius: 17, justifyContent: "center", alignItems: "center", marginBottom: 8 }}
+          <View
+            style={{ width: 52, height: 52, borderRadius: 0, justifyContent: "center", alignItems: "center", marginBottom: 8 }}
           >
             <Icon size={24} color={item.color} strokeWidth={2} />
-          </LinearGradient>
+          </View>
           <Text style={{ color: colors.text, fontSize: 11, fontWeight: "700", letterSpacing: 0.3 }}>{item.label}</Text>
         </View>
       </PressCard>
@@ -199,13 +196,12 @@ export default function HomeScreen() {
 
         const toNotify = newAnnouncements.slice(0, 3).reverse();
         for (const ann of toNotify) {
-          await Notifications.scheduleNotificationAsync({
-            content: {
-              title: `📣 New Announcement: ${ann.title}`,
-              body: ann.content.length > 80 ? `${ann.content.substring(0, 80)}...` : ann.content,
-              data: { route: "/(tabs)/home" },
-            },
-            trigger: null, // show immediately
+          Toast.show({
+            type: "info",
+            text1: `📣 New Announcement: ${ann.title}`,
+            text2: ann.content.length > 80 ? `${ann.content.substring(0, 80)}...` : ann.content,
+            position: "top",
+            visibilityTime: 4000,
           });
         }
 
@@ -253,7 +249,7 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* ── Header ─────────────────────────────────────────────── */}
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 24 }}>
+      <View  style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 24 }}>
         <Animated.View entering={FadeIn.duration(400)} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             <StudyHubBrand size="sm" showTagline={false} />
@@ -269,11 +265,11 @@ export default function HomeScreen() {
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <PressCard onPress={() => handleFeaturePress("/(tabs)/notifications")} style={{ position: "relative" }}>
-              <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: colors.card, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
+              <View style={{ width: 42, height: 42, borderRadius: 0, backgroundColor: colors.card, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
                 <Bell size={19} color={colors.text} />
               </View>
               {unreadCount > 0 && (
-                <View style={{ position: "absolute", top: -3, right: -3, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: colors.danger, justifyContent: "center", alignItems: "center", paddingHorizontal: 3 }}>
+                <View style={{ position: "absolute", top: -3, right: -3, minWidth: 18, height: 18, borderRadius: 0, backgroundColor: colors.danger, justifyContent: "center", alignItems: "center", paddingHorizontal: 3 }}>
                   <Text style={{ color: "#fff", fontSize: 10, fontWeight: "900" }}>{unreadCount > 9 ? "9+" : unreadCount}</Text>
                 </View>
               )}
@@ -285,11 +281,11 @@ export default function HomeScreen() {
         <Animated.View entering={FadeInDown.delay(120).duration(350)}>
           {tokenStatus?.hasActiveToken ? (
             <View style={{
-              backgroundColor: colors.success + "14", borderRadius: 18, padding: 18,
+              backgroundColor: colors.success + "14", borderRadius: 0, padding: 18,
               borderWidth: 1, borderColor: colors.success + "35",
               flexDirection: "row", alignItems: "center", gap: 14,
             }}>
-              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: colors.success + "22", justifyContent: "center", alignItems: "center" }}>
+              <View style={{ width: 44, height: 44, borderRadius: 0, backgroundColor: colors.success + "22", justifyContent: "center", alignItems: "center" }}>
                 <CheckCircle2 size={24} color={colors.success} />
               </View>
               <View style={{ flex: 1 }}>
@@ -297,15 +293,15 @@ export default function HomeScreen() {
                 <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 2 }}>{tokenStatus.daysLeft}d remaining · device locked 🔒</Text>
               </View>
               {tokenStatus.isExpiringSoon && (
-                <View style={{ backgroundColor: colors.warning + "22", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: colors.warning + "40" }}>
+                <View style={{ backgroundColor: colors.warning + "22", borderRadius: 0, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: colors.warning + "40" }}>
                   <Text style={{ color: colors.warning, fontSize: 12, fontWeight: "800" }}>Renew</Text>
                 </View>
               )}
             </View>
           ) : (
             <PressCard onPress={() => router.push("/(tabs)/activate-token" as any)} style={{}}>
-              <View style={{ backgroundColor: colors.warning + "14", borderRadius: 18, padding: 18, borderWidth: 1, borderColor: colors.warning + "35", flexDirection: "row", alignItems: "center", gap: 14 }}>
-                <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: colors.warning + "22", justifyContent: "center", alignItems: "center" }}>
+              <View style={{ backgroundColor: colors.warning + "14", borderRadius: 0, padding: 18, borderWidth: 1, borderColor: colors.warning + "35", flexDirection: "row", alignItems: "center", gap: 14 }}>
+                <View style={{ width: 44, height: 44, borderRadius: 0, backgroundColor: colors.warning + "22", justifyContent: "center", alignItems: "center" }}>
                   {tokenStatus?.hasPendingToken ? <Ticket size={22} color={colors.warning} /> : <AlertTriangle size={22} color={colors.warning} />}
                 </View>
                 <View style={{ flex: 1 }}>
@@ -321,7 +317,7 @@ export default function HomeScreen() {
             </PressCard>
           )}
         </Animated.View>
-      </LinearGradient>
+      </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -346,8 +342,8 @@ export default function HomeScreen() {
             {/* ── Search shortcut ──────────────────────────────── */}
             <Animated.View entering={FadeInDown.delay(180).duration(350)} style={{ marginBottom: 28 }}>
               <PressCard onPress={() => handleFeaturePress("/(tabs)/search")} style={{}}>
-                <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.card, borderRadius: 18, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 12 }}>
-                  <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: colors.primary + "16", justifyContent: "center", alignItems: "center" }}>
+                <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.card, borderRadius: 0, padding: 14, borderWidth: 1, borderColor: colors.border, gap: 12 }}>
+                  <View style={{ width: 38, height: 38, borderRadius: 0, backgroundColor: colors.primary + "16", justifyContent: "center", alignItems: "center" }}>
                     <Search size={18} color={colors.primary} />
                   </View>
                   <Text style={{ color: colors.muted, fontSize: 14, flex: 1 }}>Search notes, papers, homework...</Text>
@@ -368,7 +364,7 @@ export default function HomeScreen() {
                 {pinnedAnn.map((a: any, i: number) => (
                   <Animated.View key={a.id} entering={SlideInRight.delay(220 + i * 60).duration(320)}>
                     <PressCard onPress={() => router.push("/(tabs)/announcements")} style={{ marginBottom: 10 }}>
-                      <View style={{ backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.primary + "35", borderLeftWidth: 4, borderLeftColor: colors.primary }}>
+                      <View style={{ backgroundColor: colors.card, borderRadius: 0, padding: 16, borderWidth: 1, borderColor: colors.primary + "35", borderLeftWidth: 4, borderLeftColor: colors.primary }}>
                         <Text style={{ color: colors.text, fontWeight: "800", fontSize: 14, marginBottom: 5, letterSpacing: -0.2 }}>{a.title}</Text>
                         <Text style={{ color: colors.textMuted, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>{a.body}</Text>
                       </View>
@@ -390,12 +386,12 @@ export default function HomeScreen() {
                 feed.upcomingHomework.slice(0, 3).map((hw: any, i: number) => (
                   <Animated.View key={hw.id} entering={FadeInDown.delay(250 + i * 60).duration(320)} style={{ marginBottom: 10 }}>
                     <PressCard onPress={() => handleFeaturePress("/(tabs)/homework")} style={{}}>
-                      <View style={{ backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                      <View style={{ backgroundColor: colors.card, borderRadius: 0, padding: 16, borderWidth: 1, borderColor: colors.border, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                         <View style={{ flex: 1, marginRight: 12 }}>
                           <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15, letterSpacing: -0.2 }}>{hw.title}</Text>
                           <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 3 }}>{hw.subject}</Text>
                         </View>
-                        <View style={{ backgroundColor: urgencyColor(hw.urgency) + "18", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: urgencyColor(hw.urgency) + "40" }}>
+                        <View style={{ backgroundColor: urgencyColor(hw.urgency) + "18", borderRadius: 0, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: urgencyColor(hw.urgency) + "40" }}>
                           <Text style={{ color: urgencyColor(hw.urgency), fontSize: 12, fontWeight: "900" }}>
                             {hw.daysUntilDue === 0 ? "Today!" : `${hw.daysUntilDue}d`}
                           </Text>
@@ -421,7 +417,7 @@ export default function HomeScreen() {
                 feed.trendingNotes.slice(0, 3).map((note: any, i: number) => (
                   <Animated.View key={note.id} entering={FadeInDown.delay(310 + i * 60).duration(320)} style={{ marginBottom: 10 }}>
                     <PressCard onPress={() => handleFeaturePress("/(tabs)/notes")} style={{}}>
-                      <View style={{ backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                      <View style={{ backgroundColor: colors.card, borderRadius: 0, padding: 16, borderWidth: 1, borderColor: colors.border, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                         <View style={{ flex: 1, marginRight: 12 }}>
                           <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15, letterSpacing: -0.2 }}>{note.title}</Text>
                           <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 3 }}>{note.subject}</Text>
@@ -451,7 +447,7 @@ export default function HomeScreen() {
                 feed.recentUploads.slice(0, 3).map((note: any, i: number) => (
                   <Animated.View key={note.id} entering={FadeInDown.delay(370 + i * 60).duration(320)} style={{ marginBottom: 10 }}>
                     <PressCard onPress={() => handleFeaturePress("/(tabs)/notes")} style={{}}>
-                      <View style={{ backgroundColor: colors.card, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.border }}>
+                      <View style={{ backgroundColor: colors.card, borderRadius: 0, padding: 16, borderWidth: 1, borderColor: colors.border }}>
                         <Text style={{ color: colors.text, fontWeight: "700", fontSize: 15, letterSpacing: -0.2 }}>{note.title}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 6 }}>
                           <Text style={{ color: colors.textMuted, fontSize: 12 }}>{note.subject}</Text>
@@ -476,8 +472,8 @@ export default function HomeScreen() {
 // ── Empty card ──────────────────────────────────────────────────────────
 function EmptyCard({ icon: Icon, title, desc, color, colors }: any) {
   return (
-    <View style={{ backgroundColor: colors.card, borderRadius: 18, padding: 20, borderWidth: 1, borderColor: colors.border, alignItems: "center", gap: 8 }}>
-      <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: color + "18", justifyContent: "center", alignItems: "center" }}>
+    <View style={{ backgroundColor: colors.card, borderRadius: 0, padding: 20, borderWidth: 1, borderColor: colors.border, alignItems: "center", gap: 8 }}>
+      <View style={{ width: 48, height: 48, borderRadius: 0, backgroundColor: color + "18", justifyContent: "center", alignItems: "center" }}>
         <Icon size={24} color={color} />
       </View>
       <Text style={{ color: colors.text, fontWeight: "700", fontSize: 14 }}>{title}</Text>

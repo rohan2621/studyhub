@@ -571,6 +571,34 @@ namespace StudyHub.API.Migrations
                     b.ToTable("PaymentRecords");
                 });
 
+            modelBuilder.Entity("StudyHub.API.Models.RevenueAdjustment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AdminId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.ToTable("RevenueAdjustments");
+                });
+
             modelBuilder.Entity("StudyHub.API.Models.School", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1000,6 +1028,17 @@ namespace StudyHub.API.Migrations
                     b.Navigation("Token");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("StudyHub.API.Models.RevenueAdjustment", b =>
+                {
+                    b.HasOne("StudyHub.API.Models.User", "Admin")
+                        .WithMany()
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Admin");
                 });
 
             modelBuilder.Entity("StudyHub.API.Models.Submission", b =>

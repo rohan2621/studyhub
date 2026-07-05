@@ -25,6 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<HireRequest> HireRequests => Set<HireRequest>();
+    public DbSet<RevenueAdjustment> RevenueAdjustments => Set<RevenueAdjustment>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -168,6 +169,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(h => h.Status).HasConversion<string>();
             e.HasOne(h => h.Student).WithMany().HasForeignKey(h => h.StudentId);
             e.HasOne(h => h.Topper).WithMany().HasForeignKey(h => h.TopperId);
+        });
+        b.Entity<RevenueAdjustment>(e =>
+        {
+            e.HasIndex(r => r.CreatedAt);
+            e.HasOne(r => r.Admin).WithMany().HasForeignKey(r => r.AdminId);
         });
     }
 }

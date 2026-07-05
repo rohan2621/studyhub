@@ -1,5 +1,4 @@
 import { View, Text, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Megaphone, Pin } from "lucide-react-native";
@@ -19,12 +18,12 @@ export default function AnnouncementsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
+      <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           <Megaphone size={24} color={colors.text} />
           <Text style={{ color: colors.text, fontSize: 26, fontWeight: "800" }}>Announcements</Text>
         </View>
-      </LinearGradient>
+      </View>
 
       {isLoading ? (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -42,14 +41,14 @@ export default function AnnouncementsScreen() {
             </View>
           ) : sorted.map((a: any) => (
             <View key={a.id} style={{
-              backgroundColor: colors.card, borderRadius: 20, padding: 18,
+              backgroundColor: colors.card, borderRadius: 0, padding: 18,
               borderWidth: 1, borderColor: a.isPinned ? colors.warning + "60" : colors.border,
               borderLeftWidth: a.isPinned ? 4 : 1, borderLeftColor: a.isPinned ? colors.warning : colors.border,
             }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                 <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16, flex: 1, marginRight: 10 }}>{a.title}</Text>
                 {a.isPinned && (
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: colors.warning + "20", borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: colors.warning + "20", borderRadius: 0, paddingHorizontal: 8, paddingVertical: 4 }}>
                     <Pin size={11} color={colors.warning} />
                     <Text style={{ color: colors.warning, fontSize: 11, fontWeight: "700" }}>Pinned</Text>
                   </View>

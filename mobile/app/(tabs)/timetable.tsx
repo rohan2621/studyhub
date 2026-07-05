@@ -3,7 +3,6 @@ import {
   View, Text, ScrollView, TouchableOpacity,
   ActivityIndicator, Animated
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock, BookOpen, Users } from "lucide-react-native";
 import { api } from "../../lib/api";
@@ -33,15 +32,14 @@ function PeriodCard({ slot, colors }: { slot: any; colors: any }) {
   return (
     <View style={{
       backgroundColor: colors.card,
-      borderRadius: 20, padding: 18,
+      borderRadius: 0, padding: 18,
       borderWidth: 1, borderColor: colors.border,
       flexDirection: "row", alignItems: "center", gap: 16,
-      shadowColor: color, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
       marginBottom: 10,
     }}>
       {/* Period circle */}
       <View style={{
-        width: 52, height: 52, borderRadius: 16,
+        width: 52, height: 52, borderRadius: 0,
         backgroundColor: color + "22", justifyContent: "center", alignItems: "center",
         borderWidth: 1.5, borderColor: color + "44",
       }}>
@@ -72,7 +70,7 @@ function PeriodCard({ slot, colors }: { slot: any; colors: any }) {
       </View>
 
       {/* Color accent bar */}
-      <View style={{ width: 4, height: 44, borderRadius: 2, backgroundColor: color }} />
+      <View style={{ width: 4, height: 44, borderRadius: 0, backgroundColor: color }} />
     </View>
   );
 }
@@ -111,14 +109,13 @@ export default function TimetableScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* ── Header ─────────────────────────────────────────── */}
-      <LinearGradient
-        colors={colors.backgroundGrad as any}
+      <View
         style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}
       >
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <View style={{
-              width: 40, height: 40, borderRadius: 12,
+              width: 40, height: 40, borderRadius: 0,
               backgroundColor: colors.primary + "20",
               justifyContent: "center", alignItems: "center",
             }}>
@@ -135,7 +132,7 @@ export default function TimetableScreen() {
           {/* Day period count badge */}
           {!isLoading && (
             <View style={{
-              backgroundColor: colors.primary + "18", borderRadius: 12,
+              backgroundColor: colors.primary + "18", borderRadius: 0,
               paddingHorizontal: 12, paddingVertical: 6,
               borderWidth: 1, borderColor: colors.primary + "30",
             }}>
@@ -157,7 +154,7 @@ export default function TimetableScreen() {
                   key={day}
                   onPress={() => setSelectedIdx(i)}
                   style={{
-                    paddingHorizontal: 18, paddingVertical: 10, borderRadius: 20,
+                    paddingHorizontal: 18, paddingVertical: 10, borderRadius: 0,
                     backgroundColor: isSelected ? colors.primary : colors.card,
                     borderWidth: 1.5,
                     borderColor: isSelected
@@ -173,7 +170,7 @@ export default function TimetableScreen() {
                   </Text>
                   {isToday && !isSelected && (
                     <View style={{
-                      width: 4, height: 4, borderRadius: 2,
+                      width: 4, height: 4, borderRadius: 0,
                       backgroundColor: colors.primary, alignSelf: "center", marginTop: 3,
                     }} />
                   )}
@@ -182,7 +179,7 @@ export default function TimetableScreen() {
             })}
           </View>
         </ScrollView>
-      </LinearGradient>
+      </View>
 
       {/* ── Body ─────────────────────────────────────────────── */}
       {isLoading ? (
@@ -215,7 +212,7 @@ export default function TimetableScreen() {
             </View>
           ) : (
             slots.map((slot: any) => (
-              <PeriodCard key={slot.id} slot={slot} colors={colors} />
+              <PeriodCard key={slot.id} slot={slot} />
             ))
           )}
 
@@ -223,7 +220,7 @@ export default function TimetableScreen() {
           {slots.length > 0 && (
             <View style={{
               marginTop: 20, padding: 16,
-              backgroundColor: colors.card, borderRadius: 18,
+              backgroundColor: colors.card, borderRadius: 0,
               borderWidth: 1, borderColor: colors.border,
             }}>
               <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: "700", letterSpacing: 1, marginBottom: 10 }}>
@@ -235,11 +232,11 @@ export default function TimetableScreen() {
                   return (
                     <View key={sub} style={{
                       flexDirection: "row", alignItems: "center", gap: 6,
-                      backgroundColor: c + "18", borderRadius: 12,
+                      backgroundColor: c + "18", borderRadius: 0,
                       paddingHorizontal: 10, paddingVertical: 5,
                       borderWidth: 1, borderColor: c + "40",
                     }}>
-                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: c }} />
+                      <View style={{ width: 6, height: 6, borderRadius: 0, backgroundColor: c }} />
                       <Text style={{ color: c, fontSize: 12, fontWeight: "700" }}>{sub}</Text>
                     </View>
                   );

@@ -3,7 +3,6 @@ import {
   View, Text, TextInput, TouchableOpacity, ActivityIndicator,
   KeyboardAvoidingView, Platform, Alert,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
@@ -63,21 +62,21 @@ export default function ActivateTokenScreen() {
 
   if (statusLoading) {
     return (
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator color={colors.primary} size="large" />
-      </LinearGradient>
+      </View>
     );
   }
 
   return (
-    <LinearGradient colors={colors.backgroundGrad as any} style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <View style={{ flex: 1, padding: 24, paddingTop: 70 }}>
 
           {success ? (
             /* ── Success State ── */
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 16 }}>
-              <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: colors.success + "20", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: colors.success }}>
+              <View style={{ width: 88, height: 88, borderRadius: 0, backgroundColor: colors.success + "20", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: colors.success }}>
                 <CheckCircle2 size={44} color={colors.success} />
               </View>
               <Text style={{ color: colors.text, fontSize: 26, fontWeight: "900", textAlign: "center" }}>
@@ -88,7 +87,7 @@ export default function ActivateTokenScreen() {
               </Text>
               <TouchableOpacity
                 onPress={handleGoHome}
-                style={{ backgroundColor: colors.primary, borderRadius: 18, padding: 18, paddingHorizontal: 48, marginTop: 16, shadowColor: colors.primary, shadowOpacity: 0.4, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 8 }}
+                style={{ backgroundColor: colors.primary, borderRadius: 0, padding: 18, paddingHorizontal: 48, marginTop: 16, }}
               >
                 <Text style={{ color: "#fff", fontWeight: "900", fontSize: 17 }}>Enter StudyHub</Text>
               </TouchableOpacity>
@@ -100,7 +99,7 @@ export default function ActivateTokenScreen() {
 
               {/* Icon + heading */}
               <View style={{ alignItems: "center", marginBottom: 36 }}>
-                <View style={{ width: 80, height: 80, borderRadius: 26, backgroundColor: colors.primary + "18", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: colors.primary + "50", marginBottom: 18 }}>
+                <View style={{ width: 80, height: 80, borderRadius: 0, backgroundColor: colors.primary + "18", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: colors.primary + "50", marginBottom: 18 }}>
                   <Lock size={38} color={colors.primary} />
                 </View>
                 <Text style={{ color: colors.text, fontSize: 28, fontWeight: "900", textAlign: "center", marginBottom: 8 }}>
@@ -115,7 +114,7 @@ export default function ActivateTokenScreen() {
 
               {/* Pending token notice */}
               {tokenStatus?.hasPendingToken && (
-                <View style={{ backgroundColor: colors.warning + "15", borderRadius: 18, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: colors.warning + "40", flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
+                <View style={{ backgroundColor: colors.warning + "15", borderRadius: 0, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: colors.warning + "40", flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
                   <AlertTriangle size={20} color={colors.warning} style={{ marginTop: 1 }} />
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: colors.warning, fontWeight: "800", fontSize: 14 }}>Pending Token Found</Text>
@@ -128,7 +127,7 @@ export default function ActivateTokenScreen() {
               )}
 
               {/* Token code input card */}
-              <View style={{ backgroundColor: colors.card, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: colors.border, marginBottom: 16 }}>
+              <View style={{ backgroundColor: colors.card, borderRadius: 0, padding: 24, borderWidth: 1, borderColor: colors.border, marginBottom: 16 }}>
                 <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 10 }}>TOKEN CODE</Text>
                 <TextInput
                   value={code}
@@ -139,7 +138,7 @@ export default function ActivateTokenScreen() {
                   autoCorrect={false}
                   style={{
                     backgroundColor: colors.inputBg,
-                    borderRadius: 16, padding: 18,
+                    borderRadius: 0, padding: 18,
                     color: colors.text, fontSize: 20, fontWeight: "700",
                     borderWidth: 1.5,
                     borderColor: code ? colors.primary : colors.border,
@@ -150,13 +149,11 @@ export default function ActivateTokenScreen() {
                   onPress={() => mutation.mutate()}
                   disabled={(!code.trim() && !tokenStatus?.hasPendingToken) || mutation.isPending}
                   style={{
-                    backgroundColor: colors.primary, borderRadius: 16, padding: 18,
+                    backgroundColor: colors.primary, borderRadius: 0, padding: 18,
                     alignItems: "center",
                     opacity: (!code.trim() && !tokenStatus?.hasPendingToken) ? 0.5 : 1,
                     flexDirection: "row", justifyContent: "center", gap: 10,
-                    shadowColor: colors.primary, shadowOpacity: 0.35, shadowRadius: 10, shadowOffset: { width: 0, height: 5 },
-                    elevation: 6,
-                  }}
+                    }}
                 >
                   {mutation.isPending
                     ? <ActivityIndicator color="#fff" />
@@ -171,7 +168,7 @@ export default function ActivateTokenScreen() {
               </View>
 
               {/* What is a token */}
-              <View style={{ backgroundColor: colors.primary + "0c", borderRadius: 18, padding: 16, borderWidth: 1, borderColor: colors.primary + "20", marginBottom: 20 }}>
+              <View style={{ backgroundColor: colors.primary + "0c", borderRadius: 0, padding: 16, borderWidth: 1, borderColor: colors.primary + "20", marginBottom: 20 }}>
                 <Text style={{ color: colors.primary, fontWeight: "800", fontSize: 13, marginBottom: 6 }}>How it works</Text>
                 {[
                   "📲 One token = one device (your phone)",
@@ -201,6 +198,6 @@ export default function ActivateTokenScreen() {
           )}
         </View>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }

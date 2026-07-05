@@ -4,7 +4,6 @@ import {
   TextInput, ActivityIndicator, RefreshControl, Alert
 } from "react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   FadeInDown, useSharedValue, useAnimatedStyle, withSpring,
 } from "react-native-reanimated";
@@ -25,7 +24,7 @@ function NoteCard({ note, type, index, colors, onUpvote, onViewFile }: any) {
   return (
     <Animated.View
       entering={FadeInDown.delay(index * 50).springify().damping(14)}
-      style={{ backgroundColor: colors.card, borderRadius: 20, padding: 18, borderWidth: 1, borderColor: colors.border }}
+      style={{ backgroundColor: colors.card, borderRadius: 0, padding: 18, borderWidth: 1, borderColor: colors.border }}
     >
       {/* Title + type badge */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
@@ -36,7 +35,7 @@ function NoteCard({ note, type, index, colors, onUpvote, onViewFile }: any) {
             {note.chapter && <Text style={{ color: colors.muted, fontSize: 12 }}>• {note.chapter}</Text>}
             {note.grade && (
               <View style={{
-                backgroundColor: colors.accent + "18", borderRadius: 8,
+                backgroundColor: colors.accent + "18", borderRadius: 0,
                 paddingHorizontal: 7, paddingVertical: 2,
                 borderWidth: 1, borderColor: colors.accent + "40",
               }}>
@@ -47,7 +46,7 @@ function NoteCard({ note, type, index, colors, onUpvote, onViewFile }: any) {
         </View>
         <View style={{
           backgroundColor: type === "TopperNote" ? colors.warning + "20" : colors.primary + "20",
-          borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+          borderRadius: 0, paddingHorizontal: 10, paddingVertical: 5,
           flexDirection: "row", alignItems: "center", gap: 4,
         }}>
           {type === "TopperNote" ? <Star size={12} color={colors.warning} /> : <FileText size={12} color={colors.primary} />}
@@ -76,13 +75,13 @@ function NoteCard({ note, type, index, colors, onUpvote, onViewFile }: any) {
           {note.fileUrl ? (
             <TouchableOpacity
               onPress={() => onViewFile(note.fileUrl, note.title)}
-              style={{ backgroundColor: colors.primary, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 6 }}
+              style={{ backgroundColor: colors.primary, borderRadius: 0, paddingHorizontal: 14, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 6 }}
             >
               <Eye size={13} color="#fff" />
               <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>View</Text>
             </TouchableOpacity>
           ) : (
-            <View style={{ backgroundColor: colors.border, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <View style={{ backgroundColor: colors.border, borderRadius: 0, paddingHorizontal: 14, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 6 }}>
               <Lock size={13} color={colors.muted} />
               <Text style={{ color: colors.muted, fontSize: 12, fontWeight: "700" }}>Locked</Text>
             </View>
@@ -135,7 +134,7 @@ export default function NotesScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
+      <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
         <Animated.View entering={FadeInDown.springify().damping(14)} style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 }}>
           {type === "Note" ? <FileText size={24} color={colors.text} /> : <Star size={24} color={colors.text} />}
           <View>
@@ -150,14 +149,14 @@ export default function NotesScreen() {
 
         <Animated.View
           entering={FadeInDown.delay(80).springify().damping(14)}
-          style={{ flexDirection: "row", backgroundColor: colors.card, borderRadius: 14, padding: 4, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}
+          style={{ flexDirection: "row", backgroundColor: colors.card, borderRadius: 0, padding: 4, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}
         >
           {(["Note", "TopperNote"] as const).map((t) => (
             <TouchableOpacity
               key={t}
               onPress={() => setType(t)}
               style={{
-                flex: 1, borderRadius: 10, padding: 10, alignItems: "center",
+                flex: 1, borderRadius: 0, padding: 10, alignItems: "center",
                 backgroundColor: type === t ? colors.primary : "transparent",
                 flexDirection: "row", justifyContent: "center", gap: 6,
               }}
@@ -174,7 +173,7 @@ export default function NotesScreen() {
 
         <Animated.View
           entering={FadeInDown.delay(140).springify().damping(14)}
-          style={{ flexDirection: "row", backgroundColor: colors.inputBg, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, borderWidth: 1, borderColor: colors.border, alignItems: "center", gap: 10 }}
+          style={{ flexDirection: "row", backgroundColor: colors.inputBg, borderRadius: 0, paddingHorizontal: 14, paddingVertical: 12, borderWidth: 1, borderColor: colors.border, alignItems: "center", gap: 10 }}
         >
           <Search size={18} color={colors.textMuted} />
           <TextInput
@@ -183,20 +182,20 @@ export default function NotesScreen() {
             style={{ flex: 1, color: colors.text, fontSize: 15 }}
           />
         </Animated.View>
-      </LinearGradient>
+      </View>
 
       {subjects && subjects.length > 0 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: 50 }} contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 8, gap: 8 }}>
           <TouchableOpacity
             onPress={() => setSubject("")}
-            style={{ paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, backgroundColor: !subject ? colors.primary : colors.card, borderWidth: 1, borderColor: !subject ? colors.primary : colors.border }}
+            style={{ paddingHorizontal: 16, paddingVertical: 6, borderRadius: 0, backgroundColor: !subject ? colors.primary : colors.card, borderWidth: 1, borderColor: !subject ? colors.primary : colors.border }}
           >
             <Text style={{ color: !subject ? "#fff" : colors.textMuted, fontSize: 13, fontWeight: "600" }}>All</Text>
           </TouchableOpacity>
           {subjects.map((s: string) => (
             <TouchableOpacity
               key={s} onPress={() => setSubject(subject === s ? "" : s)}
-              style={{ paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, backgroundColor: subject === s ? colors.primary : colors.card, borderWidth: 1, borderColor: subject === s ? colors.primary : colors.border }}
+              style={{ paddingHorizontal: 16, paddingVertical: 6, borderRadius: 0, backgroundColor: subject === s ? colors.primary : colors.card, borderWidth: 1, borderColor: subject === s ? colors.primary : colors.border }}
             >
               <Text style={{ color: subject === s ? "#fff" : colors.textMuted, fontSize: 13, fontWeight: "600" }}>{s}</Text>
             </TouchableOpacity>
@@ -220,7 +219,7 @@ export default function NotesScreen() {
             </Animated.View>
           ) : (
             filtered.map((note: any, i: number) => (
-              <NoteCard key={note.id} note={note} type={type} index={i} colors={colors} onViewFile={onViewFile} onUpvote={upvoteMutation.mutate} />
+              <NoteCard key={note.id} note={note} type={type} index={i} onViewFile={onViewFile} onUpvote={upvoteMutation.mutate} />
             ))
           )}
         </ScrollView>

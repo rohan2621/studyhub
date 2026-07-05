@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl, Modal, KeyboardAvoidingView, Platform } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as signalR from "@microsoft/signalr";
 import { format } from "date-fns";
@@ -80,23 +79,23 @@ export default function DiscussionsScreen() {
   if (selectedThread) {
     return (
       <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
+        <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
           <TouchableOpacity onPress={() => setSelectedThread(null)} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 12 }}>
             <ArrowLeft size={18} color={colors.primary} />
             <Text style={{ color: colors.primary, fontWeight: "600" }}>Back</Text>
           </TouchableOpacity>
-          <View style={{ backgroundColor: colors.primary + "22", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4, alignSelf: "flex-start", marginBottom: 8 }}>
+          <View style={{ backgroundColor: colors.primary + "22", borderRadius: 0, paddingHorizontal: 10, paddingVertical: 4, alignSelf: "flex-start", marginBottom: 8 }}>
             <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>{selectedThread.subject}</Text>
           </View>
           <Text style={{ color: colors.text, fontSize: 20, fontWeight: "800" }}>{selectedThread.title}</Text>
           <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 4 }}>By {selectedThread.author}</Text>
-        </LinearGradient>
+        </View>
         <ScrollView ref={scrollRef} contentContainerStyle={{ padding: 20, gap: 12 }}>
-          <View style={{ backgroundColor: colors.primary + "18", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: colors.primary + "44" }}>
+          <View style={{ backgroundColor: colors.primary + "18", borderRadius: 0, padding: 16, borderWidth: 1, borderColor: colors.primary + "44" }}>
             <Text style={{ color: colors.text, lineHeight: 22 }}>{selectedThread.body}</Text>
           </View>
           {allReplies.map((r: any, i: number) => (
-            <View key={r.id ?? i} style={{ backgroundColor: colors.card, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: colors.border }}>
+            <View key={r.id ?? i} style={{ backgroundColor: colors.card, borderRadius: 0, padding: 16, borderWidth: 1, borderColor: colors.border }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
                 <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 13 }}>{r.author ?? "You"}</Text>
                 <Text style={{ color: colors.textMuted, fontSize: 11 }}>{r.createdAt ? format(new Date(r.createdAt), "MMM dd, HH:mm") : "Just now"}</Text>
@@ -116,9 +115,9 @@ export default function DiscussionsScreen() {
           alignItems: "flex-end"
         }}>
           <TextInput value={newReply} onChangeText={setNewReply} placeholder="Write a reply..." placeholderTextColor={colors.muted} multiline
-            style={{ flex: 1, backgroundColor: colors.inputBg, borderRadius: 14, padding: 12, color: colors.text, borderWidth: 1, borderColor: colors.border, maxHeight: 100 }} />
+            style={{ flex: 1, backgroundColor: colors.inputBg, borderRadius: 0, padding: 12, color: colors.text, borderWidth: 1, borderColor: colors.border, maxHeight: 100 }} />
           <TouchableOpacity onPress={() => replyMutation.mutate()} disabled={!newReply.trim() || replyMutation.isPending}
-            style={{ backgroundColor: colors.primary, borderRadius: 14, width: 48, height: 48, justifyContent: "center", alignItems: "center", opacity: !newReply.trim() ? 0.5 : 1 }}>
+            style={{ backgroundColor: colors.primary, borderRadius: 0, width: 48, height: 48, justifyContent: "center", alignItems: "center", opacity: !newReply.trim() ? 0.5 : 1 }}>
             <Send size={18} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -128,19 +127,19 @@ export default function DiscussionsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
+      <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <MessageCircle size={24} color={colors.text} />
             <Text style={{ color: colors.text, fontSize: 26, fontWeight: "800" }}>Discussions</Text>
           </View>
           <TouchableOpacity onPress={() => setShowNewThread(true)}
-            style={{ backgroundColor: colors.primary, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 10, flexDirection: "row", alignItems: "center", gap: 6 }}>
+            style={{ backgroundColor: colors.primary, borderRadius: 0, paddingHorizontal: 16, paddingVertical: 10, flexDirection: "row", alignItems: "center", gap: 6 }}>
             <Plus size={16} color="#fff" />
             <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>New</Text>
           </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
 
       {isLoading ? (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -151,9 +150,9 @@ export default function DiscussionsScreen() {
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}>
           {(data ?? []).map((thread: any) => (
             <TouchableOpacity key={thread.id} onPress={() => setSelectedThread(thread)}
-              style={{ backgroundColor: colors.card, borderRadius: 20, padding: 18, borderWidth: 1, borderColor: colors.border }}>
+              style={{ backgroundColor: colors.card, borderRadius: 0, padding: 18, borderWidth: 1, borderColor: colors.border }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
-                <View style={{ backgroundColor: colors.primary + "22", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 }}>
+                <View style={{ backgroundColor: colors.primary + "22", borderRadius: 0, paddingHorizontal: 10, paddingVertical: 4 }}>
                   <Text style={{ color: colors.primary, fontSize: 11, fontWeight: "700" }}>{thread.subject}</Text>
                 </View>
                 <Text style={{ color: colors.textMuted, fontSize: 12 }}>💬 {thread.replyCount}</Text>
@@ -173,7 +172,7 @@ export default function DiscussionsScreen() {
           <View style={{ flex: 1, backgroundColor: "#000000bb", justifyContent: "flex-end" }}>
             <View style={{
               backgroundColor: colors.surface,
-              borderTopLeftRadius: 28, borderTopRightRadius: 28,
+              borderTopLeftRadius: 0, borderTopRightRadius: 0,
               maxHeight: "92%"
             }}>
               {/* Header */}
@@ -191,19 +190,19 @@ export default function DiscussionsScreen() {
                   <View key={label}>
                     <Text style={{ color: colors.textMuted, marginBottom: 6, fontSize: 14 }}>{label}</Text>
                     <TextInput value={val} onChangeText={setter} placeholder={ph} placeholderTextColor={colors.muted}
-                      style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 16 }} />
+                      style={{ backgroundColor: colors.inputBg, borderRadius: 0, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 16 }} />
                   </View>
                 ))}
                 <Text style={{ color: colors.textMuted, marginBottom: 6, fontSize: 14 }}>Details</Text>
                 <TextInput value={newBody} onChangeText={setNewBody} placeholder="Describe in detail..." placeholderTextColor={colors.muted}
                   multiline numberOfLines={4}
-                  style={{ backgroundColor: colors.inputBg, borderRadius: 14, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 20, height: 100, textAlignVertical: "top" }} />
+                  style={{ backgroundColor: colors.inputBg, borderRadius: 0, padding: 14, color: colors.text, borderWidth: 1, borderColor: colors.border, marginBottom: 20, height: 100, textAlignVertical: "top" }} />
                 <TouchableOpacity onPress={() => threadMutation.mutate()} disabled={!newTitle || !newBody || !newSubject || threadMutation.isPending}
-                  style={{ backgroundColor: colors.primary, borderRadius: 14, padding: 16, alignItems: "center", marginBottom: 12, opacity: !newTitle || !newBody || !newSubject ? 0.5 : 1 }}>
+                  style={{ backgroundColor: colors.primary, borderRadius: 0, padding: 16, alignItems: "center", marginBottom: 12, opacity: !newTitle || !newBody || !newSubject ? 0.5 : 1 }}>
                   <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>{threadMutation.isPending ? "Posting..." : "Post Discussion"}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setShowNewThread(false)}
-                  style={{ borderRadius: 14, padding: 16, alignItems: "center", borderWidth: 1, borderColor: colors.border, marginBottom: 16 }}>
+                  style={{ borderRadius: 0, padding: 16, alignItems: "center", borderWidth: 1, borderColor: colors.border, marginBottom: 16 }}>
                   <Text style={{ color: colors.textMuted, fontWeight: "600" }}>Cancel</Text>
                 </TouchableOpacity>
               </ScrollView>

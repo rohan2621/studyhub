@@ -4,13 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using StudyHub.API.Data;
 using StudyHub.API.Models;
 using System.Security.Claims;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace StudyHub.API.Controllers;
 
 [ApiController]
 [Route("admin")]
 [Authorize(Roles = "Admin")]
-public class AdminController(AppDbContext db) : ControllerBase
+public class AdminController(AppDbContext db, IMemoryCache cache) : ControllerBase
 {
     // ── Users ──────────────────────────────────────────────
     [HttpGet("users")]
@@ -159,6 +160,8 @@ public class AdminController(AppDbContext db) : ControllerBase
         if (user is null) return NotFound();
 
         // Cascade delete all referencing entity records to prevent foreign key errors
+        await db.AuditLogs.Where(a => a.ActorId == id).ExecuteDeleteAsync();
+        await db.AuditLogs.Where(a => db.Tokens.Any(t => t.UserId == id && t.Id == a.TokenId)).ExecuteDeleteAsync();
         await db.Tokens.Where(t => t.UserId == id).ExecuteDeleteAsync();
         await db.Devices.Where(d => d.UserId == id).ExecuteDeleteAsync();
         await db.Submissions.Where(s => s.StudentId == id).ExecuteDeleteAsync();
@@ -288,34 +291,43 @@ public class AdminController(AppDbContext db) : ControllerBase
     [HttpGet("stats")]
     public async Task<IActionResult> GetStats()
     {
-        var now = DateTime.UtcNow;
-
-        var totalUsers = await db.Users.CountAsync();
-        var activeTokens = await db.Tokens.CountAsync(t => t.Status == TokenStatus.Active);
-        var expiredTokens = await db.Tokens.CountAsync(t => t.Status == TokenStatus.Expired);
-        var totalRevenue = await db.PaymentRecords.SumAsync(p => (decimal?)p.Amount) ?? 0;
-        var totalNotes = await db.Notes.CountAsync();
-        var totalSchools = await db.Schools.CountAsync(s => s.IsActive);
-        var pendingRequests = await db.CustomRequests.CountAsync(c => c.Status == RequestStatus.Open);
-        var pendingRenewalCount = await db.TokenRenewalRequests.CountAsync(r => r.Status == RenewalRequestStatus.Pending);
-        var newUsersThisMonth = await db.Users
-            .CountAsync(u => u.CreatedAt >= new DateTime(now.Year, now.Month, 1));
-        var tokensExpiringIn7Days = await db.Tokens
-            .CountAsync(t => t.Status == TokenStatus.Active && t.ExpiresAt <= now.AddDays(7));
-
-        return Ok(new
+        var stats = await cache.GetOrCreateAsync("admin_stats", async entry =>
         {
-            totalUsers,
-            activeTokens,
-            expiredTokens,
-            totalRevenue,
-            totalNotes,
-            totalSchools,
-            pendingRequests,
-            pendingRenewalCount,
-            newUsersThisMonth,
-            tokensExpiringIn7Days
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);
+
+            var now = DateTime.UtcNow;
+
+            var totalUsers = await db.Users.CountAsync();
+            var activeTokens = await db.Tokens.CountAsync(t => t.Status == TokenStatus.Active);
+            var expiredTokens = await db.Tokens.CountAsync(t => t.Status == TokenStatus.Expired);
+            var baseRevenue = await db.PaymentRecords.SumAsync(p => (decimal?)p.Amount) ?? 0;
+            var adjustments = await db.RevenueAdjustments.SumAsync(r => (decimal?)r.Amount) ?? 0;
+            var totalRevenue = baseRevenue + adjustments;
+            var totalNotes = await db.Notes.CountAsync();
+            var totalSchools = await db.Schools.CountAsync(s => s.IsActive);
+            var pendingRequests = await db.CustomRequests.CountAsync(c => c.Status == RequestStatus.Open);
+            var pendingRenewalCount = await db.TokenRenewalRequests.CountAsync(r => r.Status == RenewalRequestStatus.Pending);
+            var newUsersThisMonth = await db.Users
+                .CountAsync(u => u.CreatedAt >= new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc));
+            var tokensExpiringIn7Days = await db.Tokens
+                .CountAsync(t => t.Status == TokenStatus.Active && t.ExpiresAt <= now.AddDays(7));
+
+            return new
+            {
+                totalUsers,
+                activeTokens,
+                expiredTokens,
+                totalRevenue,
+                totalNotes,
+                totalSchools,
+                pendingRequests,
+                pendingRenewalCount,
+                newUsersThisMonth,
+                tokensExpiringIn7Days
+            };
         });
+
+        return Ok(stats);
     }
 
     // ── Custom Requests ───────────────────────────────────
@@ -397,9 +409,39 @@ public class AdminController(AppDbContext db) : ControllerBase
         var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
         return File(bytes, "text/csv", $"studyhub-payments-{DateTime.UtcNow:yyyyMMdd}.csv");
     }
+
+    // ── Revenue Adjustments ───────────────────────────────
+    [HttpPost("revenue-adjustments")]
+    public async Task<IActionResult> AddRevenueAdjustment([FromBody] RevenueAdjustmentRequest req)
+    {
+        var adminId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        
+        var adj = new RevenueAdjustment
+        {
+            Amount = req.Amount,
+            Reason = req.Reason,
+            AdminId = adminId
+        };
+        db.RevenueAdjustments.Add(adj);
+        
+        db.AuditLogs.Add(new AuditLog
+        {
+            ActorId = adminId,
+            Action = "REVENUE_ADJUSTMENT",
+            Meta = $"{{\"amount\":{req.Amount}, \"reason\":\"{req.Reason}\"}}"
+        });
+
+        await db.SaveChangesAsync();
+        
+        // Invalidate stats cache so the new revenue shows up immediately
+        cache.Remove("admin_stats");
+
+        return Ok(new { message = "Revenue adjusted successfully." });
+    }
 }
 
 public record CreateUserRequest(string Name, string Email, string Password, UserRole Role, Guid SchoolId, string? Grade);
 public record ChangeRoleRequest(UserRole Role);
 public record CreateSchoolRequest(string Name, string City, string? LogoUrl);
 public record UpdateRequestStatusRequest(RequestStatus Status);
+public record RevenueAdjustmentRequest(decimal Amount, string Reason);

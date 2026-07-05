@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
-import { TouchableOpacity, Text, ActivityIndicator, ViewStyle } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { TouchableOpacity, Text, ActivityIndicator, ViewStyle, View } from "react-native";
 import { useThemeStore } from "../../stores/themeStore";
 
 interface Props {
@@ -16,31 +15,26 @@ export function GradientButton({ title, onPress, loading, disabled, style, icon 
   const { colors } = useThemeStore();
 
   return (
-    <TouchableOpacity onPress={onPress} disabled={disabled || loading} style={style}>
-      <LinearGradient
-        colors={colors.primaryGrad as any}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+    <TouchableOpacity onPress={onPress} disabled={disabled || loading} style={style} activeOpacity={0.85}>
+      <View
         style={{
-          borderRadius: 18, padding: 18,
+          borderRadius: 0,
+          padding: 17,
           flexDirection: "row",
-          justifyContent: "center", alignItems: "center", gap: 10,
-          opacity: disabled || loading ? 0.6 : 1,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.5,
-          shadowRadius: 16,
-          elevation: 8,
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 10,
+          opacity: disabled || loading ? 0.55 : 1,
         }}
       >
         {loading
           ? <ActivityIndicator color="#fff" />
           : <>
             {icon}
-            <Text style={{ color: "#fff", fontWeight: "800", fontSize: 17, letterSpacing: 0.5 }}>{title}</Text>
+            <Text style={{ color: "#fff", fontWeight: "800", fontSize: 16, letterSpacing: 0.3 }}>{title}</Text>
           </>
         }
-      </LinearGradient>
+      </View>
     </TouchableOpacity>
   );
 }

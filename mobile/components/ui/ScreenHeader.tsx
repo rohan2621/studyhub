@@ -1,5 +1,4 @@
 import { View, Text } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useThemeStore } from "../../stores/themeStore";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -14,9 +13,15 @@ export function ScreenHeader({ title, subtitle, showThemeToggle, rightElement }:
   const { colors } = useThemeStore();
 
   return (
-    <LinearGradient
-      colors={colors.backgroundGrad as any}
-      style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}
+    <View
+      style={{ 
+        paddingTop: 60, 
+        paddingHorizontal: 20, 
+        paddingBottom: 20, 
+        backgroundColor: colors.background,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border
+      }}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <View>
@@ -26,6 +31,6 @@ export function ScreenHeader({ title, subtitle, showThemeToggle, rightElement }:
         {showThemeToggle && <ThemeToggle />}
         {rightElement}
       </View>
-    </LinearGradient>
+    </View>
   );
 }

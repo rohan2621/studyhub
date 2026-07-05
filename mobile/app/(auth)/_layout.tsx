@@ -1,10 +1,13 @@
 import { Stack } from "expo-router";
+import { useThemeStore } from "../../stores/themeStore";
 
 export default function AuthLayout() {
+  const { colors } = useThemeStore();
+
   return (
     <Stack screenOptions={{
       headerShown: false,
-      contentStyle: { backgroundColor: "#0f0f1a" },
+      contentStyle: { backgroundColor: colors.background },
       animation: "slide_from_right",
     }} />
   );

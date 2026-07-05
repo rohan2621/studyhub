@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { View, Text, TouchableOpacity, Linking, ScrollView } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import Animated, {
   FadeIn, FadeInDown, useSharedValue, useAnimatedStyle,
@@ -67,7 +66,7 @@ export default function DeviceMismatchScreen() {
   }));
 
   return (
-    <LinearGradient colors={colors.backgroundGrad as any} style={{ flex: 1 }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+    <View style={{ flex: 1 }} >
       <BackgroundArt />
 
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 24, paddingVertical: 40 }} showsVerticalScrollIndicator={false}>
@@ -79,7 +78,7 @@ export default function DeviceMismatchScreen() {
           entering={FadeIn.delay(150).duration(500)}
           style={[
             {
-              width: 84, height: 84, borderRadius: 28,
+              width: 84, height: 84, borderRadius: 0,
               backgroundColor: colors.danger + "18",
               borderWidth: 1.5, borderColor: colors.danger + "40",
               justifyContent: "center", alignItems: "center",
@@ -136,7 +135,7 @@ export default function DeviceMismatchScreen() {
               marginTop: 12,
               borderWidth: 1.5,
               borderColor: colors.border,
-              borderRadius: 18,
+              borderRadius: 0,
               padding: 16,
               width: "100%",
               alignItems: "center",
@@ -150,6 +149,6 @@ export default function DeviceMismatchScreen() {
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 }

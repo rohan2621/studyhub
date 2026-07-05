@@ -3,7 +3,6 @@ import {
   View, Text, TouchableOpacity, ScrollView,
   KeyboardAvoidingView, Platform, Modal, TextInput, Linking, ActivityIndicator
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
@@ -33,7 +32,7 @@ function PasswordStrength({ password }: { password: string }) {
     <View style={{ marginBottom: 16, marginTop: -8 }}>
       <View style={{ flexDirection: "row", gap: 4, marginBottom: 6 }}>
         {[1, 2, 3, 4].map((i) => (
-          <View key={i} style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: i <= score ? clrs[score] : colors.border }} />
+          <View key={i} style={{ flex: 1, height: 4, borderRadius: 0, backgroundColor: i <= score ? clrs[score] : colors.border }} />
         ))}
       </View>
       <Text style={{ color: clrs[score], fontSize: 12, fontWeight: "700" }}>{labels[score]}</Text>
@@ -104,7 +103,7 @@ export default function RegisterScreen() {
   });
 
   return (
-    <LinearGradient colors={colors.backgroundGrad as any} style={{ flex: 1 }} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <BackgroundArt />
       <View style={{ position: "absolute", top: 56, right: 20, zIndex: 10 }}>
         <ThemeToggle />
@@ -121,8 +120,8 @@ export default function RegisterScreen() {
           </View>
 
           {/* Role locked */}
-          <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.inputBg, borderRadius: 18, borderWidth: 1.5, borderColor: colors.border, paddingHorizontal: 16, paddingVertical: 14, marginBottom: 16 }}>
-            <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.success + "20", justifyContent: "center", alignItems: "center", marginRight: 12 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.inputBg, borderRadius: 0, borderWidth: 1.5, borderColor: colors.border, paddingHorizontal: 16, paddingVertical: 14, marginBottom: 16 }}>
+            <View style={{ width: 40, height: 40, borderRadius: 0, backgroundColor: colors.success + "20", justifyContent: "center", alignItems: "center", marginRight: 12 }}>
               <GraduationCap size={20} color={colors.success} />
             </View>
             <View style={{ flex: 1 }}>
@@ -141,9 +140,9 @@ export default function RegisterScreen() {
           {/* School picker trigger */}
           <TouchableOpacity
             onPress={() => setShowSchoolPicker(true)}
-            style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.inputBg, borderRadius: 18, borderWidth: 1.5, borderColor: schoolId ? colors.primary : colors.border, paddingHorizontal: 16, paddingVertical: 14, marginBottom: 16 }}
+            style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.inputBg, borderRadius: 0, borderWidth: 1.5, borderColor: schoolId ? colors.primary : colors.border, paddingHorizontal: 16, paddingVertical: 14, marginBottom: 16 }}
           >
-            <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primary + "20", justifyContent: "center", alignItems: "center", marginRight: 12 }}>
+            <View style={{ width: 40, height: 40, borderRadius: 0, backgroundColor: colors.primary + "20", justifyContent: "center", alignItems: "center", marginRight: 12 }}>
               <School size={20} color={colors.primary} />
             </View>
             <View style={{ flex: 1 }}>
@@ -161,7 +160,7 @@ export default function RegisterScreen() {
             <View style={{ flexDirection: "row", gap: 8 }}>
               {GRADES.map((g) => (
                 <TouchableOpacity key={g} onPress={() => setGrade(g)}
-                  style={{ paddingHorizontal: 20, paddingVertical: 12, borderRadius: 20, backgroundColor: grade === g ? colors.primary : colors.inputBg, borderWidth: 1.5, borderColor: grade === g ? colors.primary : colors.border }}>
+                  style={{ paddingHorizontal: 20, paddingVertical: 12, borderRadius: 0, backgroundColor: grade === g ? colors.primary : colors.inputBg, borderWidth: 1.5, borderColor: grade === g ? colors.primary : colors.border }}>
                   <Text style={{ color: grade === g ? "#fff" : colors.textMuted, fontSize: 14, fontWeight: "700" }}>Class {g}</Text>
                 </TouchableOpacity>
               ))}
@@ -174,12 +173,10 @@ export default function RegisterScreen() {
             {SECTIONS.map((s) => (
               <TouchableOpacity key={s} onPress={() => setSection(s)}
                 style={{
-                  flex: 1, paddingVertical: 14, borderRadius: 20, alignItems: "center",
+                  flex: 1, paddingVertical: 14, borderRadius: 0, alignItems: "center",
                   backgroundColor: section === s ? colors.primary : colors.inputBg,
                   borderWidth: 1.5, borderColor: section === s ? colors.primary : colors.border,
-                  shadowColor: section === s ? colors.primary : "transparent",
-                  shadowOpacity: 0.3, shadowRadius: 6, elevation: section === s ? 4 : 0,
-                }}>
+                  }}>
                 <Text style={{ color: section === s ? "#fff" : colors.textMuted, fontSize: 16, fontWeight: "900" }}>{s}</Text>
               </TouchableOpacity>
             ))}
@@ -202,7 +199,7 @@ export default function RegisterScreen() {
       {/* ── School Picker Modal ── */}
       <Modal visible={showSchoolPicker} animationType="slide" transparent>
         <View style={{ flex: 1, backgroundColor: "#000000cc", justifyContent: "flex-end" }}>
-          <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 28, maxHeight: "80%", borderWidth: 1, borderColor: colors.border }}>
+          <View style={{ backgroundColor: colors.surface, borderRadius: 0, padding: 28, maxHeight: "80%", borderWidth: 1, borderColor: colors.border }}>
 
             {showAddSchool ? (
               /* ── Add School Form ── */
@@ -223,7 +220,7 @@ export default function RegisterScreen() {
                   onChangeText={setNewSchoolName}
                   placeholder="e.g. Sunrise Academy"
                   placeholderTextColor={colors.muted}
-                  style={{ backgroundColor: colors.inputBg, borderRadius: 16, padding: 16, color: colors.text, borderWidth: 1.5, borderColor: newSchoolName ? colors.primary : colors.border, marginBottom: 16 }}
+                  style={{ backgroundColor: colors.inputBg, borderRadius: 0, padding: 16, color: colors.text, borderWidth: 1.5, borderColor: newSchoolName ? colors.primary : colors.border, marginBottom: 16 }}
                 />
 
                 <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: "700", letterSpacing: 1, marginBottom: 8 }}>CITY</Text>
@@ -232,13 +229,13 @@ export default function RegisterScreen() {
                   onChangeText={setNewSchoolCity}
                   placeholder="e.g. Kathmandu"
                   placeholderTextColor={colors.muted}
-                  style={{ backgroundColor: colors.inputBg, borderRadius: 16, padding: 16, color: colors.text, borderWidth: 1.5, borderColor: newSchoolCity ? colors.primary : colors.border, marginBottom: 24 }}
+                  style={{ backgroundColor: colors.inputBg, borderRadius: 0, padding: 16, color: colors.text, borderWidth: 1.5, borderColor: newSchoolCity ? colors.primary : colors.border, marginBottom: 24 }}
                 />
 
                 <TouchableOpacity
                   onPress={() => addSchoolMutation.mutate()}
                   disabled={!newSchoolName.trim() || !newSchoolCity.trim() || addSchoolMutation.isPending}
-                  style={{ backgroundColor: colors.primary, borderRadius: 16, padding: 16, alignItems: "center", marginBottom: 12, opacity: !newSchoolName.trim() || !newSchoolCity.trim() ? 0.5 : 1, flexDirection: "row", justifyContent: "center", gap: 8 }}
+                  style={{ backgroundColor: colors.primary, borderRadius: 0, padding: 16, alignItems: "center", marginBottom: 12, opacity: !newSchoolName.trim() || !newSchoolCity.trim() ? 0.5 : 1, flexDirection: "row", justifyContent: "center", gap: 8 }}
                 >
                   {addSchoolMutation.isPending
                     ? <ActivityIndicator color="#fff" />
@@ -248,7 +245,7 @@ export default function RegisterScreen() {
                       </>
                   }
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setShowAddSchool(false)} style={{ borderRadius: 16, padding: 16, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
+                <TouchableOpacity onPress={() => setShowAddSchool(false)} style={{ borderRadius: 0, padding: 16, alignItems: "center", borderWidth: 1, borderColor: colors.border }}>
                   <Text style={{ color: colors.textMuted, fontWeight: "600" }}>Back to Search</Text>
                 </TouchableOpacity>
               </>
@@ -264,7 +261,7 @@ export default function RegisterScreen() {
                 </View>
 
                 {/* Search */}
-                <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.inputBg, borderRadius: 16, paddingHorizontal: 14, paddingVertical: 12, borderWidth: 1, borderColor: colors.border, marginBottom: 12, gap: 10 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.inputBg, borderRadius: 0, paddingHorizontal: 14, paddingVertical: 12, borderWidth: 1, borderColor: colors.border, marginBottom: 12, gap: 10 }}>
                   <Search size={18} color={colors.muted} />
                   <TextInput
                     placeholder="Search your school..."
@@ -284,7 +281,7 @@ export default function RegisterScreen() {
                       onPress={() => { setSchoolId(s.id); setSchoolName(s.name); setShowSchoolPicker(false); setSchoolSearch(""); }}
                       style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border, flexDirection: "row", alignItems: "center", gap: 12 }}
                     >
-                      <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primary + "20", justifyContent: "center", alignItems: "center" }}>
+                      <View style={{ width: 40, height: 40, borderRadius: 0, backgroundColor: colors.primary + "20", justifyContent: "center", alignItems: "center" }}>
                         <School size={20} color={colors.primary} />
                       </View>
                       <View style={{ flex: 1 }}>
@@ -311,7 +308,7 @@ export default function RegisterScreen() {
                   {/* Always show "Add School" button at bottom */}
                   <TouchableOpacity
                     onPress={() => { setNewSchoolName(schoolSearch); setShowAddSchool(true); }}
-                    style={{ margin: 16, backgroundColor: colors.primary + "18", borderRadius: 16, padding: 16, alignItems: "center", borderWidth: 1.5, borderColor: colors.primary + "50", flexDirection: "row", justifyContent: "center", gap: 8 }}
+                    style={{ margin: 16, backgroundColor: colors.primary + "18", borderRadius: 0, padding: 16, alignItems: "center", borderWidth: 1.5, borderColor: colors.primary + "50", flexDirection: "row", justifyContent: "center", gap: 8 }}
                   >
                     <Plus size={18} color={colors.primary} />
                     <Text style={{ color: colors.primary, fontWeight: "800", fontSize: 15 }}>
@@ -328,7 +325,7 @@ export default function RegisterScreen() {
       {/* ── Success Modal ── */}
       <Modal visible={showSuccess} animationType="fade" transparent>
         <View style={{ flex: 1, backgroundColor: "#000000cc", justifyContent: "center", padding: 24 }}>
-          <View style={{ backgroundColor: colors.card, borderRadius: 32, padding: 32, borderWidth: 1, borderColor: colors.border, alignItems: "center" }}>
+          <View style={{ backgroundColor: colors.card, borderRadius: 0, padding: 32, borderWidth: 1, borderColor: colors.border, alignItems: "center" }}>
             <StudyHubBrand size="sm" showTagline={false} />
             <Text style={{ fontSize: 24, fontWeight: "800", color: colors.text, marginTop: 16, marginBottom: 8, textAlign: "center" }}>Welcome to StudyHub!</Text>
             <Text style={{ color: colors.textMuted, textAlign: "center", lineHeight: 22, marginBottom: 28 }}>
@@ -336,14 +333,14 @@ export default function RegisterScreen() {
             </Text>
             <TouchableOpacity
               onPress={() => Linking.openURL("https://wa.me/9779800000000")}
-              style={{ backgroundColor: "#25d366", borderRadius: 16, padding: 16, width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 12 }}
+              style={{ backgroundColor: "#25d366", borderRadius: 0, padding: 16, width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 12 }}
             >
               <MessageCircle size={20} color="#fff" />
               <Text style={{ color: "#fff", fontWeight: "800", fontSize: 16 }}>WhatsApp Us</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => { setShowSuccess(false); router.replace("/(auth)/login"); }}
-              style={{ borderWidth: 1.5, borderColor: colors.primary, borderRadius: 16, padding: 16, width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10 }}
+              style={{ borderWidth: 1.5, borderColor: colors.primary, borderRadius: 0, padding: 16, width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10 }}
             >
               <Text style={{ color: colors.primary, fontWeight: "800", fontSize: 16 }}>Go to Login</Text>
               <ArrowRight size={18} color={colors.primary} />
@@ -351,6 +348,6 @@ export default function RegisterScreen() {
           </View>
         </View>
       </Modal>
-    </LinearGradient>
+    </View>
   );
 }

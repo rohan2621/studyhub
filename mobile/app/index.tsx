@@ -1,6 +1,5 @@
 import { Redirect } from "expo-router";
 import { View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   FadeIn, useSharedValue, useAnimatedStyle,
   withRepeat, withTiming, Easing,
@@ -30,12 +29,9 @@ export default function Index() {
 
   if (isLoading) {
     return (
-      <LinearGradient
-        colors={colors.backgroundGrad as any}
+      <View
         style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
+        >
         <BackgroundArt />
         <Animated.View entering={FadeIn.duration(400)} style={{ alignItems: "center", gap: 24 }}>
           <StudyHubBrand size="lg" showTagline />
@@ -43,7 +39,7 @@ export default function Index() {
             <Loader2 size={28} color={colors.primary} />
           </Animated.View>
         </Animated.View>
-      </LinearGradient>
+      </View>
     );
   }
 

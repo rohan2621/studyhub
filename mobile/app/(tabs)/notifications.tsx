@@ -1,5 +1,4 @@
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Bell } from "lucide-react-native";
@@ -36,7 +35,7 @@ export default function NotificationsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LinearGradient colors={colors.backgroundGrad as any} style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
+      <View style={{ paddingTop: 60, paddingHorizontal: 20, paddingBottom: 20 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Bell size={24} color={colors.text} />
@@ -44,7 +43,7 @@ export default function NotificationsScreen() {
           </View>
           {(data?.unreadCount ?? 0) > 0 && (
             <TouchableOpacity onPress={() => readAllMutation.mutate()}
-              style={{ backgroundColor: colors.primary + "22", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 }}>
+              style={{ backgroundColor: colors.primary + "22", borderRadius: 0, paddingHorizontal: 12, paddingVertical: 8 }}>
               <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>Mark all read</Text>
             </TouchableOpacity>
           )}
@@ -52,7 +51,7 @@ export default function NotificationsScreen() {
         {(data?.unreadCount ?? 0) > 0 && (
           <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 6 }}>{data.unreadCount} unread</Text>
         )}
-      </LinearGradient>
+      </View>
 
       {isLoading ? (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -71,12 +70,12 @@ export default function NotificationsScreen() {
           ) : notifications.map((n: any) => (
             <TouchableOpacity key={n.id} onPress={() => !n.isRead && readMutation.mutate(n.id)}
               style={{
-                backgroundColor: colors.card, borderRadius: 18, padding: 16,
+                backgroundColor: colors.card, borderRadius: 0, padding: 16,
                 borderWidth: 1, borderColor: n.isRead ? colors.border : colors.primary + "44",
                 borderLeftWidth: n.isRead ? 1 : 4, borderLeftColor: n.isRead ? colors.border : colors.primary,
                 flexDirection: "row", gap: 14,
               }}>
-              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: colors.primary + "18", justifyContent: "center", alignItems: "center" }}>
+              <View style={{ width: 44, height: 44, borderRadius: 0, backgroundColor: colors.primary + "18", justifyContent: "center", alignItems: "center" }}>
                 <Text style={{ fontSize: 22 }}>{TYPE_ICONS[n.type] ?? "🔔"}</Text>
               </View>
               <View style={{ flex: 1 }}>
@@ -86,7 +85,7 @@ export default function NotificationsScreen() {
                   {format(new Date(n.createdAt), "MMM dd, HH:mm")}
                 </Text>
               </View>
-              {!n.isRead && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary, marginTop: 4 }} />}
+              {!n.isRead && <View style={{ width: 8, height: 8, borderRadius: 0, backgroundColor: colors.primary, marginTop: 4 }} />}
             </TouchableOpacity>
           ))}
         </ScrollView>

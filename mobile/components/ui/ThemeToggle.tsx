@@ -12,18 +12,13 @@ export function ThemeToggle() {
       style={{
         width: 44,
         height: 44,
-        borderRadius: 22,
+        borderRadius: 0,
         backgroundColor: colors.card,
         borderWidth: 1,
         borderColor: colors.border,
         justifyContent: "center",
         alignItems: "center",
-        shadowColor: colors.primary,
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 3 },
-        elevation: 3,
-      }}
+        }}
     >
       {isDark ? (
         <Sun size={20} color="#f59e0b" strokeWidth={2.2} />

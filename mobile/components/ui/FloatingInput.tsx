@@ -36,6 +36,7 @@ export function FloatingInput({
           fontSize: 14,
           fontWeight: "600",
           marginBottom: 8,
+          letterSpacing: 0.2,
         }}
       >
         {label}
@@ -46,14 +47,14 @@ export function FloatingInput({
         style={{
           flexDirection: "row",
           alignItems: "center",
-          backgroundColor: colors.card,
-          borderRadius: 14,
-          borderWidth: 1.5,
+          backgroundColor: colors.inputBg,
+          borderRadius: 0,
+          borderWidth: 1,
           borderColor: error
             ? colors.danger
             : focused
-            ? colors.primary
-            : colors.border,
+              ? colors.primary
+              : colors.border,
           paddingHorizontal: 14,
           height: 56,
         }}
@@ -78,9 +79,9 @@ export function FloatingInput({
             paddingVertical: 0,
           }}
           placeholder={props.placeholder}
-          placeholderTextColor={colors.textMuted}
-          cursorColor={colors.primary}      // Android
-          selectionColor={colors.primary}   // Android & iOS
+          placeholderTextColor={colors.muted}
+          cursorColor={colors.primary}
+          selectionColor={colors.primary}
           caretHidden={false}
           underlineColorAndroid="transparent"
           onFocus={() => setFocused(true)}
@@ -96,6 +97,7 @@ export function FloatingInput({
             style={{
               justifyContent: "center",
               alignItems: "center",
+              padding: 4,
             }}
           >
             {rightIcon}
