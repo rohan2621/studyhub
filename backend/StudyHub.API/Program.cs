@@ -171,6 +171,7 @@ app.UseMiddleware<TokenCheckMiddleware>();
 app.MapControllers();
 app.MapHub<DiscussionHub>("/hubs/discussions");
 app.MapHealthChecks("/health");
+app.MapGet("/ping", () => Results.Ok(new { status = "alive", time = DateTime.UtcNow })).AllowAnonymous();
 app.MapHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = []

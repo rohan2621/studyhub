@@ -48,6 +48,7 @@ public class TokenCheckMiddleware(RequestDelegate next)
         "/custom-requests",
 
         // ── Infrastructure ────────────────────────────────────────────────
+        "/ping",
         "/health",
         "/swagger",
         "/hubs",
