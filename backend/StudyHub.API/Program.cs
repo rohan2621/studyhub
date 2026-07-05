@@ -132,10 +132,9 @@ builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
          "http://localhost:3000",
          "http://localhost:3001",
          "http://localhost:8080",
-            "http://192.168.191.1:8080/",
-            "http://192.168.18.11:8080/",
-
-         "https://yourdomain.com"
+         "http://192.168.191.1:8080",
+         "http://192.168.18.11:8080",
+         "https://studysub.vercel.app"
      )));
 
 // Health checks
