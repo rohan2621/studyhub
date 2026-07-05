@@ -74,7 +74,7 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env) : C
             return BadRequest("File must be an APK (.apk).");
 
         // Ensure wwwroot/apps exists
-        var webRootPath = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
+        var webRootPath = Path.Combine(env.ContentRootPath, "wwwroot");
         var appsPath = Path.Combine(webRootPath, "apps");
         if (!Directory.Exists(appsPath))
             Directory.CreateDirectory(appsPath);
@@ -101,5 +101,31 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env) : C
         await db.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetLatestRelease), new { id = release.Id }, release);
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
+    public async Task<IActionResult> DeleteRelease(Guid id)
+    {
+        var release = await db.AppReleases.FindAsync(id);
+        if (release == null) return NotFound("Release not found.");
+
+        // Delete the physical file if it exists
+        if (!string.IsNullOrEmpty(release.FileUrl))
+        {
+            var fileName = Path.GetFileName(release.FileUrl);
+            var appsPath = Path.Combine(env.ContentRootPath, "wwwroot", "apps");
+            var filePath = Path.Combine(appsPath, fileName);
+            
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+        }
+
+        db.AppReleases.Remove(release);
+        await db.SaveChangesAsync();
+
+        return NoContent();
     }
 }

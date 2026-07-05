@@ -1624,6 +1624,18 @@ function AppReleasesTab({ setMessage }: { setMessage: (m: any) => void }) {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this release? This cannot be undone.")) return;
+    
+    try {
+      await api.delete(`/api/appreleases/${id}`);
+      setMessage({ type: 'success', text: 'App release deleted successfully.' });
+      fetchReleases();
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.response?.data?.message || err.response?.data || 'Failed to delete release.' });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -1664,13 +1676,22 @@ function AppReleasesTab({ setMessage }: { setMessage: (m: any) => void }) {
                 <p className="mt-1 text-sm text-[#5a7095] max-w-3xl truncate">{release.releaseNotes}</p>
                 <p className="mt-1 text-xs text-[#5a7095]/60">Uploaded {formatDate(release.createdAt)}</p>
               </div>
-              <a
-                href={api.defaults.baseURL?.replace('/api', '') + release.fileUrl}
-                download
-                className="flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
-              >
-                <Download className="h-4 w-4" /> Download
-              </a>
+              <div className="flex items-center gap-2">
+                <a
+                  href={`${(api.defaults.baseURL || '').replace(/\/api\/?$/, '').replace(/\/$/, '')}${release.fileUrl}`}
+                  download
+                  className="flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+                >
+                  <Download className="h-4 w-4" /> Download
+                </a>
+                <button
+                  onClick={() => handleDelete(release.id)}
+                  className="flex items-center justify-center p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                  title="Delete Release"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
