@@ -155,10 +155,16 @@ using (var scope = app.Services.CreateScope())
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseSerilogRequestLogging();
+var wwwrootPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+if (!Directory.Exists(wwwrootPath))
+    Directory.CreateDirectory(wwwrootPath);
+
 var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
 provider.Mappings[".apk"] = "application/vnd.android.package-archive";
 app.UseStaticFiles(new StaticFileOptions
 {
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwrootPath),
+    RequestPath = "",
     ContentTypeProvider = provider
 });
 app.UseCors();
