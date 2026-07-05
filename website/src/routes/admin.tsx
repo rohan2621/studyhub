@@ -792,18 +792,26 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
   const [schools, setSchools] = useState<any[]>([]);
   const [selectedSchoolId, setSelectedSchoolId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [catalog, setCatalog] = useState<any[]>([]);
 
   // Note Modal States
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formTitle, setFormTitle] = useState("");
-  const [formSubject, setFormSubject] = useState("");
   const [formChapter, setFormChapter] = useState("");
   const [formFileUrl, setFormFileUrl] = useState("");
   const [formGrade, setFormGrade] = useState("10");
   const [formSection, setFormSection] = useState("");
+  const [formSubject, setFormSubject] = useState("");
   const [formType, setFormType] = useState("Note");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Catalog Modal States
+  const [showCatalogModal, setShowCatalogModal] = useState(false);
+  const [catGrade, setCatGrade] = useState("10");
+  const [catSection, setCatSection] = useState("");
+  const [catSubject, setCatSubject] = useState("");
+  const [isSubmittingCat, setIsSubmittingCat] = useState(false);
 
   const fetchNotes = async () => {
     setIsLoading(true);
@@ -819,6 +827,16 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
     }
   };
 
+  const fetchCatalog = async () => {
+    if (!selectedSchoolId) return;
+    try {
+      const res = await api.get(`/catalog?schoolId=${selectedSchoolId}`);
+      setCatalog(res.data || []);
+    } catch {
+      console.error("Failed to fetch catalog");
+    }
+  };
+
   useEffect(() => {
     api.get("/admin/schools")
       .then(res => {
@@ -829,7 +847,10 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
   }, []);
 
   useEffect(() => {
-    if (selectedSchoolId) fetchNotes();
+    if (selectedSchoolId) {
+      fetchNotes();
+      fetchCatalog();
+    }
   }, [selectedSchoolId]);
 
   const handleDelete = async (id: string, title: string) => {
@@ -843,15 +864,34 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
     }
   };
 
+  const handleDeleteCatalog = async (id: string) => {
+    if (!confirm("Delete this section/subject? Note: You cannot delete a section that has uploaded files.")) return;
+    try {
+      await api.delete(`/catalog/${id}`);
+      setMessage({ type: "success", text: "Section deleted successfully." });
+      fetchCatalog();
+    } catch (e: any) {
+      setMessage({ type: "error", text: e.response?.data?.error || "Failed to delete section." });
+    }
+  };
+
   const openAdd = () => {
     setEditingId(null);
     setFormTitle("");
-    setFormSubject("");
     setFormChapter("");
     setFormFileUrl("");
-    setFormGrade("10");
-    setFormSection("");
     setFormType("Note");
+    
+    // Auto-select first available catalog entry if any
+    if (catalog.length > 0) {
+      setFormGrade(catalog[0].grade);
+      setFormSection(catalog[0].section || "");
+      setFormSubject(catalog[0].subject);
+    } else {
+      setFormGrade("10");
+      setFormSection("");
+      setFormSubject("");
+    }
     setShowModal(true);
   };
 
@@ -889,6 +929,7 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
       }
       setShowModal(false);
       fetchNotes();
+      fetchCatalog();
       setMessage({ type: "success", text: "Note saved." });
     } catch {
       setMessage({ type: "error", text: "Failed to save note." });
@@ -897,18 +938,47 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
     }
   };
 
+  const handleAddCatalog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingCat(true);
+    try {
+      await api.post("/catalog", {
+        schoolId: selectedSchoolId,
+        grade: catGrade,
+        section: catSection || null,
+        subject: catSubject
+      });
+      setMessage({ type: "success", text: "Section added to catalog." });
+      setCatSubject("");
+      fetchCatalog();
+    } catch (e: any) {
+      setMessage({ type: "error", text: e.response?.data?.error || "Failed to add section." });
+    } finally {
+      setIsSubmittingCat(false);
+    }
+  };
+
+  const availableGrades = Array.from(new Set(catalog.map(c => c.grade)));
+  const availableSections = Array.from(new Set(catalog.filter(c => c.grade === formGrade).map(c => c.section || "")));
+  const availableSubjects = Array.from(new Set(catalog.filter(c => c.grade === formGrade && (c.section || "") === formSection).map(c => c.subject)));
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <label className="text-sm font-bold text-[#0e2a4d]">Filter School:</label>
           <select value={selectedSchoolId} onChange={(e) => setSelectedSchoolId(e.target.value)} className="rounded-xl border border-[#2f6fed]/15 bg-white px-3 py-2 text-sm text-[#0e2a4d] outline-none">
             {schools.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
-        <button onClick={openAdd} className="flex items-center gap-2 rounded-xl gradient-primary px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-500/20">
-          <Plus className="h-4 w-4" /> Add Note
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowCatalogModal(true)} className="flex items-center gap-2 rounded-xl border border-[#2f6fed]/15 bg-white px-4 py-2 text-sm font-semibold text-[#2f6fed] hover:bg-[#2f6fed]/5">
+            <Plus className="h-4 w-4" /> Manage Sections
+          </button>
+          <button onClick={openAdd} className="flex items-center gap-2 rounded-xl gradient-primary px-4 py-2 text-sm font-semibold text-white shadow-md shadow-blue-500/20">
+            <Plus className="h-4 w-4" /> Add Note
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto overflow-y-hidden rounded-xl border border-[#2f6fed]/15 bg-white/80">
@@ -949,6 +1019,7 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
         </table>
       </div>
 
+      {/* Upload Note Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0e2a4d]/40 backdrop-blur-sm px-4">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-[#2f6fed]/15 overflow-hidden">
@@ -957,36 +1028,68 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
               <button onClick={() => setShowModal(false)}><X className="h-5 w-5 text-[#5a7095]" /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">Title</label>
-                <input type="text" required value={formTitle} onChange={(e) => setFormTitle(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none" />
+              {catalog.length === 0 && !editingId && (
+                <div className="bg-amber-50 text-amber-700 p-3 rounded-lg text-sm border border-amber-200">
+                  <AlertCircle className="w-4 h-4 inline mr-1" />
+                  No classes/subjects configured for this school. Please "Manage Sections" first.
+                </div>
+              )}
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">Grade</label>
+                  <select required value={formGrade} onChange={(e) => { setFormGrade(e.target.value); setFormSection(""); setFormSubject(""); }} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none">
+                    <option value="">Select Grade</option>
+                    {editingId ? (
+                      ["8", "9", "10", "11", "12"].map(g => <option key={g} value={g}>Class {g}</option>)
+                    ) : (
+                      availableGrades.map(g => <option key={g as string} value={g as string}>Class {g as string}</option>)
+                    )}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">Section</label>
+                  <select value={formSection} onChange={(e) => { setFormSection(e.target.value); setFormSubject(""); }} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none">
+                    {editingId ? (
+                      <>
+                        <option value="">All</option>
+                        {["A", "B", "C", "D", "E"].map(s => <option key={s} value={s}>Section {s}</option>)}
+                      </>
+                    ) : (
+                      <>
+                        {availableSections.length > 0 ? (
+                          availableSections.map(s => <option key={s as string} value={s as string}>{s ? `Section ${s}` : 'All Sections'}</option>)
+                        ) : (
+                          <option value="">All</option>
+                        )}
+                      </>
+                    )}
+                  </select>
+                </div>
               </div>
               <div>
                 <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">Subject</label>
-                <input type="text" required value={formSubject} onChange={(e) => setFormSubject(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none" />
+                {editingId ? (
+                   <input type="text" required value={formSubject} onChange={(e) => setFormSubject(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none" />
+                ) : (
+                  <select required value={formSubject} onChange={(e) => setFormSubject(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none">
+                    <option value="">Select Subject</option>
+                    {availableSubjects.map(s => <option key={s as string} value={s as string}>{s as string}</option>)}
+                  </select>
+                )}
               </div>
+              
               <div>
                 <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">Chapter</label>
                 <input type="text" required value={formChapter} onChange={(e) => setFormChapter(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none" />
               </div>
               <div>
+                <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">Title</label>
+                <input type="text" required value={formTitle} onChange={(e) => setFormTitle(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none" />
+              </div>
+              <div>
                 <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">File URL</label>
                 <input type="text" required value={formFileUrl} onChange={(e) => setFormFileUrl(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">Grade</label>
-                  <select value={formGrade} onChange={(e) => setFormGrade(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none">
-                    {["8", "9", "10", "11", "12"].map(g => <option key={g} value={g}>Class {g}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">Section</label>
-                  <select value={formSection} onChange={(e) => setFormSection(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none">
-                    <option value="">All</option>
-                    {["A", "B", "C", "D", "E"].map(s => <option key={s} value={s}>Section {s}</option>)}
-                  </select>
-                </div>
               </div>
               <div>
                 <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">Note Type</label>
@@ -997,15 +1100,88 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 rounded-xl border border-[#2f6fed]/15 py-2 text-sm font-semibold text-[#5a7095] hover:bg-slate-50">Cancel</button>
-                <button type="submit" disabled={isSubmitting} className="flex-1 rounded-xl gradient-primary py-2 text-sm font-semibold text-white disabled:opacity-60">{isSubmitting ? "Saving..." : "Save Note"}</button>
+                <button type="submit" disabled={isSubmitting || (!editingId && catalog.length === 0)} className="flex-1 rounded-xl gradient-primary py-2 text-sm font-semibold text-white disabled:opacity-60">{isSubmitting ? "Saving..." : "Save Note"}</button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Manage Sections / Catalog Modal */}
+      {showCatalogModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0e2a4d]/40 backdrop-blur-sm px-4">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-[#2f6fed]/15 flex flex-col max-h-[80vh]">
+            <div className="flex items-center justify-between bg-slate-50 border-b border-[#2f6fed]/10 px-6 py-4">
+              <h3 className="font-bold text-[#0e2a4d] text-lg">Manage Class Sections & Subjects</h3>
+              <button onClick={() => setShowCatalogModal(false)}><X className="h-5 w-5 text-[#5a7095]" /></button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Add New Section */}
+                <div>
+                  <h4 className="font-bold text-sm text-[#0e2a4d] mb-4 pb-2 border-b">Add New Subject Folder</h4>
+                  <form onSubmit={handleAddCatalog} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="mb-1 block text-xs font-semibold text-[#0e2a4d]">Grade</label>
+                        <select required value={catGrade} onChange={(e) => setCatGrade(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none">
+                          {["8", "9", "10", "11", "12"].map(g => <option key={g} value={g}>Class {g}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-semibold text-[#0e2a4d]">Section</label>
+                        <select value={catSection} onChange={(e) => setCatSection(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none">
+                          <option value="">All</option>
+                          {["A", "B", "C", "D", "E"].map(s => <option key={s} value={s}>Section {s}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-semibold text-[#0e2a4d]">Subject Name</label>
+                      <input type="text" required placeholder="e.g. Physics" value={catSubject} onChange={(e) => setCatSubject(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none" />
+                    </div>
+                    <button type="submit" disabled={isSubmittingCat} className="w-full rounded-xl gradient-primary py-2 text-sm font-semibold text-white disabled:opacity-60">
+                      {isSubmittingCat ? "Adding..." : "Add Folder"}
+                    </button>
+                  </form>
+                </div>
+                
+                {/* Existing Catalog */}
+                <div>
+                  <h4 className="font-bold text-sm text-[#0e2a4d] mb-4 pb-2 border-b">Existing Folders</h4>
+                  {catalog.length === 0 ? (
+                    <p className="text-sm text-[#5a7095]">No folders configured yet.</p>
+                  ) : (
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                      {catalog.map(c => (
+                        <div key={c.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm">
+                          <div>
+                            <p className="font-semibold text-[#0e2a4d]">{c.subject}</p>
+                            <p className="text-xs text-[#5a7095]">Class {c.grade}{c.section ? ` Sec ${c.section}` : ' (All)'} • {c.itemCount || 0} items</p>
+                          </div>
+                          <button onClick={() => handleDeleteCatalog(c.id)} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg" title="Delete Folder">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-slate-50 border-t border-[#2f6fed]/10 px-6 py-4 flex justify-end">
+               <button onClick={() => setShowCatalogModal(false)} className="rounded-xl border border-[#2f6fed]/15 px-6 py-2 text-sm font-semibold text-[#0e2a4d] hover:bg-white">Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
+
 
 // ── Homework Tab ───────────────────────────────────────────────────
 function HomeworkTab({ setMessage }: { setMessage: (m: any) => void }) {

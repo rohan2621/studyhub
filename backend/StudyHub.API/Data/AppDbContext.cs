@@ -27,6 +27,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<HireRequest> HireRequests => Set<HireRequest>();
     public DbSet<RevenueAdjustment> RevenueAdjustments => Set<RevenueAdjustment>();
     public DbSet<AppRelease> AppReleases => Set<AppRelease>();
+    public DbSet<SchoolSubjectCatalog> SubjectCatalogs => Set<SchoolSubjectCatalog>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -175,6 +176,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             e.HasIndex(r => r.CreatedAt);
             e.HasOne(r => r.Admin).WithMany().HasForeignKey(r => r.AdminId);
+        });
+
+        b.Entity<SchoolSubjectCatalog>(e =>
+        {
+            e.HasIndex(s => s.SchoolId);
+            e.HasIndex(s => new { s.SchoolId, s.Grade, s.Section, s.Subject }).IsUnique();
+            e.HasOne(s => s.School).WithMany().HasForeignKey(s => s.SchoolId);
         });
     }
 }
