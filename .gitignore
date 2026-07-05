@@ -1,0 +1,4 @@
+backend/StudyHub.API/appsettings.Development.json
+backend/StudyHub.API/appsettings.*.json
+backend/StudyHub.API/bin/
+backend/StudyHub.API/obj/
