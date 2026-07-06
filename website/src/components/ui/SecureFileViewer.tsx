@@ -124,15 +124,11 @@ export function SecureFileViewer({ visible, url, title, onClose }: Props) {
           </div>
         </div>
 
-        {/* Clear transparent click shield overlay to prevent selecting or right-clicking elements inside iframe */}
-        <div className="absolute inset-0 z-20 bg-transparent" />
-
         {isPdf ? (
           <iframe
             src={viewerUrl}
             title={title}
             className="h-full w-full border-none select-none no-select"
-            style={{ pointerEvents: "none" }}
             sandbox="allow-scripts allow-same-origin"
           />
         ) : (
