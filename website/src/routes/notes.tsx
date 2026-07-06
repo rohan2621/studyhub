@@ -98,7 +98,7 @@ function NotesPage() {
   // Derived Views
   const uniqueClasses = Array.from(new Set(catalog.map(c => JSON.stringify({ grade: c.grade, section: c.section }))))
     .map(s => JSON.parse(s))
-    .filter(c => isAdmin || c.grade === user?.grade)
+    .filter(c => isAdmin || String(c.grade) === String(user?.grade))
     .sort((a, b) => parseInt(a.grade) - parseInt(b.grade));
 
   const subjectsForClass = catalog.filter(c => c.grade === selectedClass?.grade && c.section === selectedClass?.section);
