@@ -39,7 +39,10 @@ export const useAuthStore = create<AuthStore>()(
       refreshToken: null,
       deviceId: getOrCreateDeviceId(),
       isHydrated: false,
-      setUser: (user) => set({ user }),
+      setUser: (user) => {
+        if (user && user.role) user.role = String(user.role).toLowerCase();
+        set({ user });
+      },
       setToken: (token) => set({ token }),
       setAccessToken: (accessToken) => set({ accessToken }),
       setRefreshToken: (refreshToken) => set({ refreshToken }),
@@ -63,6 +66,9 @@ export const useAuthStore = create<AuthStore>()(
       }),
       onRehydrateStorage: () => (state, error) => {
         if (state && !error) {
+          if (state.user && state.user.role) {
+            state.user.role = String(state.user.role).toLowerCase();
+          }
           state.isHydrated = true;
           useAuthStore.setState({ isHydrated: true });
         }
@@ -75,7 +81,7 @@ export function getTokenState(token: Token | null): "none" | "unused" | "active"
   if (!token) return "none";
   if (token.status === "revoked") return "revoked";
   if (token.status === "unused") return "unused";
-  if (new Date(token.expires_at) < new Date()) return "expired";
+  if (token.expires_at && new Date(token.expires_at) < new Date()) return "expired";
   if (token.status === "active") return "active";
   return "none";
 }

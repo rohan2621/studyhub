@@ -21,9 +21,10 @@ export const Route = createFileRoute("/notes")({
 function NotesPage() {
   const { user, token } = useAuthStore();
   const tokenState = getTokenState(token);
-  const hasAccess = tokenState === "active" || user?.role === "admin" || user?.role === "teacher";
-  const isAdmin = user?.role === "admin";
-  const isStudent = user?.role === "student";
+  const userRole = user?.role?.toLowerCase();
+  const hasAccess = tokenState === "active" || userRole === "admin" || userRole === "teacher";
+  const isAdmin = userRole === "admin";
+  const isStudent = userRole === "student";
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");

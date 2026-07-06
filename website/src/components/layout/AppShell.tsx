@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { Sidebar } from "./Sidebar";
 import { useAuthStore, getTokenState } from "@/stores/auth";
+import { api } from "@/lib/api";
 import { Lock } from "lucide-react";
 
 interface AppShellProps {
@@ -12,7 +13,7 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, requireAuth = true }: AppShellProps) {
-  const { user, token, isHydrated } = useAuthStore();
+  const { user, token, setToken, isHydrated } = useAuthStore();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -24,9 +25,31 @@ export function AppShell({ children, requireAuth = true }: AppShellProps) {
     if (isHydrated && requireAuth) {
       if (!user) {
         navigate({ to: "/login", search: { redirect: pathname } });
+      } else if (user.role === "student") {
+        // Sync token state globally in case they activated on another device
+        api.get("/tokens/me")
+          .then(res => {
+            if (res.data.hasActiveToken) {
+              setToken({
+                id: res.data.id,
+                code: res.data.code,
+                user_id: user.id,
+                plan: res.data.plan.toLowerCase() as any,
+                issued_at: new Date().toISOString(),
+                expires_at: res.data.expiresAt,
+                status: "active",
+                device_id: res.data.deviceBound ? "bound" : null,
+                is_device_permanent: res.data.isDevicePermanent,
+                can_bind_permanent: res.data.canBindPermanent
+              });
+            } else {
+              setToken(null);
+            }
+          })
+          .catch(console.error);
       }
     }
-  }, [isHydrated, requireAuth, user, navigate, pathname]);
+  }, [isHydrated, requireAuth, user?.id, navigate, pathname]);
 
   const isLockedOut = requireAuth && user && !isAdmin && tokenState !== "active" && isRestricted;
 
