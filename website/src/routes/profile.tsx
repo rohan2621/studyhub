@@ -29,6 +29,11 @@ function ProfilePage() {
   const [isActivating, setIsActivating] = useState(false);
   const [isBinding, setIsBinding] = useState(false);
 
+  // Terms and conditions modal
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [pendingActivationCode, setPendingActivationCode] = useState<string | null>(null);
+
   // Token renewal request
   const [renewalPlan, setRenewalPlan] = useState("OneMonth");
   const [renewalReason, setRenewalReason] = useState("");
@@ -66,22 +71,14 @@ function ProfilePage() {
     }
   }, [user]);
 
-  const handleActivate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activateCode.trim()) return;
+  const initiateActivation = async (code: string) => {
     setIsActivating(true);
     setMessage(null);
     try {
-      const res = await api.post("/tokens/activate", { code: activateCode.trim() });
-      setToken(res.data?.token || null);
-      if (res.data?.accessToken) setAccessToken(res.data.accessToken);
-      setMessage({ type: "success", text: "Token activated successfully! Your access is now unlocked." });
-      setActivateCode("");
-      
-      // Refresh token status
-      api.get("/tokens/me")
-        .then(res => setTokenStatus(res.data))
-        .catch(console.error);
+      await api.post("/tokens/validate", { code });
+      setPendingActivationCode(code);
+      setShowTermsModal(true);
+      setAgreedToTerms(false);
     } catch (err: any) {
       setMessage({ type: "error", text: err.response?.data?.error || "Invalid or already-used token code." });
     } finally {
@@ -89,22 +86,36 @@ function ProfilePage() {
     }
   };
 
+  const handleActivate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activateCode.trim()) return;
+    await initiateActivation(activateCode.trim());
+  };
+
   const handleActivatePending = async () => {
     if (!tokenStatus?.pendingCode) return;
+    await initiateActivation(tokenStatus.pendingCode);
+  };
+
+  const confirmActivation = async () => {
+    if (!pendingActivationCode) return;
     setIsActivating(true);
     setMessage(null);
     try {
-      const res = await api.post("/tokens/activate", { code: tokenStatus.pendingCode });
+      const res = await api.post("/tokens/activate", { code: pendingActivationCode });
       setToken(res.data?.token || null);
       if (res.data?.accessToken) setAccessToken(res.data.accessToken);
       setMessage({ type: "success", text: "Token activated successfully! Your access is now unlocked." });
+      setActivateCode("");
+      setShowTermsModal(false);
+      setPendingActivationCode(null);
       
-      // Refresh token status
       api.get("/tokens/me")
         .then(res => setTokenStatus(res.data))
         .catch(console.error);
     } catch (err: any) {
-      setMessage({ type: "error", text: err.response?.data?.error || "Failed to activate pending token." });
+      setMessage({ type: "error", text: err.response?.data?.error || "Failed to activate token." });
+      setShowTermsModal(false);
     } finally {
       setIsActivating(false);
     }
@@ -414,6 +425,41 @@ function ProfilePage() {
           </button>
         </div>
       </div>
+
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg bg-white p-6 shadow-xl border border-black">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold font-[family-name:var(--font-heading)]">Terms and Conditions</h3>
+              <button onClick={() => setShowTermsModal(false)}><X className="h-5 w-5" /></button>
+            </div>
+            
+            <div className="bg-gray-50 border border-gray-200 p-4 h-64 overflow-y-auto mb-4 text-sm text-gray-700 leading-relaxed">
+              <p className="font-bold mb-2">StudyHub Access Token Terms</p>
+              <ul className="list-disc pl-5 space-y-2">
+                <li><span className="font-bold">One Device Policy:</span> Your token will be permanently linked to this current device upon activation. It cannot be used simultaneously on other phones, tablets, or computers.</li>
+                <li><span className="font-bold">Non-Transferable:</span> Tokens are strictly tied to your account and cannot be sold or transferred.</li>
+                <li><span className="font-bold">Usage:</span> This token grants access to StudyHub materials for the specified duration. The content is for personal use only.</li>
+                <li><span className="font-bold">Device Reset:</span> If you lose your device or get a new one, you must contact your school admin to request a device reset.</li>
+                <li><span className="font-bold">Termination:</span> Violation of these rules, such as attempting to bypass the device lock, may result in immediate suspension of your account without a refund.</li>
+              </ul>
+              <p className="mt-4">By clicking "I Agree", you confirm that you have read and understood these terms, and agree to abide by them while using the StudyHub platform (both Web and Mobile).</p>
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer mb-6">
+              <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-black" />
+              <span className="text-sm font-semibold text-black">I agree to the StudyHub Terms and Conditions and understand the one-device limit.</span>
+            </label>
+
+            <div className="flex gap-3">
+              <button onClick={() => setShowTermsModal(false)} className="flex-1 saas-button-outline">Cancel</button>
+              <button onClick={confirmActivation} disabled={!agreedToTerms || isActivating} className="flex-1 saas-button">
+                {isActivating ? "Activating..." : "Confirm & Activate"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

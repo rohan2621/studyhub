@@ -90,6 +90,30 @@ public class TokensController(AppDbContext db) : ControllerBase
         return Ok(tokens);
     }
 
+    [HttpPost("validate")]
+    public async Task<IActionResult> Validate([FromBody] ActivateTokenRequest req)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var token = !string.IsNullOrEmpty(req.Code)
+            ? await db.Tokens.FirstOrDefaultAsync(t => t.Code == req.Code && t.UserId == userId)
+            : await db.Tokens.FirstOrDefaultAsync(t => t.UserId == userId && t.Status == TokenStatus.Unused);
+
+        if (token is null)
+            return NotFound(new { error = "No redeemable token found on your account." });
+
+        if (token.Status == TokenStatus.Revoked)
+            return BadRequest(new { error = "This token has been revoked. Contact support." });
+
+        if (token.Status == TokenStatus.Expired)
+            return BadRequest(new { error = "This token has expired. Contact support to renew." });
+
+        if (token.Status != TokenStatus.Unused && token.Status != TokenStatus.Active)
+            return BadRequest(new { error = $"Token cannot be activated. Status: {token.Status}." });
+
+        return Ok(new { valid = true, plan = token.Plan.ToString() });
+    }
+
     [HttpPost("activate")]
     public async Task<IActionResult> Activate(
         [FromBody] ActivateTokenRequest req,

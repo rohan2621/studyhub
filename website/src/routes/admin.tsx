@@ -805,6 +805,7 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
   const [formSubject, setFormSubject] = useState("");
   const [formType, setFormType] = useState("Note");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
 
   // Catalog Modal States
   const [showCatalogModal, setShowCatalogModal] = useState(false);
@@ -893,6 +894,34 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
       setFormSubject("");
     }
     setShowModal(true);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingFile(true);
+    try {
+      const { data: presignInfo } = await api.post("/files/presign", {
+        fileName: file.name,
+        contentType: file.type || "application/octet-stream",
+        fileSizeBytes: file.size
+      });
+
+      const uploadRes = await fetch(presignInfo.uploadUrl, {
+        method: presignInfo.method,
+        headers: presignInfo.headers,
+        body: file
+      });
+      
+      if (!uploadRes.ok) throw new Error("Upload failed");
+      
+      setFormFileUrl(presignInfo.publicUrl);
+    } catch (err) {
+      setMessage({ type: "error", text: "Failed to upload file." });
+      console.error(err);
+    } finally {
+      setIsUploadingFile(false);
+    }
   };
 
   const openEdit = (n: any) => {
@@ -1088,8 +1117,16 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
                 <input type="text" required value={formTitle} onChange={(e) => setFormTitle(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none" />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">File URL</label>
-                <input type="text" required value={formFileUrl} onChange={(e) => setFormFileUrl(e.target.value)} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none" />
+                <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">File</label>
+                {formFileUrl ? (
+                  <div className="flex items-center gap-3 bg-green-50 p-3 rounded-xl border border-green-200">
+                    <span className="text-sm truncate max-w-[200px] text-green-700 font-semibold">File attached</span>
+                    <button type="button" onClick={() => setFormFileUrl("")} className="text-xs bg-white border border-red-200 text-red-500 rounded px-2 py-1 hover:bg-red-50">Remove</button>
+                  </div>
+                ) : (
+                  <input type="file" required={!editingId} onChange={handleFileUpload} className="w-full rounded-xl border border-[#2f6fed]/20 px-3 py-2 text-sm outline-none" />
+                )}
+                {isUploadingFile && <p className="text-xs text-[#2f6fed] mt-1 font-semibold">Uploading...</p>}
               </div>
               <div>
                 <label className="mb-1 block text-sm font-semibold text-[#0e2a4d]">Note Type</label>
@@ -1100,7 +1137,7 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 rounded-xl border border-[#2f6fed]/15 py-2 text-sm font-semibold text-[#5a7095] hover:bg-slate-50">Cancel</button>
-                <button type="submit" disabled={isSubmitting || (!editingId && catalog.length === 0)} className="flex-1 rounded-xl gradient-primary py-2 text-sm font-semibold text-white disabled:opacity-60">{isSubmitting ? "Saving..." : "Save Note"}</button>
+                <button type="submit" disabled={isSubmitting || isUploadingFile || (!editingId && catalog.length === 0)} className="flex-1 rounded-xl gradient-primary py-2 text-sm font-semibold text-white disabled:opacity-60">{isSubmitting ? "Saving..." : "Save Note"}</button>
               </div>
             </form>
           </div>

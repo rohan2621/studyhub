@@ -25,14 +25,18 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
         [FromQuery] int pageSize = 20)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var claimsSchoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        Guid.TryParse(User.FindFirstValue("schoolId"), out var claimsSchoolId);
         var userGrade = User.FindFirstValue("grade") ?? "";
         var userSection = User.FindFirstValue("section") ?? "";
         var isAdmin = User.IsInRole("Admin");
 
         var targetSchoolId = isAdmin && schoolId.HasValue ? schoolId.Value : claimsSchoolId;
 
-        var query = db.Notes.Where(n => n.SchoolId == targetSchoolId);
+        var query = db.Notes.AsQueryable();
+        if (targetSchoolId != Guid.Empty)
+        {
+            query = query.Where(n => n.SchoolId == targetSchoolId);
+        }
 
         if (!isAdmin)
         {
@@ -111,13 +115,16 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
     public async Task<IActionResult> CreateNote([FromBody] CreateNoteRequest req)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var claimsSchoolId = Guid.Parse(User.FindFirstValue("schoolId")!);
+        Guid.TryParse(User.FindFirstValue("schoolId"), out var claimsSchoolId);
         var isAdmin = User.IsInRole("Admin");
 
         // Admin can target any school; others use their own school
         var schoolId = isAdmin && req.TargetSchoolId.HasValue
             ? req.TargetSchoolId.Value
             : claimsSchoolId;
+
+        if (schoolId == Guid.Empty)
+            return BadRequest(new { error = "Target school is required." });
 
         // Validate grade
         if (!new[] { "8", "9", "10", "11", "12" }.Contains(req.Grade))
