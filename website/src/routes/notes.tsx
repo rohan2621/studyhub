@@ -58,7 +58,7 @@ function NotesPage() {
         if (res.data?.length > 0) setSelectedSchoolId(res.data[0].id);
       }).catch(console.error);
     } else {
-      setSelectedSchoolId(user?.schoolId || "");
+      setSelectedSchoolId(user?.school_id || user?.schoolId || "");
     }
   }, [isAdmin, user]);
 
