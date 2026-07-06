@@ -32,10 +32,8 @@ function NotesPage() {
   const [notes, setNotes] = useState<any[]>([]);
 
   // Navigation State
-  const [viewLevel, setViewLevel] = useState<"classes" | "subjects" | "files">(isAdmin ? "classes" : "subjects");
-  const [selectedClass, setSelectedClass] = useState<{ grade: string, section: string | null } | null>(
-    isStudent && user ? { grade: user.grade, section: user.section } : null
-  );
+  const [viewLevel, setViewLevel] = useState<"classes" | "subjects" | "files">("classes");
+  const [selectedClass, setSelectedClass] = useState<{ grade: string, section: string | null } | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
 
   // Viewer State
@@ -100,6 +98,7 @@ function NotesPage() {
   // Derived Views
   const uniqueClasses = Array.from(new Set(catalog.map(c => JSON.stringify({ grade: c.grade, section: c.section }))))
     .map(s => JSON.parse(s))
+    .filter(c => isAdmin || c.grade === user?.grade)
     .sort((a, b) => parseInt(a.grade) - parseInt(b.grade));
 
   const subjectsForClass = catalog.filter(c => c.grade === selectedClass?.grade && c.section === selectedClass?.section);
@@ -130,17 +129,12 @@ function NotesPage() {
         <LockOverlay isLocked={!hasAccess} message="Active StudyHub license required to access notes." />
 
         <div className="mb-6 flex items-center gap-3 bg-white p-3 rounded-xl border border-[#2f6fed]/15 shadow-sm">
-           {viewLevel !== "classes" && isAdmin && (
+           {viewLevel === "subjects" && (
              <button onClick={() => { setViewLevel("classes"); setSelectedClass(null); setSelectedSubject(null); }} className="p-2 hover:bg-slate-100 rounded-lg text-[#5a7095] transition-colors">
                <ArrowLeft className="w-5 h-5" />
              </button>
            )}
-           {(viewLevel === "files" && !isAdmin) && (
-             <button onClick={() => { setViewLevel("subjects"); setSelectedSubject(null); }} className="p-2 hover:bg-slate-100 rounded-lg text-[#5a7095] transition-colors">
-               <ArrowLeft className="w-5 h-5" />
-             </button>
-           )}
-           {(viewLevel === "files" && isAdmin) && (
+           {viewLevel === "files" && (
              <button onClick={() => { setViewLevel("subjects"); setSelectedSubject(null); }} className="p-2 hover:bg-slate-100 rounded-lg text-[#5a7095] transition-colors">
                <ArrowLeft className="w-5 h-5" />
              </button>
