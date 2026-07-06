@@ -14,7 +14,7 @@ import appCss from "../styles.css?url";
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 font-[family-name:var(--font-sans)] text-black">
-      <div className="max-w-md border border-black bg-white p-12 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+      <div className="w-full max-w-md border border-black bg-white p-6 sm:p-12 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
         <h1 className="text-7xl font-extrabold font-[family-name:var(--font-heading)] text-black">404</h1>
         <h2 className="mt-4 text-xl font-bold">Page not found</h2>
         <p className="mt-2 text-sm text-gray-600">
@@ -42,7 +42,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 font-[family-name:var(--font-sans)] text-black">
-      <div className="max-w-md border border-black bg-white p-12 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+      <div className="w-full max-w-md border border-black bg-white p-6 sm:p-12 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
         <h1 className="text-xl font-extrabold tracking-tight font-[family-name:var(--font-heading)]">
           This page didn't load
         </h1>

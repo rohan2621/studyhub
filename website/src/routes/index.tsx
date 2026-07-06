@@ -33,7 +33,7 @@ function LandingPage() {
             <img src="/logo.png?v=12" alt="StudyHub" className="h-[28px] w-auto dark:invert" />
             <span className="font-extrabold text-xl tracking-tight">StudyHub</span>
           </div>
-          <div className="flex items-center gap-6 font-bold text-sm">
+          <div className="flex items-center gap-4 sm:gap-6 font-bold text-sm">
             {latestRelease && (
               <a href={latestRelease.downloadUrl} className="hidden sm:flex items-center gap-2 hover:text-gray-600 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
@@ -41,7 +41,7 @@ function LandingPage() {
               </a>
             )}
             {user ? (
-              <Link to="/dashboard" className="px-5 py-2.5 bg-black text-white hover:bg-gray-800 transition-colors">
+              <Link to="/dashboard" className="px-4 py-2 sm:px-5 sm:py-2.5 bg-black text-white hover:bg-gray-800 transition-colors text-xs sm:text-sm">
                 Dashboard
               </Link>
             ) : (
@@ -49,7 +49,7 @@ function LandingPage() {
                 <Link to="/login" className="hover:text-gray-600 transition-colors">
                   Log in
                 </Link>
-                <Link to="/signup" className="px-6 py-2.5 bg-black text-white hover:bg-gray-800 transition-colors">
+                <Link to="/signup" className="px-4 py-2 sm:px-6 sm:py-2.5 bg-black text-white hover:bg-gray-800 transition-colors text-xs sm:text-sm">
                   Sign up
                 </Link>
               </>
@@ -65,25 +65,25 @@ function LandingPage() {
         <div className="mx-auto max-w-[1400px] px-6 lg:flex lg:items-center lg:gap-x-12 py-16 lg:py-24">
           
           {/* Left Column */}
-          <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto lg:w-1/2 pr-8">
-            <div className="inline-flex items-center gap-2 border border-black px-3 py-1.5 text-xs font-bold mb-8 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] bg-white">
+          <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto lg:w-1/2 lg:pr-8">
+            <div className="inline-flex items-center gap-2 border border-black px-3 py-1.5 text-xs font-bold mb-6 sm:mb-8 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] bg-white">
               <Sparkles className="h-3.5 w-3.5" />
               Modern E-Learning Platform
             </div>
             
-            <h1 className="text-6xl font-black tracking-tight sm:text-[80px] font-[family-name:var(--font-heading)] leading-[1.05] mb-8">
+            <h1 className="text-5xl sm:text-6xl md:text-[80px] font-black tracking-tight font-[family-name:var(--font-heading)] leading-[1.05] mb-6 sm:mb-8">
               Master your <br/> studies.
             </h1>
             
-            <p className="mt-6 text-xl leading-relaxed text-gray-600 max-w-xl mb-10 font-medium">
+            <p className="mt-4 sm:mt-6 text-lg sm:text-xl leading-relaxed text-gray-600 max-w-xl mb-8 sm:mb-10 font-medium">
               Access premium notes, submit homework, view past papers, and learn directly from toppers. The complete digital ecosystem built for students.
             </p>
             
-            <div className="mt-10 flex items-center gap-x-4">
-              <Link to={user ? "/dashboard" : "/signup"} className="border border-black bg-black text-white px-8 py-3.5 font-bold hover:bg-white hover:text-black transition-colors text-base">
+            <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <Link to={user ? "/dashboard" : "/signup"} className="border border-black bg-black text-white px-8 py-3.5 font-bold hover:bg-white hover:text-black transition-colors text-base text-center">
                 Start for free
               </Link>
-              <Link to="/search" className="border border-black bg-white text-black px-8 py-3.5 font-bold hover:bg-gray-50 transition-colors text-base">
+              <Link to="/search" className="border border-black bg-white text-black px-8 py-3.5 font-bold hover:bg-gray-50 transition-colors text-base text-center">
                 Book a demo
               </Link>
             </div>
@@ -109,7 +109,7 @@ function LandingPage() {
                 {/* Mockup Body */}
                 <div className="flex flex-1 overflow-hidden bg-white">
                   {/* Mockup Sidebar */}
-                  <div className="w-32 border-r-2 border-black p-3 space-y-4 flex flex-col pt-6">
+                  <div className="hidden sm:flex w-32 border-r-2 border-black p-3 space-y-4 flex-col pt-6">
                     <div className="flex items-center gap-2"><div className="w-3 h-3 border-2 border-black rounded-full"></div><div className="h-2 w-16 bg-gray-200"></div></div>
                     <div className="flex items-center gap-2 bg-gray-100 p-1 -ml-1 border-2 border-black"><div className="w-3 h-3 border-2 border-black"></div><div className="font-black text-[9px] uppercase tracking-wider">Subjects</div></div>
                     <div className="flex items-center gap-2"><div className="w-3 h-3 border-2 border-black"></div><div className="h-2 w-14 bg-gray-200"></div></div>
@@ -120,18 +120,18 @@ function LandingPage() {
                   </div>
                   
                   {/* Mockup Content */}
-                  <div className="flex-1 p-6 bg-white flex flex-col">
-                    <div className="flex justify-between items-start mb-8">
+                  <div className="flex-1 p-4 sm:p-6 bg-white flex flex-col overflow-y-auto">
+                    <div className="flex justify-between items-start mb-6 sm:mb-8">
                       <div>
-                        <h2 className="font-black text-2xl leading-none">Subjects Overview</h2>
+                        <h2 className="font-black text-xl sm:text-2xl leading-none">Subjects Overview</h2>
                         <p className="text-[10px] text-gray-500 mt-1 font-semibold">Class 10 Sec A</p>
                       </div>
-                      <div className="border-2 border-gray-200 rounded-full px-3 py-1.5 text-[10px] text-gray-400 w-40 flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 border-2 border-gray-300 rounded-full block"></span> Search subjects, notes...
+                      <div className="hidden sm:flex border-2 border-gray-200 rounded-full px-3 py-1.5 text-[10px] text-gray-400 w-40 items-center gap-2">
+                        <span className="w-2.5 h-2.5 border-2 border-gray-300 rounded-full block"></span> Search subjects...
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                       {/* Folder 1 */}
                       <div className="border-2 border-black rounded-xl p-4 pt-5 relative bg-white transition-transform hover:-translate-y-1">
                         {/* Folder Tab */}
@@ -247,7 +247,7 @@ function LandingPage() {
                 <p className="text-gray-700 font-medium leading-relaxed max-w-xl mb-6">
                   StudyHub syncs your notes and progress instantly. Start reading on your laptop, continue on your tablet, and review on your phone during your commute.
                 </p>
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4">
                   <div className="flex items-center gap-2 font-bold text-sm bg-white border-2 border-black px-3 py-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg> Desktop</div>
                   <div className="flex items-center gap-2 font-bold text-sm bg-white border-2 border-black px-3 py-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg> Mobile Apps</div>
                 </div>
@@ -279,7 +279,7 @@ function LandingPage() {
               
               <Link 
                 to="/download" 
-                className="inline-flex items-center gap-3 border-2 border-black bg-white text-black px-8 py-4 font-black text-lg transition-transform shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none"
+                className="inline-flex justify-center items-center gap-3 border-2 border-black bg-white text-black px-6 py-3 sm:px-8 sm:py-4 font-black text-base sm:text-lg transition-transform shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none w-full sm:w-auto"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                 Download APK Now
