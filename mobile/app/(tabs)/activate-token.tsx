@@ -244,6 +244,15 @@ export default function ActivateTokenScreen() {
                 <Text style={{ color: colors.text, marginBottom: 8, lineHeight: 22, fontSize: 14 }}>
                   <Text style={{ fontWeight: "700" }}>• Termination:</Text> Violation of these rules may result in immediate suspension of your account without a refund.
                 </Text>
+                <Text style={{ color: colors.text, marginBottom: 8, lineHeight: 22, fontSize: 14 }}>
+                  <Text style={{ fontWeight: "700" }}>• No Refunds:</Text> Once paid, tokens are non-refundable under any circumstances.
+                </Text>
+                <Text style={{ color: colors.text, marginBottom: 8, lineHeight: 22, fontSize: 14 }}>
+                  <Text style={{ fontWeight: "700" }}>• Academic Outcomes:</Text> We are not responsible for any academic drawbacks or poor performance. This app is designed solely as a reference tool for those who missed classes.
+                </Text>
+                <Text style={{ color: colors.text, marginBottom: 8, lineHeight: 22, fontSize: 14 }}>
+                  <Text style={{ fontWeight: "700" }}>• Liability:</Text> We are not responsible for any illegal activities or misuse of the platform.
+                </Text>
 
                 <Text style={{ color: colors.textMuted, marginTop: 8, fontSize: 13, lineHeight: 20 }}>
                   By checking the box below, you confirm that you have read and understood these terms.

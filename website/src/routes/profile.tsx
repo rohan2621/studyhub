@@ -442,6 +442,9 @@ function ProfilePage() {
                 <li><span className="font-bold">Usage:</span> This token grants access to StudyHub materials for the specified duration. The content is for personal use only.</li>
                 <li><span className="font-bold">Device Reset:</span> If you lose your device or get a new one, you must contact your school admin to request a device reset.</li>
                 <li><span className="font-bold">Termination:</span> Violation of these rules, such as attempting to bypass the device lock, may result in immediate suspension of your account without a refund.</li>
+                <li><span className="font-bold">No Refunds:</span> Once paid, tokens are non-refundable under any circumstances.</li>
+                <li><span className="font-bold">Academic Outcomes:</span> We are not responsible for any academic drawbacks or poor performance. This app is designed solely as a reference tool for those who missed classes.</li>
+                <li><span className="font-bold">Liability:</span> We are not responsible for any illegal activities or misuse of the platform.</li>
               </ul>
               <p className="mt-4">By clicking "I Agree", you confirm that you have read and understood these terms, and agree to abide by them while using the StudyHub platform (both Web and Mobile).</p>
             </div>
