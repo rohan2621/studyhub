@@ -23,6 +23,7 @@ public class TokenCheckMiddleware(RequestDelegate next)
 
         // ── Token management (always accessible so they can activate) ────
         "/tokens/me",
+        "/tokens/validate",
         "/tokens/activate",
         "/tokens/activation",
         "/tokens/history",
