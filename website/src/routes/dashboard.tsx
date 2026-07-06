@@ -99,7 +99,7 @@ function DashboardPage() {
     <AppShell>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="font-[family-name:var(--font-heading)] text-3xl font-bold text-[#0e2a4d]">
               Dashboard
@@ -116,7 +116,7 @@ function DashboardPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search notes, homework, papers..."
-                className="w-72 rounded-xl border border-[#2f6fed]/15 bg-white/60 py-2.5 pl-9 pr-4 text-sm text-[#0e2a4d] placeholder:text-[#5a7095]/50 outline-none ring-[#2f6fed] transition-all focus:border-[#2f6fed] focus:ring-2 focus:ring-[#2f6fed]/15"
+                className="w-full md:w-72 rounded-xl border border-[#2f6fed]/15 bg-white/60 py-2.5 pl-9 pr-4 text-sm text-[#0e2a4d] placeholder:text-[#5a7095]/50 outline-none ring-[#2f6fed] transition-all focus:border-[#2f6fed] focus:ring-2 focus:ring-[#2f6fed]/15"
               />
             </div>
           </form>
@@ -124,8 +124,8 @@ function DashboardPage() {
 
         {/* Token / Access Banner */}
         {tokenState !== "active" && user?.role === "student" && (
-          <div className="rounded-xl border border-[#f5b843]/20 bg-[#f5b843]/8 px-5 py-4">
-            <div className="flex items-center justify-between">
+          <div className="rounded-xl border border-[#f5b843]/20 bg-[#f5b843]/8 px-4 sm:px-5 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="font-[family-name:var(--font-heading)] font-semibold text-[#0e2a4d]">
                   {tokenState === "expired" ? "Your access expired" : "Unlock full access"}
@@ -157,8 +157,8 @@ function DashboardPage() {
 
         {/* Permanent Device Lock Prompt */}
         {tokenState === "active" && user?.role === "student" && !token?.is_device_permanent && (
-          <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/8 px-5 py-4">
-            <div className="flex items-center justify-between gap-4">
+          <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/8 px-4 sm:px-5 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="font-[family-name:var(--font-heading)] font-semibold text-indigo-900 flex items-center gap-1.5">
                   <span>🔒 Secure Device Lock</span>
@@ -195,7 +195,7 @@ function DashboardPage() {
         )}
 
         {/* Feature Cards */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
           {featureCards.map((card) => {
             const Icon = card.icon;
             return (
@@ -217,9 +217,9 @@ function DashboardPage() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Upcoming Homework */}
-          <div className="glass-card col-span-2 p-6">
+          <div className="glass-card lg:col-span-2 p-4 sm:p-6">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-[#2f6fed]" />
@@ -341,7 +341,7 @@ function DashboardPage() {
           ) : !feed?.recentUploads?.length ? (
             <p className="py-6 text-center text-sm text-[#5a7095]">Nothing uploaded yet. New content will appear here.</p>
           ) : (
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {feed.recentUploads.map((item: any) => (
                 <div key={item.id} className="rounded-xl border border-[#2f6fed]/8 bg-white/50 p-4 transition-all hover:bg-white/80">
                   <span className={`inline-block rounded-md px-2 py-0.5 text-xs font-semibold ${item.type === "TopperNote" ? "bg-amber-100 text-amber-700" : "bg-[#2f6fed]/8 text-[#2f6fed]"}`}>

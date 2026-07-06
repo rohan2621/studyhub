@@ -228,7 +228,7 @@ function HomeworkPage() {
             const urgencyLabel = daysUntil < 0 ? "Overdue" : daysUntil === 0 ? "Due today" : daysUntil === 1 ? "Due tomorrow" : `${daysUntil} days left`;
 
             return (
-              <div key={hw.id} className="glass-card flex items-center justify-between p-5 transition-all duration-300 hover:glass-card-hover">
+              <div key={hw.id} className="glass-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 transition-all duration-300 hover:glass-card-hover">
                 <div className="flex items-start gap-4">
                   <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-[#2f6fed]/8 text-[#2f6fed]">
                     <AlertCircle className="h-4 w-4" />

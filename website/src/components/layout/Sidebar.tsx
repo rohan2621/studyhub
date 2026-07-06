@@ -35,7 +35,7 @@ const navItems = [
   { label: "Profile", to: "/profile", icon: User },
 ];
 
-export function Sidebar() {
+export function Sidebar({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {
   const { pathname } = useLocation();
   const { user, token, logout } = useAuthStore();
   const tokenState = getTokenState(token);
@@ -67,7 +67,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-black bg-white text-black font-[family-name:var(--font-sans)]">
+    <aside className={className || "fixed left-0 top-0 z-40 hidden lg:flex h-screen w-64 flex-col border-r border-black bg-white text-black font-[family-name:var(--font-sans)]"}>
       <Link to="/dashboard" className="flex items-center px-6 py-5 border-b border-black">
         <img src="/logo.png?v=12" alt="StudyHub" width="38" height="38" loading="eager" className="h-[38px] w-[38px] dark:invert" />
         
@@ -83,6 +83,7 @@ export function Sidebar() {
             <Link
               key={item.to}
               to={item.to}
+              onClick={onNavigate}
               aria-current={isActive ? "page" : undefined}
               className={`group flex items-center justify-between border px-3 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${isActive
                 ? "border-black bg-black text-white"

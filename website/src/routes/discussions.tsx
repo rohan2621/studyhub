@@ -219,7 +219,7 @@ function DiscussionsPage() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#2f6fed] to-[#38bdf8]">
             <MessageSquare className="h-5 w-5 text-white" />
@@ -229,21 +229,21 @@ function DiscussionsPage() {
             <p className="text-sm text-[#5a7095]">{filtered.length} threads</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5a7095]" />
             <input
               type="text"
               placeholder="Search discussions..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-64 rounded-xl border border-[#2f6fed]/15 bg-white/60 py-2.5 pl-9 pr-4 text-sm text-[#0e2a4d] placeholder:text-[#5a7095]/50 outline-none ring-[#2f6fed] transition-all focus:border-[#2f6fed] focus:ring-2 focus:ring-[#2f6fed]/15"
+              className="w-full sm:w-64 rounded-xl border border-[#2f6fed]/15 bg-white/60 py-2.5 pl-9 pr-4 text-sm text-[#0e2a4d] placeholder:text-[#5a7095]/50 outline-none ring-[#2f6fed] transition-all focus:border-[#2f6fed] focus:ring-2 focus:ring-[#2f6fed]/15"
             />
           </div>
           <select
             value={subjectFilter}
             onChange={(e) => setSubjectFilter(e.target.value)}
-            className="rounded-xl border border-[#2f6fed]/15 bg-white/60 px-4 py-2.5 text-sm text-[#0e2a4d] outline-none"
+            className="w-full sm:w-auto rounded-xl border border-[#2f6fed]/15 bg-white/60 px-4 py-2.5 text-sm text-[#0e2a4d] outline-none"
           >
             {subjects.map((s) => (
               <option key={s} value={s}>{s}</option>
