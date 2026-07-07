@@ -394,7 +394,7 @@ function ProfilePage() {
                   </p>
                   <div className="space-y-3">
                     <a
-                      href="https://wa.me/9779800000000" // Replace with actual WhatsApp number
+                      href="https://wa.me/9779801829630" // Replace with actual WhatsApp number
                       target="_blank"
                       rel="noreferrer"
                       className="flex items-center justify-between border border-black bg-[#25d366] px-4 py-3 text-white transition-transform hover:-translate-y-0.5"
