@@ -40,5 +40,27 @@ public class FileService(IConfiguration config, IHttpClientFactory httpClientFac
         return (uploadUrl, publicUrl, key);
     }
 
+    public async Task<string> UploadAppReleaseAsync(Stream fileStream, string fileName)
+    {
+        var key = $"apps/{Guid.NewGuid()}/{fileName}";
+        var uploadUrl = GetUploadUrl(key);
+        var publicUrl = GetPublicUrl(key);
+
+        var client = httpClientFactory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _key);
+
+        using var content = new StreamContent(fileStream);
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.android.package-archive");
+
+        var response = await client.PostAsync(uploadUrl, content);
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Failed to upload APK to Supabase: {error}");
+        }
+
+        return publicUrl;
+    }
+
     public string GetServiceRoleKey() => _key;
 }
