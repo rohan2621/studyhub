@@ -403,7 +403,7 @@ function ProfilePage() {
                       <span className="font-bold">→</span>
                     </a>
                     <a
-                      href="https://instagram.com/studyhub" // Replace with actual Instagram profile
+                      href="https://www.instagram.com/general.nless/" // Replace with actual Instagram profile
                       target="_blank"
                       rel="noreferrer"
                       className="flex items-center justify-between border border-black bg-[#e1306c] px-4 py-3 text-white transition-transform hover:-translate-y-0.5"
