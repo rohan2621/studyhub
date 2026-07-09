@@ -51,7 +51,7 @@ public class AdminController(AppDbContext db, IMemoryCache cache) : ControllerBa
                 u.Section,
                 ClassLabel = $"Class {u.Grade}{u.Section}",
                 u.CreatedAt,
-                School = new { u.School.Id, u.School.Name },
+                School = u.School == null ? null : new { u.School.Id, u.School.Name },
                 ActiveToken = u.Tokens
                     .Where(t => t.Status == TokenStatus.Active)
                     .Select(t => new { t.Id, t.Plan, t.ExpiresAt, t.Status })

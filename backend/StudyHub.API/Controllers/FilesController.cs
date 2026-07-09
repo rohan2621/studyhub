@@ -9,26 +9,31 @@ namespace StudyHub.API.Controllers;
 [Authorize]
 public class FilesController(FileService fileService) : ControllerBase
 {
-    [HttpPost("presign")]
+    [HttpPost("upload")]
     [Authorize(Roles = "Teacher,TopperContributor,Admin")]
-    public IActionResult GetUploadInfo([FromBody] PresignRequest req)
+    [DisableRequestSizeLimit]
+    [RequestFormLimits(MultipartBodyLengthLimit = 536870912)] // 512 MB
+    public async Task<IActionResult> UploadFile(IFormFile file)
     {
+        if (file == null || file.Length == 0)
+            return BadRequest(new { error = "File is required." });
+
         try
         {
-            var (uploadUrl, publicUrl, key) = fileService.PrepareUpload(
-                req.FileName, req.ContentType, req.FileSizeBytes);
+            var fileName = file.FileName;
+            
+            // Clean up file name to prevent path traversal issues
+            var safeName = System.Text.RegularExpressions.Regex.Replace(fileName, "[^a-zA-Z0-9.\\-_]", "");
+
+            string publicUrl;
+            using (var stream = file.OpenReadStream())
+            {
+                publicUrl = await fileService.UploadGeneralFileAsync(stream, safeName, file.ContentType);
+            }
 
             return Ok(new
             {
-                uploadUrl,
-                publicUrl,
-                key,
-                method = "POST",
-                headers = new
-                {
-                    Authorization = fileService.GetStorageAuthorizationHeader(),
-                    ContentType = req.ContentType
-                }
+                url = publicUrl
             });
         }
         catch (InvalidOperationException ex)
@@ -37,5 +42,3 @@ public class FilesController(FileService fileService) : ControllerBase
         }
     }
 }
-
-public record PresignRequest(string FileName, string ContentType, long FileSizeBytes);

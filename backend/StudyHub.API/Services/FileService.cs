@@ -62,7 +62,31 @@ public class FileService(IConfiguration config, IHttpClientFactory httpClientFac
         return publicUrl;
     }
 
-    // Returns the Authorization header value for Supabase storage requests.
-    // Intentionally not public — use GetStorageAuthorizationHeader() for controlled access.
-    internal string GetStorageAuthorizationHeader() => $"Bearer {_key}";
+    public async Task<string> UploadGeneralFileAsync(Stream fileStream, string fileName, string contentType)
+    {
+        if (!AllowedTypes.Contains(contentType))
+            throw new InvalidOperationException("File type not allowed.");
+
+        if (fileStream.Length > MaxFileSizeBytes)
+            throw new InvalidOperationException("File exceeds 20 MB limit.");
+
+        var key = $"notes/{Guid.NewGuid()}/{fileName}";
+        var uploadUrl = GetUploadUrl(key);
+        var publicUrl = GetPublicUrl(key);
+
+        var client = httpClientFactory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _key);
+
+        using var content = new StreamContent(fileStream);
+        content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+
+        var response = await client.PostAsync(uploadUrl, content);
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Failed to upload file to Supabase: {error}");
+        }
+
+        return publicUrl;
+    }
 }

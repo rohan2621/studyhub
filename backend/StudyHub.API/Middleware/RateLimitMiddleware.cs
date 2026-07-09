@@ -8,6 +8,7 @@ public class RateLimitMiddleware(RequestDelegate next)
     {
         { "/auth/login",    (10, 60) },
         { "/auth/signup",   (5,  60) },
+        { "/auth/refresh",  (20, 60) },
         { "/tokens/activate", (5, 300) },
     };
 

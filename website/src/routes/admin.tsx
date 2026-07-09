@@ -901,21 +901,14 @@ function NotesTab({ setMessage }: { setMessage: (m: any) => void }) {
     if (!file) return;
     setIsUploadingFile(true);
     try {
-      const { data: presignInfo } = await api.post("/files/presign", {
-        fileName: file.name,
-        contentType: file.type || "application/octet-stream",
-        fileSizeBytes: file.size
-      });
+      const formData = new FormData();
+      formData.append("file", file);
 
-      const uploadRes = await fetch(presignInfo.uploadUrl, {
-        method: presignInfo.method,
-        headers: presignInfo.headers,
-        body: file
+      const res = await api.post("/files/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
       });
       
-      if (!uploadRes.ok) throw new Error("Upload failed");
-      
-      setFormFileUrl(presignInfo.publicUrl);
+      setFormFileUrl(res.data.url);
     } catch (err) {
       setMessage({ type: "error", text: "Failed to upload file." });
       console.error(err);
