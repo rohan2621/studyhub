@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using StackExchange.Redis;
 using StudyHub.API.Data;
+using StudyHub.API.Filters;
 using StudyHub.API.Hubs;
 using StudyHub.API.Jobs;
 using StudyHub.API.Middleware;
@@ -66,7 +67,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             {
                 var token = ctx.Request.Query["access_token"];
                 if (!string.IsNullOrEmpty(token) &&
-                    ctx.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                    (ctx.HttpContext.Request.Path.StartsWithSegments("/hubs") || 
+                     ctx.HttpContext.Request.Path.StartsWithSegments("/hangfire")))
                     ctx.Token = token;
                 return Task.CompletedTask;
             }
@@ -141,6 +143,16 @@ builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
+// Forwarded Headers (for Rate Limiting behind proxy)
+builder.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | 
+                               Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+    // Clear restrictions to trust the reverse proxy (e.g. Render/Vercel)
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
 
 // Migrate & seed
@@ -152,6 +164,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Middleware pipeline — ORDER MATTERS
+app.UseForwardedHeaders();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseSerilogRequestLogging();
@@ -185,7 +198,7 @@ app.MapHealthChecks("/health");
 app.MapGet("/ping", () => Results.Ok(new { status = "alive", time = DateTime.UtcNow })).AllowAnonymous();
 app.MapHangfireDashboard("/hangfire", new DashboardOptions
 {
-    Authorization = []
+    Authorization = [new HangfireAuthorizationFilter()]
 });
 
 // Recurring jobs
