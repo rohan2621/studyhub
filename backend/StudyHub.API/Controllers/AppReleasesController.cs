@@ -8,8 +8,8 @@ using System.ComponentModel.DataAnnotations;
 namespace StudyHub.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
-public class AppReleasesController(AppDbContext db, IWebHostEnvironment env, FileService fileService) : ControllerBase
+[Route("appreleases")]
+public class AppReleasesController(AppDbContext db, FileService fileService) : ControllerBase
 {
     /// <summary>
     /// Gets the latest app release. Used by the mobile app on startup.
@@ -73,8 +73,9 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env, Fil
         if (Path.GetExtension(dto.File.FileName).ToLower() != ".apk")
             return BadRequest("File must be an APK (.apk).");
 
-        // Safe filename: app-v1.0.1.apk
-        var fileName = $"app-v{dto.VersionName}-{DateTime.UtcNow.Ticks}.apk";
+        // Sanitize version name to prevent path traversal or injection in the filename
+        var safeVersion = System.Text.RegularExpressions.Regex.Replace(dto.VersionName, "[^a-zA-Z0-9.\\-_]", "");
+        var fileName = $"app-v{safeVersion}-{DateTime.UtcNow.Ticks}.apk";
         string fileUrl;
 
         using (var stream = dto.File.OpenReadStream())
@@ -85,7 +86,7 @@ public class AppReleasesController(AppDbContext db, IWebHostEnvironment env, Fil
         var release = new AppRelease
         {
             VersionCode = dto.VersionCode,
-            VersionName = dto.VersionName ?? "1.0.0",
+            VersionName = dto.VersionName,
             ReleaseNotes = dto.ReleaseNotes ?? string.Empty,
             IsMandatory = dto.IsMandatory,
             FileUrl = fileUrl

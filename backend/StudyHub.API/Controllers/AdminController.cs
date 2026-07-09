@@ -348,9 +348,16 @@ public class AdminController(AppDbContext db, IMemoryCache cache) : ControllerBa
         foreach (var u in users)
         {
             var activeToken = u.Tokens.FirstOrDefault(t => t.Status == TokenStatus.Active);
-            csv.AppendLine($"{u.Id},{u.Name},{u.Email},{u.Role},{u.School?.Name},{u.Grade}," +
-                           $"{u.CreatedAt:yyyy-MM-dd},{activeToken is not null}," +
-                           $"{activeToken?.ExpiresAt:yyyy-MM-dd}");
+            csv.AppendLine(
+                $"{EscapeCsv(u.Id.ToString())}," +
+                $"{EscapeCsv(u.Name)}," +
+                $"{EscapeCsv(u.Email)}," +
+                $"{EscapeCsv(u.Role.ToString())}," +
+                $"{EscapeCsv(u.School?.Name)}," +
+                $"{EscapeCsv(u.Grade)}," +
+                $"{u.CreatedAt:yyyy-MM-dd}," +
+                $"{activeToken is not null}," +
+                $"{activeToken?.ExpiresAt:yyyy-MM-dd}");
         }
 
         var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
@@ -371,8 +378,15 @@ public class AdminController(AppDbContext db, IMemoryCache cache) : ControllerBa
 
         foreach (var p in payments)
         {
-            csv.AppendLine($"{p.Id},{p.User.Name},{p.User.Email},{p.Plan}," +
-                           $"{p.Amount},{p.Channel},{p.Token.Code},{p.CreatedAt:yyyy-MM-dd}");
+            csv.AppendLine(
+                $"{EscapeCsv(p.Id.ToString())}," +
+                $"{EscapeCsv(p.User.Name)}," +
+                $"{EscapeCsv(p.User.Email)}," +
+                $"{EscapeCsv(p.Plan.ToString())}," +
+                $"{p.Amount}," +
+                $"{EscapeCsv(p.Channel)}," +
+                $"{EscapeCsv(p.Token.Code)}," +
+                $"{p.CreatedAt:yyyy-MM-dd}");
         }
 
         var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
@@ -406,6 +420,23 @@ public class AdminController(AppDbContext db, IMemoryCache cache) : ControllerBa
         cache.Remove("admin_stats");
 
         return Ok(new { message = "Revenue adjusted successfully." });
+    }
+
+    /// <summary>
+    /// Sanitizes a value for safe inclusion in a CSV field.
+    /// Prevents formula injection by prefixing dangerous leading characters,
+    /// and wraps fields containing commas, quotes, or newlines in double quotes.
+    /// </summary>
+    private static string EscapeCsv(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return "";
+        // Prevent formula injection: prefix with ' if starts with =, +, -, @
+        if (value[0] is '=' or '+' or '-' or '@')
+            value = "'" + value;
+        // Wrap in quotes if contains comma, quote, or newline
+        if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
+            return $"\"{value.Replace("\"", "\"\"\"")}\"";
+        return value;
     }
 }
 

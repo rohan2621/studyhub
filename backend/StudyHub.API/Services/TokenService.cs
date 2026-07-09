@@ -7,13 +7,26 @@ using StudyHub.API.Models;
 
 namespace StudyHub.API.Services;
 
-public class TokenService(IConfiguration config)
+public class TokenService
 {
+    private readonly SymmetricSecurityKey _signingKey;
+    private readonly int _accessTokenExpiryMinutes;
+    private readonly string _issuer;
+    private readonly string _audience;
+
+    public TokenService(IConfiguration config)
+    {
+        _signingKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(config["Jwt:Secret"]!));
+        _accessTokenExpiryMinutes = int.Parse(
+            config["Jwt:AccessTokenExpiryMinutes"] ?? "15");
+        _issuer = config["Jwt:Issuer"]!;
+        _audience = config["Jwt:Audience"]!;
+    }
+
     public string GenerateAccessToken(User user)
     {
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(config["Jwt:Secret"]!));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var creds = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
@@ -28,11 +41,10 @@ public class TokenService(IConfiguration config)
         };
 
         var token = new JwtSecurityToken(
-            issuer: config["Jwt:Issuer"],
-            audience: config["Jwt:Audience"],
+            issuer: _issuer,
+            audience: _audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(
-                int.Parse(config["Jwt:AccessTokenExpiryMinutes"]!)),
+            expires: DateTime.UtcNow.AddMinutes(_accessTokenExpiryMinutes),
             signingCredentials: creds
         );
 

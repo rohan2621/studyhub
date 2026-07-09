@@ -26,7 +26,7 @@ public class FilesController(FileService fileService) : ControllerBase
                 method = "POST",
                 headers = new
                 {
-                    Authorization = $"Bearer {fileService.GetServiceRoleKey()}",
+                    Authorization = fileService.GetStorageAuthorizationHeader(),
                     ContentType = req.ContentType
                 }
             });

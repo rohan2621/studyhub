@@ -95,7 +95,7 @@ public class TokenCheckMiddleware(RequestDelegate next)
                 .OrderByDescending(t => t.IssuedAt)
                 .FirstOrDefaultAsync();
 
-            cachedResult = new CachedTokenResult { Token = dbToken };
+            cachedResult = new CachedTokenResult(dbToken);
             cache.Set(cacheKey, cachedResult, TimeSpan.FromSeconds(60));
         }
 
@@ -123,7 +123,9 @@ public class TokenCheckMiddleware(RequestDelegate next)
             return;
         }
 
-        // Non-permanent tokens: only allow access from the same network
+        // Non-permanent tokens: only allow access from the same network.
+        // Note: ForwardedHeaders middleware runs before this, so RemoteIpAddress
+        // is already correctly resolved to the real client IP (not the proxy IP).
         var clientIp = ctx.Connection.RemoteIpAddress?.ToString();
         var isSameNetwork = !string.IsNullOrEmpty(token.IpAddress) && token.IpAddress == clientIp;
 
@@ -154,7 +156,4 @@ public class TokenCheckMiddleware(RequestDelegate next)
     }
 }
 
-public class CachedTokenResult
-{
-    public Token? Token { get; set; }
-}
+public sealed record CachedTokenResult(Token? Token);

@@ -12,6 +12,9 @@ export const api = axios.create({
 const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL = 15000; // 15 seconds Cache TTL
 
+// Paths that should always bypass the client-side cache (real-time data)
+const CACHE_BYPASS_PATHS = ["/notifications", "/tokens/me", "/feed"] as const;
+
 // ── Request: attach auth token + device ID & handle cache ─────────────────────────
 api.interceptors.request.use((config) => {
   const { accessToken, deviceId } = useAuthStore.getState();
@@ -30,7 +33,7 @@ api.interceptors.request.use((config) => {
 
   // Serve GET requests from cache if valid and not bypassed
   if (method === "get") {
-    const isBypass = ["/notifications", "/tokens/me", "/feed"].some(path => config.url?.includes(path));
+    const isBypass = CACHE_BYPASS_PATHS.some(path => config.url?.includes(path));
     if (!isBypass) {
       const cacheKey = `${config.url}?${new URLSearchParams(config.params || {}).toString()}`;
       const cached = cache.get(cacheKey);
@@ -57,7 +60,7 @@ api.interceptors.response.use(
   (response) => {
     const method = response.config.method?.toLowerCase() ?? "";
     if (method === "get") {
-      const isBypass = ["/notifications", "/tokens/me", "/feed"].some(path => response.config.url?.includes(path));
+      const isBypass = CACHE_BYPASS_PATHS.some(path => response.config.url?.includes(path));
       if (!isBypass) {
         const cacheKey = `${response.config.url}?${new URLSearchParams(response.config.params || {}).toString()}`;
         cache.set(cacheKey, {

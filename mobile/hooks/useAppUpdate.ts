@@ -32,7 +32,7 @@ export function useAppUpdate() {
 
     const checkUpdate = async () => {
       try {
-        const res = await api.get<AppRelease>('/api/appreleases/latest');
+        const res = await api.get<AppRelease>('/appreleases/latest');
         const latestRelease = res.data;
         
         // Grab the current versionCode from app.json via expo-constants

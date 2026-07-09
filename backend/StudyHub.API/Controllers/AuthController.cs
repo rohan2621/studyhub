@@ -104,7 +104,10 @@ public class AuthController(
             .Include(u => u.School)
             .FirstOrDefaultAsync(u => u.Email == email);
 
-        // Timing-safe: always run bcrypt even if user not found
+        // Timing-safe: always run bcrypt regardless of whether the user exists.
+        // When user IS found, we verify their real hash. When user is NOT found,
+        // we run a dummy verify so both paths take the same amount of time,
+        // preventing user-enumeration via response timing.
         var dummyHash = "$2a$12$dummyhashtopreventtimingattacksxxxxxxxxxxxxxxxxxxxxxxxxx";
         var passwordValid = user is not null &&
             BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash);
@@ -142,10 +145,14 @@ public class AuthController(
             "valid",
             TimeSpan.FromDays(7));
 
+        // Always set Secure=true in production. On services like Render, SSL is terminated
+        // at the proxy so Request.IsHttps would be false even for external HTTPS connections.
+        var isProduction = HttpContext.RequestServices
+            .GetRequiredService<IWebHostEnvironment>().IsProduction();
         Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = Request.IsHttps,
+            Secure = isProduction || Request.IsHttps,
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
@@ -202,10 +209,13 @@ public class AuthController(
             "valid",
             TimeSpan.FromDays(7));
 
+        // Always set Secure=true in production (see Login endpoint comment).
+        var isProductionRefresh = HttpContext.RequestServices
+            .GetRequiredService<IWebHostEnvironment>().IsProduction();
         Response.Cookies.Append("refresh_token", newRefreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = Request.IsHttps,
+            Secure = isProductionRefresh || Request.IsHttps,
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
@@ -268,7 +278,7 @@ public class AuthController(
             user.Grade,
             user.Section,
             user.CreatedAt,
-            School = new { user.School.Id, user.School.Name }
+            School = user.School is null ? null : new { user.School.Id, user.School.Name }
         });
     }
 

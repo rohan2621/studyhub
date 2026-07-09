@@ -56,11 +56,13 @@ public class FileService(IConfiguration config, IHttpClientFactory httpClientFac
         if (!response.IsSuccessStatusCode)
         {
             var error = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Failed to upload APK to Supabase: {error}");
+            throw new InvalidOperationException($"Failed to upload APK to Supabase: {error}");
         }
 
         return publicUrl;
     }
 
-    public string GetServiceRoleKey() => _key;
+    // Returns the Authorization header value for Supabase storage requests.
+    // Intentionally not public — use GetStorageAuthorizationHeader() for controlled access.
+    internal string GetStorageAuthorizationHeader() => $"Bearer {_key}";
 }

@@ -19,7 +19,7 @@ function LandingPage() {
   const [latestRelease, setLatestRelease] = useState<any>(null);
 
   useEffect(() => {
-    api.get("/api/appreleases/latest")
+    api.get("/appreleases/latest")
       .then(res => setLatestRelease(res.data))
       .catch(() => {});
   }, []);

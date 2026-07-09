@@ -12,7 +12,7 @@ function DownloadPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/api/appreleases/latest")
+    api.get("/appreleases/latest")
       .then(res => setLatestRelease(res.data))
       .catch(() => {})
       .finally(() => setIsLoading(false));
