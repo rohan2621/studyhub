@@ -1789,7 +1789,7 @@ function AppReleasesTab({ setMessage }: { setMessage: (m: any) => void }) {
 
   const fetchReleases = () => {
     setIsLoading(true);
-    api.get('/api/appreleases')
+    api.get('/appreleases')
       .then(res => setReleases(res.data))
       .catch(err => console.error(err))
       .finally(() => setIsLoading(false));
@@ -1815,7 +1815,7 @@ function AppReleasesTab({ setMessage }: { setMessage: (m: any) => void }) {
     data.append('file', formData.file);
 
     try {
-      await api.post('/api/appreleases', data, {
+      await api.post('/appreleases', data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -1834,7 +1834,7 @@ function AppReleasesTab({ setMessage }: { setMessage: (m: any) => void }) {
     if (!window.confirm("Are you sure you want to delete this release? This cannot be undone.")) return;
     
     try {
-      await api.delete(`/api/appreleases/${id}`);
+      await api.delete(`/appreleases/${id}`);
       setMessage({ type: 'success', text: 'App release deleted successfully.' });
       fetchReleases();
     } catch (err: any) {
