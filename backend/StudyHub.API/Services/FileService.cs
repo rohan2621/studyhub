@@ -48,6 +48,10 @@ public class FileService(IConfiguration config, IHttpClientFactory httpClientFac
 
         var client = httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _key);
+        // x-upsert allows overwriting existing objects; required by some Supabase bucket policies
+        client.DefaultRequestHeaders.TryAddWithoutValidation("x-upsert", "true");
+        // APKs can be 50–150 MB — set a generous timeout of 10 minutes
+        client.Timeout = TimeSpan.FromMinutes(10);
 
         using var content = new StreamContent(fileStream);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.android.package-archive");
@@ -56,7 +60,7 @@ public class FileService(IConfiguration config, IHttpClientFactory httpClientFac
         if (!response.IsSuccessStatusCode)
         {
             var error = await response.Content.ReadAsStringAsync();
-            throw new InvalidOperationException($"Failed to upload APK to Supabase: {error}");
+            throw new InvalidOperationException($"Supabase storage rejected the upload (HTTP {(int)response.StatusCode}): {error}");
         }
 
         return publicUrl;

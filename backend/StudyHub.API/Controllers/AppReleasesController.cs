@@ -78,9 +78,14 @@ public class AppReleasesController(AppDbContext db, FileService fileService) : C
         var fileName = $"app-v{safeVersion}-{DateTime.UtcNow.Ticks}.apk";
         string fileUrl;
 
-        using (var stream = dto.File.OpenReadStream())
+        try
         {
+            using var stream = dto.File.OpenReadStream();
             fileUrl = await fileService.UploadAppReleaseAsync(stream, fileName);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
 
         var release = new AppRelease

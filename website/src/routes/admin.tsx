@@ -1778,6 +1778,7 @@ function AppReleasesTab({ setMessage }: { setMessage: (m: any) => void }) {
   const [releases, setReleases] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     versionCode: 1,
@@ -1807,6 +1808,7 @@ function AppReleasesTab({ setMessage }: { setMessage: (m: any) => void }) {
     }
 
     setIsSubmitting(true);
+    setUploadProgress(0);
     const data = new FormData();
     data.append('versionCode', formData.versionCode.toString());
     data.append('versionName', formData.versionName);
@@ -1816,15 +1818,26 @@ function AppReleasesTab({ setMessage }: { setMessage: (m: any) => void }) {
 
     try {
       await api.post('/appreleases', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 300000, // 5 minutes — APKs are large
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            setUploadProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
+          }
+        },
       });
       setMessage({ type: 'success', text: 'App release uploaded successfully!' });
       setShowModal(false);
+      setUploadProgress(0);
       fetchReleases();
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.response?.data || 'Failed to upload release.' });
+      // Extract a readable error from various response shapes
+      const errData = err.response?.data;
+      const errText =
+        typeof errData === 'string' ? errData :
+        errData?.message || errData?.error || errData?.title ||
+        (err.code === 'ECONNABORTED' ? 'Upload timed out. The APK may be too large or the server is slow.' : 'Failed to upload release.');
+      setMessage({ type: 'error', text: errText });
     } finally {
       setIsSubmitting(false);
     }
@@ -1970,6 +1983,23 @@ function AppReleasesTab({ setMessage }: { setMessage: (m: any) => void }) {
                 </label>
               </div>
               <div className="pt-2">
+                {isSubmitting && (
+                  <div className="mb-3">
+                    <div className="mb-1 flex justify-between text-xs font-medium text-[#5a7095]">
+                      <span>Uploading APK to server…</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                      <div
+                        className="h-2 rounded-full bg-gradient-to-r from-[#2f6fed] to-[#0a4bbd] transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                    {uploadProgress === 100 && (
+                      <p className="mt-1 text-xs text-amber-600">Saving to storage… please wait, do not close this window.</p>
+                    )}
+                  </div>
+                )}
                 <button
                   type="submit"
                   disabled={isSubmitting}
