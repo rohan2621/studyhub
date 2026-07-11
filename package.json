@@ -1,0 +1,130 @@
+{
+  "name": "studyhub",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
+    "@react-native-async-storage/async-storage": "^3.1.1",
+    "@react-native-community/netinfo": "^12.0.1",
+    "@rn-primitives/accordion": "^1.5.2",
+    "@rn-primitives/alert-dialog": "^1.5.2",
+    "@rn-primitives/avatar": "^1.5.2",
+    "@rn-primitives/checkbox": "^1.5.2",
+    "@rn-primitives/dialog": "^1.5.2",
+    "@rn-primitives/dropdown-menu": "^1.5.2",
+    "@rn-primitives/label": "^1.5.2",
+    "@rn-primitives/popover": "^1.5.2",
+    "@rn-primitives/portal": "^1.5.2",
+    "@rn-primitives/progress": "^1.5.2",
+    "@rn-primitives/radio-group": "^1.5.2",
+    "@rn-primitives/select": "^1.5.2",
+    "@rn-primitives/separator": "^1.5.2",
+    "@rn-primitives/slider": "^1.5.2",
+    "@rn-primitives/switch": "^1.5.2",
+    "@rn-primitives/tabs": "^1.5.2",
+    "@rn-primitives/toast": "^1.5.2",
+    "@rn-primitives/toggle": "^1.5.2",
+    "@rn-primitives/toggle-group": "^1.5.2",
+    "@rn-primitives/tooltip": "^1.5.2",
+    "@rn-primitives/types": "^1.5.2",
+    "@shopify/flash-list": "^2.3.2",
+    "@tanstack/react-query": "^5.101.2",
+    "axios": "^1.18.1",
+    "crypto-js": "^4.2.0",
+    "date-fns": "^4.4.0",
+    "expo": "~57.0.1",
+    "expo-application": "^57.0.0",
+    "expo-constants": "^57.0.2",
+    "expo-crypto": "^57.0.0",
+    "expo-device": "^57.0.0",
+    "expo-document-picker": "^57.0.0",
+    "expo-file-system": "^57.0.0",
+    "expo-image": "^57.0.0",
+    "expo-image-manipulator": "^57.0.1",
+    "expo-linear-gradient": "^57.0.0",
+    "expo-linking": "^57.0.1",
+    "expo-notifications": "^57.0.2",
+    "expo-router": "^57.0.2",
+    "expo-screen-capture": "^57.0.0",
+    "expo-secure-store": "^57.0.0",
+    "expo-status-bar": "~57.0.0",
+    "nativewind": "^4.2.6",
+    "react": "19.2.3",
+    "react-hook-form": "^7.80.0",
+    "react-native": "0.86.0",
+    "react-native-gesture-handler": "^3.0.2",
+    "react-native-reanimated": "^4.5.0",
+    "react-native-safe-area-context": "^5.8.0",
+    "react-native-screens": "^4.25.2",
+    "tailwindcss": "^3.4.19",
+    "uuid": "^14.0.1",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@react-native/jest-preset": "^0.86.0",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^14.0.1",
+    "@types/crypto-js": "^4.2.2",
+    "@types/jest": "^30.0.0",
+    "@types/react": "~19.2.2",
+    "axios-mock-adapter": "^2.1.0",
+    "jest": "^29.7.0",
+    "jest-expo": "^57.0.1",
+    "msw": "^2.7.3",
+    "ts-jest": "^29.4.11",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"app/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"app/**/*.{ts,tsx}\"",
+    "type-check": "tsc --noEmit",
+    "test": "jest --passWithNoTests"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "./tests/setup.ts"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.ts",
+      "**/tests/**/*.test.tsx"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "module": "commonjs",
+            "esModuleInterop": true
+          }
+        }
+      ]
+    },
+    "moduleNameMapper": {
+      "^@api/(.*)$": "<rootDir>/src/api/$1",
+      "^@components/(.*)$": "<rootDir>/src/components/$1",
+      "^@constants/(.*)$": "<rootDir>/src/constants/$1",
+      "^@services/(.*)$": "<rootDir>/src/services/$1",
+      "^@store/(.*)$": "<rootDir>/src/store/$1",
+      "^@t/(.*)$": "<rootDir>/src/types/$1",
+      "^@utils/(.*)$": "<rootDir>/src/utils/$1",
+      "^@validation/(.*)$": "<rootDir>/src/validation/$1",
+      "^@react-native-async-storage/async-storage$": "<rootDir>/tests/mocks/asyncStorage.ts",
+      "^expo-crypto$": "<rootDir>/tests/mocks/expoModules.ts",
+      "^expo-secure-store$": "<rootDir>/tests/mocks/expoModules.ts",
+      "^expo-device$": "<rootDir>/tests/mocks/expoModules.ts",
+      "^expo-application$": "<rootDir>/tests/mocks/expoModules.ts",
+      "^expo-constants$": "<rootDir>/tests/mocks/expoModules.ts"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(msw)/)"
+    ]
+  },
+  "private": true
+}
