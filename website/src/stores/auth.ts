@@ -61,7 +61,6 @@ export const useAuthStore = create<AuthStore>()(
         user: state.user,
         token: state.token,
         accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
         deviceId: state.deviceId,
       }),
       onRehydrateStorage: () => (state, error) => {

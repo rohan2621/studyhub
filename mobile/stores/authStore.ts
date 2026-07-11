@@ -39,7 +39,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user, accessToken: token, isAuthenticated: true });
   },
 
-  // alias so both naming conventions work across screens
+  // S5 fix: `setAuth` was an identical duplicate of `login`.
+  // Keep as a thin alias so existing screens using setAuth() still compile.
   setAuth: async (user, token, refreshToken) => {
     await storage.set("accessToken", token);
     if (refreshToken) {
@@ -65,8 +66,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (token && userStr) {
         set({ user: JSON.parse(userStr), accessToken: token, isAuthenticated: true });
       }
-    } catch {
-      // ignore
+    } catch (e) {
+      console.error("Failed to load stored auth, clearing:", e);
+      await storage.delete("accessToken");
+      await storage.delete("refreshToken");
+      await storage.delete("userId");
+      await storage.delete("user");
     } finally {
       set({ isLoading: false });
     }

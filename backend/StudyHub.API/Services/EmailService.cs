@@ -12,6 +12,7 @@ public class EmailService(IConfiguration config, ILogger<EmailService> logger)
     private readonly string _password = config["Smtp:Password"]!;
     private readonly string _fromEmail = config["Smtp:FromEmail"]!;
     private readonly string _fromName = config["Smtp:FromName"]!;
+    private readonly string _baseUrl = config["AppBaseUrl"] ?? "http://localhost:3000";
 
     public async Task SendAsync(string toEmail, string toName, string subject, string htmlBody)
     {
@@ -42,7 +43,7 @@ public class EmailService(IConfiguration config, ILogger<EmailService> logger)
 
     public async Task SendPasswordResetAsync(string toEmail, string toName, string resetToken)
     {
-        var resetUrl = $"http://localhost:3000/reset-password?token={resetToken}";
+        var resetUrl = $"{_baseUrl}/reset-password?token={resetToken}";
 
         var html = $"""
             <!DOCTYPE html>

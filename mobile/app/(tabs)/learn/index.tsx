@@ -22,10 +22,10 @@ export default function LearnDomainsScreen() {
         title="Learn" 
         subtitle="Master new subjects" 
         rightElement={
+          // F1 fix: removed invalid size="sm" prop — GradientButton has no size prop
           <GradientButton 
             title="My Progress" 
             onPress={() => router.push('/(tabs)/learn/progress')} 
-            size="sm"
           />
         }
       />

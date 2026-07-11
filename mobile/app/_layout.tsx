@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { QueryClient } from "@tanstack/react-query";
@@ -48,6 +48,7 @@ export default function RootLayout() {
   const [introVisible, setIntroVisible] = useState(true);
   const [introMounted, setIntroMounted] = useState(true);
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     loadStoredAuth();
@@ -57,9 +58,15 @@ export default function RootLayout() {
     ScreenCapture.preventScreenCaptureAsync().catch(console.error);
 
     // Enforce a minimum 2.5 second loading time so the intro animation can play fully
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setMinTimeElapsed(true);
     }, 2500);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -117,7 +124,7 @@ export default function RootLayout() {
                   <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text, marginBottom: 8, fontFamily: 'Outfit_700Bold' }}>
                     Update Available!
                   </Text>
-                  <Text style={{ fontSize: 15, color: colors.textSecondary, marginBottom: 16 }}>
+                  <Text style={{ fontSize: 15, color: colors.textMuted, marginBottom: 16 }}>
                     Version {updateAvailable.versionName} is ready to install.
                   </Text>
                   
@@ -143,7 +150,7 @@ export default function RootLayout() {
                       onPress={dismissUpdate}
                       style={{ paddingVertical: 16, alignItems: 'center', marginTop: 8 }}
                     >
-                      <Text style={{ color: colors.textSecondary, fontSize: 14, fontWeight: '600' }}>
+                      <Text style={{ color: colors.textMuted, fontSize: 14, fontWeight: '600' }}>
                         Maybe Later
                       </Text>
                     </TouchableOpacity>

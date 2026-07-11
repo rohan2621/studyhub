@@ -85,12 +85,11 @@ api.interceptors.response.use(
         
         const res = await axios.post(
           `${API_URL.replace(/\/$/, "")}/auth/refresh`,
-          {},
           { 
-            headers: { 
-              "X-User-Id": user.id,
-              "X-Refresh-Token": refreshToken || ""
-            }, 
+            userId: user.id,
+            refreshToken: refreshToken || undefined
+          },
+          { 
             withCredentials: true 
           }
         );

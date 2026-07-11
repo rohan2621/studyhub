@@ -53,15 +53,11 @@ export function useAppUpdate() {
 
   const downloadUpdate = () => {
     if (!updateAvailable) return;
-    
-    // Construct the URL to the website's download page
-    // Using the API base URL but swapping the port to the website's port (5173)
-    const baseUrl = api.defaults.baseURL || 'http://192.168.18.11:5244';
-    const websiteUrl = baseUrl.replace('5244', '5173').replace('/api', '');
-    const downloadPageUrl = `${websiteUrl}/download`;
-    
-    Linking.openURL(downloadPageUrl).catch(err => {
-      Alert.alert('Error', 'Failed to open the download page.');
+    // S3 fix: use the actual file download URL from the release directly,
+    // rather than guessing a website URL via string manipulation.
+    const downloadUrl = updateAvailable.fileUrl || (api.defaults.baseURL ?? "").replace("/api", "").concat("/download");
+    Linking.openURL(downloadUrl).catch(() => {
+      Alert.alert("Error", "Failed to open the download page.");
     });
   };
 

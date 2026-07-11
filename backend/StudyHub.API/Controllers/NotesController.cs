@@ -50,7 +50,7 @@ public class NotesController(AppDbContext db, NotificationService notificationSe
 
         if (type.HasValue) query = query.Where(n => n.Type == type.Value);
         if (subject is not null) query = query.Where(n => n.Subject == subject);
-        if (chapter is not null) query = query.Where(n => n.Chapter.ToLower().Contains(chapter.ToLower()));
+        if (chapter is not null) query = query.Where(n => EF.Functions.ILike(n.Chapter, $"%{chapter}%"));
 
         var total = await query.CountAsync();
 

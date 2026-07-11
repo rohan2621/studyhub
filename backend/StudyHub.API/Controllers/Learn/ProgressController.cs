@@ -95,7 +95,7 @@ public class ProgressController : ControllerBase
             .ToListAsync();
             
         var progress = await _context.UserLessonProgresses
-            .Where(p => p.UserId == userId && lessons.Select(l => l.Id).Contains(p.LessonId))
+            .Where(p => p.UserId == userId && p.Lesson.CourseId == courseId)
             .ToDictionaryAsync(p => p.LessonId, p => p.Status);
             
         var nodes = lessons.Select(l => new {

@@ -12,19 +12,14 @@ public class TokenExpiryJob(AppDbContext db, EmailService emailService, ILogger<
         var now = DateTime.UtcNow;
 
         // Expire tokens past their expiry date
-        var expired = await db.Tokens
-            .Include(t => t.User)
+        var expiredCount = await db.Tokens
             .Where(t => t.Status == TokenStatus.Active && t.ExpiresAt < now)
-            .ToListAsync();
+            .ExecuteUpdateAsync(s => s.SetProperty(t => t.Status, TokenStatus.Expired));
 
-        foreach (var token in expired)
+        if (expiredCount > 0)
         {
-            token.Status = TokenStatus.Expired;
-            logger.LogInformation("Token {Code} expired for user {Email}", token.Code, token.User.Email);
+            logger.LogInformation("Expired {Count} tokens", expiredCount);
         }
-
-        if (expired.Count > 0)
-            await db.SaveChangesAsync();
 
         // Send 7-day reminder
         await SendReminders(now, 7);

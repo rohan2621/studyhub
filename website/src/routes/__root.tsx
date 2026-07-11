@@ -36,9 +36,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error("Route error:", error);
   const router = useRouter();
-  useEffect(() => {
-    // You could log errors to your own analytics service here
-  }, [error]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 font-[family-name:var(--font-sans)] text-black">
@@ -226,10 +223,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-
-
-
-
-
-
-

@@ -17,7 +17,8 @@ namespace StudyHub.API.Controllers;
 public class AuthController(
     AppDbContext db,
     TokenService tokenService,
-    IConnectionMultiplexer redis) : ControllerBase
+    IConnectionMultiplexer redis,
+    IWebHostEnvironment env) : ControllerBase
 {
     // ── Signup ────────────────────────────────────────────
     [HttpPost("signup")]
@@ -147,12 +148,10 @@ public class AuthController(
 
         // Always set Secure=true in production. On services like Render, SSL is terminated
         // at the proxy so Request.IsHttps would be false even for external HTTPS connections.
-        var isProduction = HttpContext.RequestServices
-            .GetRequiredService<IWebHostEnvironment>().IsProduction();
         Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = isProduction || Request.IsHttps,
+            Secure = env.IsProduction() || Request.IsHttps,
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
@@ -177,23 +176,23 @@ public class AuthController(
 
     // ── Refresh Token ─────────────────────────────────────
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh()
+    public async Task<IActionResult> Refresh([FromBody] RefreshRequest? req = null)
     {
         var refreshToken = Request.Cookies["refresh_token"];
         if (string.IsNullOrEmpty(refreshToken))
         {
-            refreshToken = Request.Headers["X-Refresh-Token"].ToString();
+            refreshToken = req?.RefreshToken ?? Request.Headers["X-Refresh-Token"].ToString();
         }
 
         if (string.IsNullOrEmpty(refreshToken))
             return Unauthorized(new { error = "No refresh token." });
 
-        var userId = Request.Headers["X-User-Id"].ToString();
-        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+        var userIdStr = req?.UserId ?? Request.Headers["X-User-Id"].ToString();
+        if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userGuid))
             return Unauthorized(new { error = "Invalid user ID." });
 
         var cache = redis.GetDatabase();
-        var key = $"refresh:{userId}:{refreshToken}";
+        var key = $"refresh:{userGuid}:{refreshToken}";
         var valid = await cache.StringGetAsync(key);
         if (!valid.HasValue)
             return Unauthorized(new { error = "Invalid or expired refresh token." });
@@ -205,17 +204,15 @@ public class AuthController(
         await cache.KeyDeleteAsync(key);
         var newRefreshToken = tokenService.GenerateRefreshToken();
         await cache.StringSetAsync(
-            $"refresh:{userId}:{newRefreshToken}",
+            $"refresh:{userIdStr}:{newRefreshToken}",
             "valid",
             TimeSpan.FromDays(7));
 
         // Always set Secure=true in production (see Login endpoint comment).
-        var isProductionRefresh = HttpContext.RequestServices
-            .GetRequiredService<IWebHostEnvironment>().IsProduction();
         Response.Cookies.Append("refresh_token", newRefreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = isProductionRefresh || Request.IsHttps,
+            Secure = env.IsProduction() || Request.IsHttps,
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
@@ -409,3 +406,4 @@ public record LoginRequest(string Email, string Password);
 public record ForgotPasswordRequest(string Email);
 public record ResetPasswordRequest(string Token, string NewPassword);
 public record AdminResetPasswordRequest(string NewPassword);
+public record RefreshRequest(string? UserId, string? RefreshToken);

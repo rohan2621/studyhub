@@ -64,9 +64,23 @@ public class CoursesController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create(Course course)
+    public async Task<IActionResult> Create(CreateCourseDto dto)
     {
-        course.CreatedAt = DateTime.UtcNow;
+        var course = new Course
+        {
+            DomainId = dto.DomainId,
+            Slug = dto.Slug,
+            Title = dto.Title,
+            Tagline = dto.Tagline,
+            Description = dto.Description,
+            WhyItMatters = dto.WhyItMatters,
+            DifficultyLevel = dto.DifficultyLevel,
+            EstimatedHours = dto.EstimatedHours,
+            CoverImageUrl = dto.CoverImageUrl,
+            IsPublished = dto.IsPublished,
+            SortOrder = dto.SortOrder,
+            CreatedAt = DateTime.UtcNow
+        };
         _context.Courses.Add(course);
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetBySlug), new { slug = course.Slug }, course);
@@ -74,10 +88,23 @@ public class CoursesController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Update(Guid id, Course course)
+    public async Task<IActionResult> Update(Guid id, UpdateCourseDto dto)
     {
-        if (id != course.Id) return BadRequest();
-        _context.Entry(course).State = EntityState.Modified;
+        var course = await _context.Courses.FindAsync(id);
+        if (course == null) return NotFound();
+
+        course.DomainId = dto.DomainId;
+        course.Slug = dto.Slug;
+        course.Title = dto.Title;
+        course.Tagline = dto.Tagline;
+        course.Description = dto.Description;
+        course.WhyItMatters = dto.WhyItMatters;
+        course.DifficultyLevel = dto.DifficultyLevel;
+        course.EstimatedHours = dto.EstimatedHours;
+        course.CoverImageUrl = dto.CoverImageUrl;
+        course.IsPublished = dto.IsPublished;
+        course.SortOrder = dto.SortOrder;
+
         await _context.SaveChangesAsync();
         return NoContent();
     }
@@ -122,3 +149,13 @@ public class CoursesController : ControllerBase
         return Ok(progress);
     }
 }
+
+public record CreateCourseDto(
+    Guid DomainId, string Slug, string Title, string? Tagline, string? Description, 
+    string? WhyItMatters, DifficultyLevel DifficultyLevel, decimal EstimatedHours, 
+    string? CoverImageUrl, bool IsPublished, int SortOrder);
+
+public record UpdateCourseDto(
+    Guid DomainId, string Slug, string Title, string? Tagline, string? Description, 
+    string? WhyItMatters, DifficultyLevel DifficultyLevel, decimal EstimatedHours, 
+    string? CoverImageUrl, bool IsPublished, int SortOrder);

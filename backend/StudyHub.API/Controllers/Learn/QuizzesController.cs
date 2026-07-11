@@ -68,6 +68,15 @@ public class QuizzesController : ControllerBase
             
         if (quiz == null) return NotFound();
 
+        if (quiz.MaxAttempts > 0)
+        {
+            var attemptCount = await _context.QuizAttempts.CountAsync(a => a.UserId == userId && a.QuizId == quizId);
+            if (attemptCount >= quiz.MaxAttempts)
+            {
+                return BadRequest(new { error = "Maximum quiz attempts reached." });
+            }
+        }
+
         int correctCount = 0;
         foreach (var q in quiz.Questions)
         {

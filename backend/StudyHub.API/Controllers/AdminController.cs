@@ -27,8 +27,8 @@ public class AdminController(AppDbContext db, IMemoryCache cache) : ControllerBa
         var query = db.Users.Include(u => u.School).AsQueryable();
 
         if (search is not null)
-            query = query.Where(u => u.Name.ToLower().Contains(search.ToLower()) ||
-                                     u.Email.ToLower().Contains(search.ToLower()));
+            query = query.Where(u => EF.Functions.ILike(u.Name, $"%{search}%") ||
+                                     EF.Functions.ILike(u.Email, $"%{search}%"));
         if (schoolId.HasValue)          query = query.Where(u => u.SchoolId == schoolId.Value);
         if (role.HasValue)              query = query.Where(u => u.Role == role.Value);
         if (!string.IsNullOrEmpty(grade))   query = query.Where(u => u.Grade == grade);
@@ -123,7 +123,7 @@ public class AdminController(AppDbContext db, IMemoryCache cache) : ControllerBa
         {
             Name = req.Name,
             Email = req.Email.ToLower(),
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password, workFactor: 12),
             Role = req.Role,
             SchoolId = req.SchoolId,
             Grade = req.Grade ?? "N/A"
@@ -159,26 +159,37 @@ public class AdminController(AppDbContext db, IMemoryCache cache) : ControllerBa
         var user = await db.Users.FindAsync(id);
         if (user is null) return NotFound();
 
-        // Cascade delete all referencing entity records to prevent foreign key errors
-        await db.AuditLogs.Where(a => a.ActorId == id).ExecuteDeleteAsync();
-        await db.AuditLogs.Where(a => db.Tokens.Any(t => t.UserId == id && t.Id == a.TokenId)).ExecuteDeleteAsync();
-        await db.Tokens.Where(t => t.UserId == id).ExecuteDeleteAsync();
-        await db.Devices.Where(d => d.UserId == id).ExecuteDeleteAsync();
-        await db.Submissions.Where(s => s.StudentId == id).ExecuteDeleteAsync();
-        await db.CustomRequests.Where(c => c.UserId == id).ExecuteDeleteAsync();
-        await db.PaymentRecords.Where(p => p.UserId == id).ExecuteDeleteAsync();
-        await db.DiscussionThreads.Where(d => d.AuthorId == id).ExecuteDeleteAsync();
-        await db.DiscussionReplies.Where(d => d.AuthorId == id).ExecuteDeleteAsync();
-        await db.PasswordResetTokens.Where(p => p.UserId == id).ExecuteDeleteAsync();
-        await db.Notifications.Where(n => n.UserId == id).ExecuteDeleteAsync();
-        await db.NoteUpvotes.Where(n => n.UserId == id).ExecuteDeleteAsync();
-        await db.TokenRenewalRequests.Where(r => r.UserId == id).ExecuteDeleteAsync();
-        await db.HireRequests.Where(r => r.StudentId == id || r.TopperId == id).ExecuteDeleteAsync();
-        await db.Notes.Where(n => n.UploadedBy == id).ExecuteDeleteAsync();
+        using var transaction = await db.Database.BeginTransactionAsync();
+        try
+        {
+            // Cascade delete all referencing entity records to prevent foreign key errors
+            await db.AuditLogs.Where(a => a.ActorId == id).ExecuteDeleteAsync();
+            await db.AuditLogs.Where(a => db.Tokens.Any(t => t.UserId == id && t.Id == a.TokenId)).ExecuteDeleteAsync();
+            await db.Tokens.Where(t => t.UserId == id).ExecuteDeleteAsync();
+            await db.Devices.Where(d => d.UserId == id).ExecuteDeleteAsync();
+            await db.Submissions.Where(s => s.StudentId == id).ExecuteDeleteAsync();
+            await db.CustomRequests.Where(c => c.UserId == id).ExecuteDeleteAsync();
+            await db.PaymentRecords.Where(p => p.UserId == id).ExecuteDeleteAsync();
+            await db.DiscussionThreads.Where(d => d.AuthorId == id).ExecuteDeleteAsync();
+            await db.DiscussionReplies.Where(d => d.AuthorId == id).ExecuteDeleteAsync();
+            await db.PasswordResetTokens.Where(p => p.UserId == id).ExecuteDeleteAsync();
+            await db.Notifications.Where(n => n.UserId == id).ExecuteDeleteAsync();
+            await db.NoteUpvotes.Where(n => n.UserId == id).ExecuteDeleteAsync();
+            await db.TokenRenewalRequests.Where(r => r.UserId == id).ExecuteDeleteAsync();
+            await db.HireRequests.Where(r => r.StudentId == id || r.TopperId == id).ExecuteDeleteAsync();
+            await db.Notes.Where(n => n.UploadedBy == id).ExecuteDeleteAsync();
 
-        db.Users.Remove(user);
-        await db.SaveChangesAsync();
-        return NoContent();
+            db.Users.Remove(user);
+            await db.SaveChangesAsync();
+            await transaction.CommitAsync();
+            
+            return NoContent();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     // ── Schools ────────────────────────────────────────────

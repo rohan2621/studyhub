@@ -16,6 +16,7 @@ public class AiController : ControllerBase
     }
 
     [HttpGet("status")]
+    [Authorize]
     public IActionResult GetStatus()
     {
         return Ok(new { isAvailable = _aiService.IsAvailable });

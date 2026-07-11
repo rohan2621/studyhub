@@ -18,6 +18,19 @@ public class FilesController(FileService fileService) : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest(new { error = "File is required." });
 
+        var allowedMimeTypes = new[]
+        {
+            "application/pdf",
+            "image/jpeg", "image/png", "image/gif", "image/webp",
+            "video/mp4", "audio/mpeg",
+            "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        };
+
+        if (!allowedMimeTypes.Contains(file.ContentType.ToLower()))
+            return BadRequest(new { error = "Invalid file type. Only standard documents and media are allowed." });
+
         try
         {
             var fileName = file.FileName;

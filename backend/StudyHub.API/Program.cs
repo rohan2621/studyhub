@@ -137,18 +137,20 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // CORS
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
+    ?? new[] 
+    {
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:8080",
+        "https://studysub.vercel.app"
+    };
+
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
     p.AllowAnyHeader()
      .AllowAnyMethod()
      .AllowCredentials()
-     .WithOrigins(
-         "http://localhost:3000",
-         "http://localhost:3001",
-         "http://localhost:8080",
-         "http://192.168.191.1:8080",
-         "http://192.168.18.11:8080",
-         "https://studysub.vercel.app"
-     )));
+     .WithOrigins(allowedOrigins)));
 
 // Health checks
 builder.Services.AddHealthChecks()
@@ -159,9 +161,23 @@ builder.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>
 {
     options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | 
                                Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
-    // Clear restrictions to trust the reverse proxy (e.g. Render/Vercel)
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
+    if (builder.Environment.IsDevelopment())
+    {
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
+    }
+    else
+    {
+        // Add known proxy networks for production here if applicable, or leave default (loopback)
+        var trustedProxies = builder.Configuration.GetSection("TrustedProxies").Get<string[]>();
+        if (trustedProxies != null)
+        {
+            foreach (var proxy in trustedProxies)
+            {
+                options.KnownProxies.Add(System.Net.IPAddress.Parse(proxy));
+            }
+        }
+    }
 });
 
 var app = builder.Build();
@@ -192,12 +208,15 @@ app.UseStaticFiles(new StaticFileOptions
     ContentTypeProvider = provider
 });
 app.UseCors();
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+if (app.Environment.IsDevelopment())
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "StudyHub API v1");
-    c.RoutePrefix = "swagger";
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "StudyHub API v1");
+        c.RoutePrefix = "swagger";
+    });
+}
 app.UseAuthentication();
 app.UseMiddleware<JwtBlacklistMiddleware>();
 app.UseAuthorization();

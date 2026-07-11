@@ -34,13 +34,11 @@ api.interceptors.response.use(
         const refreshToken = await storage.get("refreshToken");
         const res = await axios.post(
           `${API_URL}/auth/refresh`,
-          {},
-          { 
-            headers: { 
-              "X-User-Id": userId,
-              "X-Refresh-Token": refreshToken || ""
-            }, 
-            withCredentials: true 
+          // S2 fix: send refresh token in request body, not as a header
+          { userId, refreshToken: refreshToken ?? "" },
+          {
+            timeout: 10000, // S4 fix: 10s timeout to prevent indefinite hang
+            withCredentials: true,
           }
         );
         const newToken = res.data.accessToken;

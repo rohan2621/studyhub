@@ -138,7 +138,7 @@ function SignupPage() {
                 aria-invalid={!!error}
               >
                 <option value="">Select grade</option>
-                {[9, 10, 11, 12].map((g) => (
+                {[8, 9, 10, 11, 12].map((g) => (
                   <option key={g} value={g}>
                     Grade {g}
                   </option>

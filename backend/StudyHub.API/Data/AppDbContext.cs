@@ -97,6 +97,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             e.HasIndex(t => t.Code).IsUnique();
             e.HasIndex(t => t.UserId);
+            e.HasIndex(t => t.Status);
+            e.HasIndex(t => t.ExpiresAt);
             e.Property(t => t.Plan).HasConversion<string>();
             e.Property(t => t.Status).HasConversion<string>();
             e.HasOne(t => t.User).WithMany(u => u.Tokens).HasForeignKey(t => t.UserId);

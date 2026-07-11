@@ -1,11 +1,34 @@
-export const LightColors = {
+// F4 fix: Declare the type first so both LightColors and DarkColors share
+// the same explicit annotation, preventing silent structural mismatches.
+export type ColorScheme = {
+  background: string;
+  backgroundGrad: string[];
+  surface: string;
+  card: string;
+  inputBg: string;
+  primary: string;
+  primaryGrad: string[];
+  secondary: string;
+  accent: string;
+  success: string;
+  warning: string;
+  danger: string;
+  muted: string;
+  border: string;
+  text: string;
+  textMuted: string;
+  shadow: string;
+  error: string;
+};
+
+export const LightColors: ColorScheme = {
   background: "#ffffff",
-  backgroundGrad: ["#ffffff", "#ffffff", "#ffffff"] as string[],
+  backgroundGrad: ["#ffffff", "#ffffff", "#ffffff"],
   surface: "#ffffff",
   card: "#ffffff",
   inputBg: "#ffffff",
   primary: "#000000",
-  primaryGrad: ["#000000", "#000000"] as string[],
+  primaryGrad: ["#000000", "#000000"],
   secondary: "#f3f4f6",
   accent: "#000000",
   success: "#10b981",
@@ -16,16 +39,17 @@ export const LightColors = {
   text: "#000000",
   textMuted: "#4b5563",
   shadow: "#000000",
+  error: "#ef4444",
 };
 
 export const DarkColors: ColorScheme = {
   background: "#000000",
-  backgroundGrad: ["#000000", "#000000", "#000000"] as string[],
+  backgroundGrad: ["#000000", "#000000", "#000000"],
   surface: "#000000",
   card: "#000000",
   inputBg: "#000000",
   primary: "#ffffff",
-  primaryGrad: ["#ffffff", "#ffffff"] as string[],
+  primaryGrad: ["#ffffff", "#ffffff"],
   secondary: "#1f2937",
   accent: "#ffffff",
   success: "#34d399",
@@ -36,7 +60,7 @@ export const DarkColors: ColorScheme = {
   text: "#ffffff",
   textMuted: "#d1d5db",
   shadow: "#ffffff",
+  error: "#f87171",
 };
 
-export type ColorScheme = typeof LightColors;
-export const Colors = LightColors;
+export const Colors = LightColors;

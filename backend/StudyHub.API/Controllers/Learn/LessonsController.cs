@@ -96,7 +96,12 @@ public class LessonsController : ControllerBase
         return Ok(comments);
     }
 
-    public class CommentDto { public string Body { get; set; } = string.Empty; }
+    public class CommentDto 
+    { 
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.StringLength(2000, ErrorMessage = "Comment cannot exceed 2000 characters.")]
+        public string Body { get; set; } = string.Empty; 
+    }
 
     [HttpPost("{id}/comments")]
     [Authorize]

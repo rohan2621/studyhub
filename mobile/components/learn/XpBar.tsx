@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import * as Progress from '@rn-primitives/progress';
 import { useThemeStore } from '../../stores/themeStore';
 
 interface XpBarProps {
@@ -10,32 +11,57 @@ interface XpBarProps {
 
 export function XpBar({ currentXp, nextLevelXp, level }: XpBarProps) {
   const { colors } = useThemeStore();
-  
+
   // Calculate percentage, capping at 100%
   const percentage = Math.min(Math.max((currentXp / nextLevelXp) * 100, 0), 100);
 
   return (
-    <View className="mb-4">
-      <View className="flex-row justify-between mb-2">
-        <Text className="font-bold" style={{ color: colors.primary }}>
+    <View style={styles.container}>
+      <View style={styles.row}>
+        <Text style={[styles.levelText, { color: colors.primary }]}>
           Level {level}
         </Text>
-        <Text className="text-sm" style={{ color: colors.textMuted }}>
+        <Text style={[styles.xpText, { color: colors.textMuted }]}>
           {currentXp} / {nextLevelXp} XP
         </Text>
       </View>
-      <View 
-        className="h-3 w-full rounded-full overflow-hidden"
-        style={{ backgroundColor: colors.border }}
+      {/* F2 fix: use @rn-primitives/progress for accessible progress semantics */}
+      <Progress.Root
+        value={percentage}
+        style={[styles.track, { backgroundColor: colors.border }]}
+        accessibilityLabel={`XP Progress: ${Math.round(percentage)}%`}
       >
-        <View 
-          className="h-full rounded-full"
-          style={{ 
-            backgroundColor: colors.primary, 
-            width: `${percentage}%` 
-          }}
+        <Progress.Indicator
+          style={[
+            styles.indicator,
+            {
+              backgroundColor: colors.primary,
+              width: `${percentage}%`,
+            },
+          ]}
         />
-      </View>
+      </Progress.Root>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { marginBottom: 16 },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  levelText: { fontWeight: 'bold' },
+  xpText: { fontSize: 12 },
+  track: {
+    height: 12,
+    width: '100%',
+    borderRadius: 9999,
+    overflow: 'hidden',
+  },
+  indicator: {
+    height: '100%',
+    borderRadius: 9999,
+  },
+});
