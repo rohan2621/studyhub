@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
+  Brain,
   BookOpen,
   Award,
   ClipboardList,
@@ -22,6 +23,7 @@ import { api } from "@/lib/api";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { label: "Learn", to: "/learn", icon: Brain },
   { label: "Notes", to: "/notes", icon: BookOpen },
   { label: "Topper Notes", to: "/topper-notes", icon: Award },
   { label: "Hire Topper", to: "/hire-topper", icon: GraduationCap },

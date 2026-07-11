@@ -90,6 +90,17 @@ builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<TokenExpiryJob>();
 
+builder.Services.AddScoped<XpService>();
+builder.Services.AddScoped<AchievementService>();
+builder.Services.AddScoped<RecommendationService>();
+
+var aiProvider = builder.Configuration["AI:Provider"];
+var aiKey = builder.Configuration["AI:ApiKey"];
+if (!string.IsNullOrEmpty(aiProvider) && !string.IsNullOrEmpty(aiKey))
+    builder.Services.AddScoped<StudyHub.API.Services.AI.IAiService, StudyHub.API.Services.AI.OpenAiService>();
+else
+    builder.Services.AddScoped<StudyHub.API.Services.AI.IAiService, StudyHub.API.Services.AI.StubAiService>();
+
 // Hangfire
 builder.Services.AddHangfire(cfg => cfg
     .UsePostgreSqlStorage(builder.Configuration.GetConnectionString("DefaultConnection")));

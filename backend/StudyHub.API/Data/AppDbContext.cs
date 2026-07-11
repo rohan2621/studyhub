@@ -29,6 +29,27 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<AppRelease> AppReleases => Set<AppRelease>();
     public DbSet<SchoolSubjectCatalog> SubjectCatalogs => Set<SchoolSubjectCatalog>();
 
+    // Learn Module DbSets
+    public DbSet<StudyHub.API.Models.Learn.Domain> Domains => Set<StudyHub.API.Models.Learn.Domain>();
+    public DbSet<StudyHub.API.Models.Learn.Course> Courses => Set<StudyHub.API.Models.Learn.Course>();
+    public DbSet<StudyHub.API.Models.Learn.CoursePrerequisite> CoursePrerequisites => Set<StudyHub.API.Models.Learn.CoursePrerequisite>();
+    public DbSet<StudyHub.API.Models.Learn.Lesson> Lessons => Set<StudyHub.API.Models.Learn.Lesson>();
+    public DbSet<StudyHub.API.Models.Learn.LessonResource> LessonResources => Set<StudyHub.API.Models.Learn.LessonResource>();
+    public DbSet<StudyHub.API.Models.Learn.LessonRelation> LessonRelations => Set<StudyHub.API.Models.Learn.LessonRelation>();
+    public DbSet<StudyHub.API.Models.Learn.Quiz> Quizzes => Set<StudyHub.API.Models.Learn.Quiz>();
+    public DbSet<StudyHub.API.Models.Learn.QuizQuestion> QuizQuestions => Set<StudyHub.API.Models.Learn.QuizQuestion>();
+    public DbSet<StudyHub.API.Models.Learn.FlashcardDeck> FlashcardDecks => Set<StudyHub.API.Models.Learn.FlashcardDeck>();
+    public DbSet<StudyHub.API.Models.Learn.Flashcard> Flashcards => Set<StudyHub.API.Models.Learn.Flashcard>();
+    public DbSet<StudyHub.API.Models.Learn.UserCourseProgress> UserCourseProgresses => Set<StudyHub.API.Models.Learn.UserCourseProgress>();
+    public DbSet<StudyHub.API.Models.Learn.UserLessonProgress> UserLessonProgresses => Set<StudyHub.API.Models.Learn.UserLessonProgress>();
+    public DbSet<StudyHub.API.Models.Learn.QuizAttempt> QuizAttempts => Set<StudyHub.API.Models.Learn.QuizAttempt>();
+    public DbSet<StudyHub.API.Models.Learn.FlashcardProgress> FlashcardProgresses => Set<StudyHub.API.Models.Learn.FlashcardProgress>();
+    public DbSet<StudyHub.API.Models.Learn.LearningStreak> LearningStreaks => Set<StudyHub.API.Models.Learn.LearningStreak>();
+    public DbSet<StudyHub.API.Models.Learn.XpTransaction> XpTransactions => Set<StudyHub.API.Models.Learn.XpTransaction>();
+    public DbSet<StudyHub.API.Models.Learn.Achievement> Achievements => Set<StudyHub.API.Models.Learn.Achievement>();
+    public DbSet<StudyHub.API.Models.Learn.UserAchievement> UserAchievements => Set<StudyHub.API.Models.Learn.UserAchievement>();
+    public DbSet<StudyHub.API.Models.Learn.CourseBookmark> CourseBookmarks => Set<StudyHub.API.Models.Learn.CourseBookmark>();
+    public DbSet<StudyHub.API.Models.Learn.LessonComment> LessonComments => Set<StudyHub.API.Models.Learn.LessonComment>();
     protected override void OnModelCreating(ModelBuilder b)
     {
         base.OnModelCreating(b);
@@ -183,6 +204,137 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(s => s.SchoolId);
             e.HasIndex(s => new { s.SchoolId, s.Grade, s.Section, s.Subject }).IsUnique();
             e.HasOne(s => s.School).WithMany().HasForeignKey(s => s.SchoolId);
+        });
+
+        // Learn Module Configurations
+        b.Entity<StudyHub.API.Models.Learn.Domain>(e =>
+        {
+            e.HasIndex(d => d.Slug).IsUnique();
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.Course>(e =>
+        {
+            e.HasIndex(c => c.Slug).IsUnique();
+            e.Property(c => c.DifficultyLevel).HasConversion<string>();
+            e.HasOne(c => c.Domain).WithMany(d => d.Courses).HasForeignKey(c => c.DomainId);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.CoursePrerequisite>(e =>
+        {
+            e.HasKey(cp => new { cp.CourseId, cp.PrerequisiteCourseId });
+            e.HasOne(cp => cp.Course).WithMany(c => c.Prerequisites).HasForeignKey(cp => cp.CourseId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(cp => cp.PrerequisiteCourse).WithMany(c => c.PrerequisiteFor).HasForeignKey(cp => cp.PrerequisiteCourseId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.Lesson>(e =>
+        {
+            e.HasIndex(l => l.Slug).IsUnique();
+            e.Property(l => l.LessonType).HasConversion<string>();
+            e.HasOne(l => l.Course).WithMany(c => c.Lessons).HasForeignKey(l => l.CourseId);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.LessonResource>(e =>
+        {
+            e.Property(lr => lr.ResourceType).HasConversion<string>();
+            e.HasOne(lr => lr.Lesson).WithMany(l => l.Resources).HasForeignKey(lr => lr.LessonId);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.LessonRelation>(e =>
+        {
+            e.HasKey(lr => new { lr.LessonId, lr.RelatedLessonId });
+            e.Property(lr => lr.RelationType).HasConversion<string>();
+            e.HasOne(lr => lr.Lesson).WithMany(l => l.RelatedLessons).HasForeignKey(lr => lr.LessonId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(lr => lr.RelatedLesson).WithMany(l => l.RelatedTo).HasForeignKey(lr => lr.RelatedLessonId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.Quiz>(e =>
+        {
+            e.HasIndex(q => q.LessonId).IsUnique();
+            e.HasOne(q => q.Lesson).WithOne().HasForeignKey<StudyHub.API.Models.Learn.Quiz>(q => q.LessonId);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.QuizQuestion>(e =>
+        {
+            e.HasOne(qq => qq.Quiz).WithMany(q => q.Questions).HasForeignKey(qq => qq.QuizId);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.FlashcardDeck>(e =>
+        {
+            e.HasOne(fd => fd.Course).WithMany().HasForeignKey(fd => fd.CourseId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(fd => fd.Lesson).WithMany().HasForeignKey(fd => fd.LessonId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.Flashcard>(e =>
+        {
+            e.HasOne(f => f.Deck).WithMany(fd => fd.Flashcards).HasForeignKey(f => f.DeckId);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.UserCourseProgress>(e =>
+        {
+            e.HasIndex(ucp => new { ucp.UserId, ucp.CourseId }).IsUnique();
+            e.Property(ucp => ucp.Status).HasConversion<string>();
+            e.HasOne(ucp => ucp.User).WithMany().HasForeignKey(ucp => ucp.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(ucp => ucp.Course).WithMany().HasForeignKey(ucp => ucp.CourseId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.UserLessonProgress>(e =>
+        {
+            e.HasIndex(ulp => new { ulp.UserId, ulp.LessonId }).IsUnique();
+            e.Property(ulp => ulp.Status).HasConversion<string>();
+            e.HasOne(ulp => ulp.User).WithMany().HasForeignKey(ulp => ulp.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(ulp => ulp.Lesson).WithMany().HasForeignKey(ulp => ulp.LessonId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.QuizAttempt>(e =>
+        {
+            e.HasOne(qa => qa.User).WithMany().HasForeignKey(qa => qa.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(qa => qa.Quiz).WithMany().HasForeignKey(qa => qa.QuizId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.FlashcardProgress>(e =>
+        {
+            e.HasIndex(fp => new { fp.UserId, fp.FlashcardId }).IsUnique();
+            e.Property(fp => fp.Status).HasConversion<string>();
+            e.HasOne(fp => fp.User).WithMany().HasForeignKey(fp => fp.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(fp => fp.Flashcard).WithMany().HasForeignKey(fp => fp.FlashcardId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.LearningStreak>(e =>
+        {
+            e.HasIndex(ls => ls.UserId).IsUnique();
+            e.HasOne(ls => ls.User).WithOne().HasForeignKey<StudyHub.API.Models.Learn.LearningStreak>(ls => ls.UserId);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.XpTransaction>(e =>
+        {
+            e.Property(x => x.Source).HasConversion<string>();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.Achievement>(e =>
+        {
+            e.HasIndex(a => a.Slug).IsUnique();
+            e.Property(a => a.Condition).HasConversion<string>();
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.UserAchievement>(e =>
+        {
+            e.HasIndex(ua => new { ua.UserId, ua.AchievementId }).IsUnique();
+            e.HasOne(ua => ua.User).WithMany().HasForeignKey(ua => ua.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(ua => ua.Achievement).WithMany(a => a.UserAchievements).HasForeignKey(ua => ua.AchievementId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.CourseBookmark>(e =>
+        {
+            e.HasIndex(cb => new { cb.UserId, cb.CourseId }).IsUnique();
+            e.HasOne(cb => cb.User).WithMany().HasForeignKey(cb => cb.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(cb => cb.Course).WithMany().HasForeignKey(cb => cb.CourseId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        b.Entity<StudyHub.API.Models.Learn.LessonComment>(e =>
+        {
+            e.HasOne(lc => lc.User).WithMany().HasForeignKey(lc => lc.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(lc => lc.Lesson).WithMany().HasForeignKey(lc => lc.LessonId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

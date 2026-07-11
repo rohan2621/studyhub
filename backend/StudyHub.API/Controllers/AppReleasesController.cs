@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using StudyHub.API.Data;
 using StudyHub.API.Models;
 using System.ComponentModel.DataAnnotations;
+using StudyHub.API.Services;
 
 namespace StudyHub.API.Controllers;
 

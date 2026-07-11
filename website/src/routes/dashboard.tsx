@@ -17,6 +17,7 @@ import {
   AlertCircle,
   Upload,
   GraduationCap,
+  Brain,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuthStore, getTokenState, getTokenDaysRemaining } from "@/stores/auth";
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 const featureCards = [
+  { label: "Learn", to: "/learn", icon: Brain, gradient: "from-[#10b981] to-[#34d399]", desc: "Master new skills" },
   { label: "Notes", to: "/notes", icon: BookOpen, gradient: "from-[#2f6fed] to-[#5b8def]", desc: "Browse & download" },
   { label: "Topper Notes", to: "/topper-notes", icon: Award, gradient: "from-[#f5b843] to-[#f0c060]", desc: "Top-ranked notes" },
   { label: "Hire Topper", to: "/hire-topper", icon: GraduationCap, gradient: "from-[#8b5cf6] to-[#a855f7]", desc: "Get private tutoring" },
@@ -108,7 +110,17 @@ function DashboardPage() {
               Welcome back, {user?.name || "Student"}{schoolName ? ` · ${schoolName}` : ""}{feed?.classLabel ? ` · ${feed.classLabel}` : ""}
             </p>
           </div>
-          <form onSubmit={handleSearch} className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            <Link to="/learn/progress" className="hidden md:flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-50 px-4 py-2 hover:bg-emerald-100 transition-colors">
+              <div className="h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xs">
+                L3
+              </div>
+              <div>
+                <p className="text-xs font-bold text-emerald-700">250 XP</p>
+                <p className="text-[10px] text-emerald-600">Learner</p>
+              </div>
+            </Link>
+            <form onSubmit={handleSearch} className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5a7095]" />
               <input
@@ -218,8 +230,36 @@ function DashboardPage() {
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Upcoming Homework */}
-          <div className="glass-card lg:col-span-2 p-4 sm:p-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Continue Learning Widget */}
+            <div className="glass-card p-4 sm:p-6 border-l-4 border-l-[#10b981]">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-[#10b981]" />
+                  <h2 className="font-[family-name:var(--font-heading)] text-lg font-bold text-[#0e2a4d]">
+                    Continue Learning
+                  </h2>
+                </div>
+                <Link to="/learn" className="text-xs font-medium text-[#10b981] hover:underline">Go to Hub</Link>
+              </div>
+              <div className="flex items-center justify-between rounded-xl border border-[#10b981]/15 bg-[#10b981]/5 px-4 py-3 hover:bg-[#10b981]/10 transition-colors">
+                <div>
+                  <p className="text-sm font-medium text-[#0e2a4d]">Python Programming for Beginners</p>
+                  <p className="text-xs text-[#5a7095]">Lesson 3: Control Flow</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="hidden sm:block w-24 h-2 rounded-full bg-gray-200 overflow-hidden">
+                    <div className="h-full bg-[#10b981] rounded-full" style={{ width: "40%" }} />
+                  </div>
+                  <Link to="/learn/courses/python-beginners/lessons/control-flow" className="rounded-lg bg-[#10b981] px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-[#059669] transition-colors">
+                    Resume
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Upcoming Homework */}
+            <div className="glass-card p-4 sm:p-6">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-[#2f6fed]" />
@@ -256,6 +296,7 @@ function DashboardPage() {
                 })}
               </div>
             )}
+          </div>
           </div>
 
           {/* Right column */}

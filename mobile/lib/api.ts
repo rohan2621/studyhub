@@ -80,3 +80,72 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// ── Learn API Endpoints ──────────────────────────────────────────────
+export const learnApi = {
+  // Domains
+  getDomains: async () => {
+    const res = await api.get("/learn/domains");
+    return res.data;
+  },
+  getDomainBySlug: async (slug: string) => {
+    const res = await api.get(`/learn/domains/${slug}`);
+    return res.data;
+  },
+
+  // Courses
+  getCourses: async (params?: { domainId?: string; search?: string }) => {
+    const res = await api.get("/learn/courses", { params });
+    return res.data;
+  },
+  getCourseBySlug: async (slug: string) => {
+    const res = await api.get(`/learn/courses/${slug}`);
+    return res.data;
+  },
+  enrollCourse: async (id: string) => {
+    const res = await api.post(`/learn/courses/${id}/enroll`);
+    return res.data;
+  },
+  getCourseProgress: async (id: string) => {
+    const res = await api.get(`/learn/courses/${id}/progress`);
+    return res.data;
+  },
+
+  // Lessons
+  getLesson: async (id: string) => {
+    const res = await api.get(`/learn/lessons/${id}`);
+    return res.data;
+  },
+  completeLesson: async (id: string) => {
+    const res = await api.post(`/learn/lessons/${id}/complete`);
+    return res.data;
+  },
+
+  // Quizzes
+  getQuizByLesson: async (lessonId: string) => {
+    const res = await api.get(`/learn/quizzes/${lessonId}`);
+    return res.data;
+  },
+  submitQuiz: async (quizId: string, answers: Record<string, number>) => {
+    const res = await api.post(`/learn/quizzes/${quizId}/submit`, { answers });
+    return res.data;
+  },
+
+  // Progress
+  getProgressOverview: async () => {
+    const res = await api.get("/learn/progress/overview");
+    return res.data;
+  },
+  getRecommendations: async () => {
+    const res = await api.get("/learn/progress/recommendations");
+    return res.data;
+  },
+  getAchievements: async () => {
+    const res = await api.get("/learn/progress/achievements");
+    return res.data;
+  },
+  getStreak: async () => {
+    const res = await api.get("/learn/progress/streak");
+    return res.data;
+  }
+};

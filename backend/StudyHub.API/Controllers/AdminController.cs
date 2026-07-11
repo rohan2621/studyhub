@@ -384,7 +384,7 @@ public class AdminController(AppDbContext db, IMemoryCache cache) : ControllerBa
                 $"{EscapeCsv(p.User.Email)}," +
                 $"{EscapeCsv(p.Plan.ToString())}," +
                 $"{p.Amount}," +
-                $"{EscapeCsv(p.Channel)}," +
+                $"{EscapeCsv(p.Channel.ToString())}," +
                 $"{EscapeCsv(p.Token.Code)}," +
                 $"{p.CreatedAt:yyyy-MM-dd}");
         }

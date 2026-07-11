@@ -12,8 +12,8 @@ import { api } from "../../lib/api";
 
 function CustomTabBar({ state, descriptors, navigation, colors, tokenStatus, user, isAdmin }: any) {
   const { isDark } = useThemeStore();
-  // Sort and filter for the 4 main visible routes to guarantee perfect layout order
-  const visibleRoutes = ["home", "search", "content", "profile"];
+  // Sort and filter for the main visible routes to guarantee perfect layout order
+  const visibleRoutes = ["home", "search", "learn", "content", "profile"];
   const routes = state.routes
     .filter((r: any) => visibleRoutes.includes(r.name))
     .sort((a: any, b: any) => visibleRoutes.indexOf(a.name) - visibleRoutes.indexOf(b.name));
@@ -65,6 +65,7 @@ function CustomTabBar({ state, descriptors, navigation, colors, tokenStatus, use
           let name = "home-outline";
           if (route.name === "home") name = focused ? "home" : "home-outline";
           else if (route.name === "search") name = focused ? "search" : "search-outline";
+          else if (route.name === "learn") name = focused ? "school" : "school-outline";
           else if (route.name === "content") name = focused ? "book" : "book-outline";
           else if (route.name === "profile") name = focused ? "person" : "person-outline";
 
@@ -141,6 +142,7 @@ export default function TabsLayout() {
       >
         <Tabs.Screen name="home" options={{ title: "Home" }} />
         <Tabs.Screen name="search" options={{ title: "Search" }} />
+        <Tabs.Screen name="learn" options={{ title: "Learn" }} />
         <Tabs.Screen name="content" options={{ title: "Content" }} />
         <Tabs.Screen name="profile" options={{ title: "Profile" }} />
 
