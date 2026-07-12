@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { BookOpen, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "@/stores/auth";
 import { api } from "@/lib/api";
 
@@ -29,51 +29,60 @@ function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await api.post("/auth/login", { email, password });
+      const res = await api.post("/auth/login", {
+        email: email.trim().toLowerCase(),
+        password,
+      });
       const { accessToken, refreshToken, user: backendUser } = res.data;
 
-
-      // Store user and access token in auth store
+      // Store tokens immediately so subsequent API calls are authenticated
       setAccessToken(accessToken);
       if (refreshToken) {
         setRefreshToken(refreshToken);
       }
 
-      // Map user role properly
-      const mappedRole = backendUser.role.toLowerCase() as "admin" | "teacher" | "student";
+      // Safely resolve role — backend may return PascalCase ("Admin") or camelCase ("admin")
+      // depending on serializer settings. Normalise to lowercase string.
+      const rawRole: unknown =
+        backendUser.role ?? backendUser.Role ?? "student";
+      const mappedRole = String(rawRole).toLowerCase() as
+        | "admin"
+        | "teacher"
+        | "student"
+        | "toppercontributor";
 
+      // Safely resolve all fields with both camelCase and PascalCase fallbacks
       const mappedUser = {
-        id: backendUser.id,
-        name: backendUser.name,
-        email: backendUser.email,
+        id: backendUser.id ?? backendUser.Id ?? "",
+        name: backendUser.name ?? backendUser.Name ?? "",
+        email: backendUser.email ?? backendUser.Email ?? email,
         role: mappedRole,
-        school_id: backendUser.schoolId,
-        grade: parseInt(backendUser.grade) || 0,
-        created_at: new Date().toISOString()
+        school_id: backendUser.schoolId ?? backendUser.SchoolId ?? undefined,
+        grade: parseInt(backendUser.grade ?? backendUser.Grade ?? "0") || 0,
+        created_at: new Date().toISOString(),
       };
 
       setUser(mappedUser);
 
-
-      // If user is a student, fetch their active token info
+      // Fetch token info only for students (admins and teachers bypass token check)
       if (mappedRole === "student") {
         try {
           const tokenRes = await api.get("/tokens/me", {
-            headers: { Authorization: `Bearer ${accessToken}` }
+            headers: { Authorization: `Bearer ${accessToken}` },
           });
 
           if (tokenRes.data.hasActiveToken) {
             setToken({
               id: tokenRes.data.id,
               code: tokenRes.data.code,
-              user_id: backendUser.id,
+              user_id: mappedUser.id,
               plan: tokenRes.data.plan.toLowerCase() as any,
               issued_at: new Date().toISOString(),
               expires_at: tokenRes.data.expiresAt,
               status: "active",
               device_id: tokenRes.data.deviceBound ? "bound" : null,
               is_device_permanent: tokenRes.data.isDevicePermanent,
-              can_bind_permanent: tokenRes.data.canBindPermanent
+              can_bind_permanent: tokenRes.data.canBindPermanent,
             });
           } else {
             setToken(null);
@@ -87,12 +96,24 @@ function LoginPage() {
 
       setIsLoading(false);
 
-      navigate({ to: "/dashboard" });
+      // Route admin users to the admin panel; everyone else to the dashboard
+      if (mappedRole === "admin") {
+        navigate({ to: "/admin" });
+      } else {
+        navigate({ to: "/dashboard" });
+      }
     } catch (err: any) {
       setIsLoading(false);
-
-
-      setError(err.response?.data?.error || err.response?.data?.message || "Invalid credentials");
+      // Surface the backend's error message when available; fall back gracefully
+      const serverError =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message;
+      setError(
+        serverError && serverError !== "Network Error"
+          ? serverError
+          : "Invalid email or password. Please try again."
+      );
     }
   };
 
@@ -101,7 +122,14 @@ function LoginPage() {
       <div className="w-full max-w-md">
         <div className="border border-black bg-white p-8">
           <div className="mb-6 flex items-center justify-center">
-            <img src="/logo.png?v=12" alt="StudyHub" width="61" height="61" loading="eager" className="h-[61px] w-[61px] dark:invert" />
+            <img
+              src="/logo.png?v=12"
+              alt="StudyHub"
+              width="61"
+              height="61"
+              loading="eager"
+              className="h-[61px] w-[61px] dark:invert"
+            />
           </div>
 
           <h1 className="mb-1 text-center font-[family-name:var(--font-heading)] text-2xl font-extrabold">
@@ -152,12 +180,20 @@ function LoginPage() {
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   aria-pressed={showPassword}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="h-4 w-4" aria-hidden="true" />
+                  )}
                 </button>
               </div>
             </div>
 
-            {error && <p id="login-error" role="alert" className="text-sm font-medium text-red-600">{error}</p>}
+            {error && (
+              <p id="login-error" role="alert" className="text-sm font-medium text-red-600">
+                {error}
+              </p>
+            )}
 
             <button
               type="submit"
@@ -179,10 +215,3 @@ function LoginPage() {
     </div>
   );
 }
-
-
-
-
-
-
-

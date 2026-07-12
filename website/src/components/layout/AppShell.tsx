@@ -27,6 +27,11 @@ export function AppShell({ children, requireAuth = true }: AppShellProps) {
     if (isHydrated && requireAuth) {
       if (!user) {
         navigate({ to: "/login", search: { redirect: pathname } });
+      } else if (user.role === "admin") {
+        // Admin users should always be on /admin — redirect if they land elsewhere
+        if (!pathname.startsWith("/admin")) {
+          navigate({ to: "/admin" });
+        }
       } else if (user.role === "student") {
         // Sync token state globally in case they activated on another device
         api.get("/tokens/me")
@@ -51,7 +56,7 @@ export function AppShell({ children, requireAuth = true }: AppShellProps) {
           .catch(console.error);
       }
     }
-  }, [isHydrated, requireAuth, user?.id, navigate, pathname]);
+  }, [isHydrated, requireAuth, user?.id, user?.role, navigate, pathname]);
 
   const isLockedOut = requireAuth && user && !isAdmin && tokenState !== "active" && isRestricted;
 
