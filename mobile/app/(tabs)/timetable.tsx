@@ -212,7 +212,7 @@ export default function TimetableScreen() {
             </View>
           ) : (
             slots.map((slot: any) => (
-              <PeriodCard key={slot.id} slot={slot} />
+              <PeriodCard key={slot.id} slot={slot} colors={colors} />
             ))
           )}
 

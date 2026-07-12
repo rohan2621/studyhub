@@ -133,6 +133,7 @@ function DashboardPage() {
             </div>
           </form>
         </div>
+        </div>
 
         {/* Token / Access Banner */}
         {tokenState !== "active" && user?.role === "student" && (

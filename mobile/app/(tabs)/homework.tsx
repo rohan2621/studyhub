@@ -284,6 +284,7 @@ export default function HomeworkScreen() {
               <HwCard
                 key={hw.id}
                 hw={hw}
+                colors={colors}
                 onSubmit={() => { setSubmitModal(hw.id); setFileUrl(""); }}
                 onViewFile={onViewFile}
               />

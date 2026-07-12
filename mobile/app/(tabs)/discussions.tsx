@@ -44,7 +44,7 @@ export default function DiscussionsScreen() {
       const conn = new signalR.HubConnectionBuilder()
         .withUrl(`${API_URL}/hubs/discussions?access_token=${token}`)
         .withAutomaticReconnect().build();
-      conn.on("NewReply", (r) => {
+      conn.on("NewReply", (r: any) => {
         setRtReplies((prev) => [...prev, r]);
         setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
       });
