@@ -147,10 +147,17 @@ var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get
     };
 
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
-    p.AllowAnyHeader()
-     .AllowAnyMethod()
-     .AllowCredentials()
-     .WithOrigins(allowedOrigins)));
+{
+    p.AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+    if (builder.Environment.IsDevelopment())
+    {
+        p.SetIsOriginAllowed(_ => true);
+    }
+    else
+    {
+        p.WithOrigins(allowedOrigins);
+    }
+}));
 
 // Health checks
 builder.Services.AddHealthChecks()
