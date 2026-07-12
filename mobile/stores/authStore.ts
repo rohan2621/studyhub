@@ -6,11 +6,19 @@ interface User {
   name: string;
   email: string;
   role: string;
-  schoolId: string;
-  grade: string;
-  section: string;
+  schoolId?: string;
+  grade?: string;
+  section?: string;
   school?: string;
 }
+
+// Helper: returns true for users with Admin role regardless of string/numeric form
+export function isAdminUser(user: User | null): boolean {
+  if (!user) return false;
+  const r = user.role;
+  return r === "Admin" || String(r).toLowerCase() === "admin" || (r as unknown) === 3;
+}
+
 
 interface AuthState {
   user: User | null;

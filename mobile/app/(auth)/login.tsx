@@ -8,7 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 import { Mail, Lock, Eye, EyeOff, Check, ArrowRight } from "lucide-react-native";
 import { api } from "../../lib/api";
-import { useAuthStore } from "../../stores/authStore";
+import { useAuthStore, isAdminUser } from "../../stores/authStore";
 import { useThemeStore } from "../../stores/themeStore";
 import { FloatingInput } from "../../components/ui/FloatingInput";
 import { GradientButton } from "../../components/ui/GradientButton";
@@ -35,7 +35,7 @@ export default function LoginScreen() {
         text1: `Welcome back, ${data.user.name}!`,
       });
 
-      if (data.user.role === 3 || data.user.role === "Admin") {
+      if (isAdminUser(data.user)) {
         router.replace("/(admin)");
       } else {
         router.replace("/(tabs)/home");

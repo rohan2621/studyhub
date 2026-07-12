@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Lock, ChevronRight } from "lucide-react-native";
 import Toast from "react-native-toast-message";
 import { useThemeStore } from "../../stores/themeStore";
-import { useAuthStore } from "../../stores/authStore";
+import { useAuthStore, isAdminUser } from "../../stores/authStore";
 import { api } from "../../lib/api";
 
 function CustomTabBar({ state, descriptors, navigation, colors, tokenStatus, user, isAdmin }: any) {
@@ -106,7 +106,7 @@ function CustomTabBar({ state, descriptors, navigation, colors, tokenStatus, use
 export default function TabsLayout() {
   const { colors } = useThemeStore();
   const { user } = useAuthStore();
-  const isAdmin = Number(user?.role) === 3 || user?.role === "Admin";
+  const isAdmin = isAdminUser(user);
   const [showLockModal, setShowLockModal] = useState(false);
 
   const { data: tokenStatus } = useQuery({

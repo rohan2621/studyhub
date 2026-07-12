@@ -6,13 +6,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { Loader2 } from "lucide-react-native";
 import { useEffect } from "react";
-import { useAuthStore } from "../stores/authStore";
+import { useAuthStore, isAdminUser } from "../stores/authStore";
 import { useThemeStore } from "../stores/themeStore";
 import { StudyHubBrand } from "../components/ui/StudyHubBrand";
 import { BackgroundArt } from "../components/ui/BackgroundArt";
 
 export default function Index() {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, user } = useAuthStore();
   const { colors } = useThemeStore();
   const rotation = useSharedValue(0);
 
@@ -43,5 +43,14 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={isAuthenticated ? "/(tabs)/home" : "/(auth)/login"} />;
+  if (!isAuthenticated) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  // Route admin users to the admin panel; everyone else goes to the student tabs
+  if (isAdminUser(user)) {
+    return <Redirect href="/(admin)" />;
+  }
+
+  return <Redirect href="/(tabs)/home" />;
 }
