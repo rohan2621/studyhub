@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\StudyHub.API.csproj": {}
+    "c:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\StudyHub.API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\StudyHub.API.csproj": {
+    "c:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\StudyHub.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\StudyHub.API.csproj",
+        "projectUniqueName": "c:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\StudyHub.API.csproj",
         "projectName": "StudyHub.API",
-        "projectPath": "C:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\StudyHub.API.csproj",
+        "projectPath": "c:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\StudyHub.API.csproj",
         "packagesPath": "C:\\Users\\unoth\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\obj\\",
+        "outputPath": "c:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\unoth\\AppData\\Roaming\\NuGet\\NuGet.Config"

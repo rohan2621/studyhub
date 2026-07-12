@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "NtVVT5z94WY=",
+  "dgSpecHash": "1oyfYLHo5Uw=",
   "success": true,
-  "projectFilePath": "C:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\StudyHub.API.csproj",
+  "projectFilePath": "c:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\StudyHub.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\unoth\\.nuget\\packages\\aspnetcore.healthchecks.npgsql\\9.0.0\\aspnetcore.healthchecks.npgsql.9.0.0.nupkg.sha512",
     "C:\\Users\\unoth\\.nuget\\packages\\aspnetcore.healthchecks.redis\\9.0.0\\aspnetcore.healthchecks.redis.9.0.0.nupkg.sha512",

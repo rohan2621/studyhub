@@ -511,3 +511,5 @@ C:\Users\unoth\OneDrive\Desktop\C++ Rhiwaz\anti gravity\studyhub\backend\StudyHu
 C:\Users\unoth\OneDrive\Desktop\C++ Rhiwaz\anti gravity\studyhub\backend\StudyHub.API\obj\Debug\net8.0\StudyHub.API.pdb
 C:\Users\unoth\OneDrive\Desktop\C++ Rhiwaz\anti gravity\studyhub\backend\StudyHub.API\obj\Debug\net8.0\StudyHub.API.genruntimeconfig.cache
 C:\Users\unoth\OneDrive\Desktop\C++ Rhiwaz\anti gravity\studyhub\backend\StudyHub.API\obj\Debug\net8.0\ref\StudyHub.API.dll
+c:\Users\unoth\OneDrive\Desktop\C++ Rhiwaz\anti gravity\studyhub\backend\StudyHub.API\bin\Debug\net8.0\appsettings.Development.json
+c:\Users\unoth\OneDrive\Desktop\C++ Rhiwaz\anti gravity\studyhub\backend\StudyHub.API\bin\Debug\net8.0\StudyHub.API.staticwebassets.runtime.json

@@ -1,11 +1,19 @@
 {
   "Version": 1,
-  "Hash": "lheUHrZYO96fx4tDqe0HFBaVJUlHDbO1KLQOecmhcZQ=",
+  "Hash": "ijo0kdPdURApGJHjijLZGoZhgujI81s8Rxg0MHHIwLA=",
   "Source": "StudyHub.API",
   "BasePath": "_content/StudyHub.API",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "StudyHub.API\\wwwroot",
+      "Source": "StudyHub.API",
+      "ContentRoot": "c:\\Users\\unoth\\OneDrive\\Desktop\\C++ Rhiwaz\\anti gravity\\studyhub\\backend\\StudyHub.API\\wwwroot\\",
+      "BasePath": "_content/StudyHub.API",
+      "Pattern": "**"
+    }
+  ],
   "Assets": []
 }
