@@ -26,13 +26,13 @@ function LoginPage() {
   const { setUser, setToken, setAccessToken, setRefreshToken } = useAuthStore();
 
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 50);
+    const t = setTimeout(() => setMounted(true), 60);
     return () => clearTimeout(t);
   }, []);
 
   const triggerShake = () => {
     setShake(true);
-    setTimeout(() => setShake(false), 600);
+    setTimeout(() => setShake(false), 550);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,42 +131,49 @@ function LoginPage() {
   };
 
   return (
-    <div className="auth-page-bg">
-      <div className="auth-blob auth-blob-1" />
-      <div className="auth-blob auth-blob-2" />
-      <div className="auth-blob auth-blob-3" />
+    <div className="bw-page">
+      {/* Subtle dot-grid background texture */}
+      <div className="bw-bg-grid" />
 
       <div
-        className="auth-card-wrapper"
+        className="bw-wrapper"
         style={{
           opacity: mounted ? 1 : 0,
-          transform: mounted ? "translateY(0)" : "translateY(24px)",
-          transition: "opacity 0.5s ease, transform 0.5s ease",
+          transform: mounted ? "translateY(0)" : "translateY(20px)",
+          transition: "opacity 0.45s ease, transform 0.45s ease",
         }}
       >
+        {/* Top accent line */}
+        <div className="bw-accent-bar" />
+
         <div
-          className="auth-card"
-          style={{ animation: shake ? "auth-shake 0.5s ease" : "none" }}
+          className="bw-card"
+          style={{ animation: shake ? "bw-shake 0.5s ease" : "none" }}
         >
-          <div className="auth-logo-wrap">
-            <div className="auth-logo-ring">
+          {/* Logo */}
+          <div className="bw-logo-wrap">
+            <div className="bw-logo-box">
               <img
                 src="/logo.png?v=12"
                 alt="StudyHub"
-                width="36"
-                height="36"
+                width="32"
+                height="32"
                 loading="eager"
-                className="auth-logo-img"
+                className="bw-logo-img"
               />
             </div>
+            <span className="bw-brand">StudyHub</span>
           </div>
 
-          <h1 className="auth-title">Welcome back</h1>
-          <p className="auth-subtitle">Sign in to access your study materials</p>
+          <div className="bw-divider" />
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="auth-field">
-              <label htmlFor="email" className="auth-label">School email</label>
+          <h1 className="bw-title">Welcome back</h1>
+          <p className="bw-subtitle">Sign in to access your study materials</p>
+
+          <form onSubmit={handleSubmit} className="bw-form">
+            {/* Email */}
+            <div className="bw-field">
+              <label htmlFor="email" className="bw-label">School email</label>
               <input
                 id="email"
                 type="email"
@@ -174,7 +181,7 @@ function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@school.edu"
-                className="auth-input"
+                className="bw-input"
                 autoComplete="email"
                 autoCapitalize="none"
                 spellCheck={false}
@@ -183,9 +190,10 @@ function LoginPage() {
               />
             </div>
 
-            <div className="auth-field">
-              <label htmlFor="password" className="auth-label">Password</label>
-              <div className="auth-input-wrap">
+            {/* Password */}
+            <div className="bw-field">
+              <label htmlFor="password" className="bw-label">Password</label>
+              <div className="bw-input-wrap">
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -193,7 +201,7 @@ function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="auth-input auth-input-pr"
+                  className="bw-input bw-input-pr"
                   autoComplete="current-password"
                   aria-invalid={!!error}
                   aria-describedby={error ? "login-error" : undefined}
@@ -201,7 +209,7 @@ function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="auth-eye-btn"
+                  className="bw-eye-btn"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   aria-pressed={showPassword}
                 >
@@ -214,77 +222,315 @@ function LoginPage() {
               </div>
             </div>
 
+            {/* Error */}
             {error && (
-              <div id="login-error" role="alert" className="auth-error">
-                <span className="auth-error-dot" />
+              <div id="login-error" role="alert" className="bw-error">
+                <span className="bw-error-icon">!</span>
                 {error}
               </div>
             )}
 
-            <button type="submit" disabled={isLoading} className="auth-submit-btn">
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="bw-btn"
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                   Signing in…
                 </>
-              ) : "Sign in"}
+              ) : (
+                <>
+                  Sign in
+                  <span className="bw-btn-arrow">→</span>
+                </>
+              )}
             </button>
           </form>
 
-          <p className="auth-footer-text">
+          <p className="bw-footer">
             Don&apos;t have an account?{" "}
-            <Link to="/signup" className="auth-link">Sign up</Link>
+            <Link to="/signup" className="bw-link">Sign up</Link>
           </p>
         </div>
+
+        {/* Bottom shadow strip */}
+        <div className="bw-shadow-strip" />
       </div>
 
       <style>{`
-        @keyframes auth-blob-move {
-          0%,100%{transform:translate(0,0) scale(1);}
-          33%{transform:translate(30px,-20px) scale(1.05);}
-          66%{transform:translate(-20px,15px) scale(0.97);}
-        }
-        @keyframes auth-shake {
+        @keyframes bw-shake {
           0%,100%{transform:translateX(0);}
-          15%{transform:translateX(-8px);}
-          30%{transform:translateX(8px);}
-          45%{transform:translateX(-6px);}
-          60%{transform:translateX(6px);}
-          75%{transform:translateX(-3px);}
-          90%{transform:translateX(3px);}
+          18%{transform:translateX(-7px);}
+          36%{transform:translateX(7px);}
+          54%{transform:translateX(-5px);}
+          72%{transform:translateX(5px);}
+          90%{transform:translateX(-2px);}
         }
-        .auth-page-bg{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:#080810;position:relative;overflow:hidden;font-family:var(--font-sans);}
-        .auth-blob{position:absolute;border-radius:50%;filter:blur(80px);animation:auth-blob-move 9s ease-in-out infinite;pointer-events:none;}
-        .auth-blob-1{width:440px;height:440px;background:radial-gradient(circle,rgba(99,102,241,0.30) 0%,transparent 70%);top:-120px;left:-120px;animation-delay:0s;}
-        .auth-blob-2{width:380px;height:380px;background:radial-gradient(circle,rgba(168,85,247,0.24) 0%,transparent 70%);bottom:-90px;right:-90px;animation-delay:-3.5s;}
-        .auth-blob-3{width:300px;height:300px;background:radial-gradient(circle,rgba(59,130,246,0.20) 0%,transparent 70%);top:50%;left:55%;transform:translate(-50%,-50%);animation-delay:-7s;}
-        .auth-card-wrapper{width:100%;max-width:420px;position:relative;z-index:10;}
-        .auth-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:2.5rem 2rem;box-shadow:0 0 0 1px rgba(99,102,241,0.07),0 25px 60px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.06);}
-        .auth-logo-wrap{display:flex;justify-content:center;margin-bottom:1.5rem;}
-        .auth-logo-ring{width:64px;height:64px;border-radius:16px;background:rgba(99,102,241,0.14);border:1px solid rgba(99,102,241,0.28);display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px rgba(99,102,241,0.22);}
-        .auth-logo-img{width:36px;height:36px;filter:brightness(0) invert(1);}
-        .auth-title{text-align:center;font-size:1.625rem;font-weight:800;color:#ffffff;letter-spacing:-0.02em;margin-bottom:0.375rem;}
-        .auth-subtitle{text-align:center;font-size:0.875rem;color:rgba(255,255,255,0.42);margin-bottom:1.75rem;}
-        .auth-form{display:flex;flex-direction:column;gap:1.125rem;}
-        .auth-field{display:flex;flex-direction:column;gap:0.375rem;}
-        .auth-label{font-size:0.8125rem;font-weight:600;color:rgba(255,255,255,0.65);letter-spacing:0.01em;}
-        .auth-input-wrap{position:relative;}
-        .auth-input{width:100%;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.11);border-radius:10px;padding:0.65rem 0.875rem;font-size:0.9375rem;color:#ffffff;transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;box-sizing:border-box;}
-        .auth-input::placeholder{color:rgba(255,255,255,0.22);}
-        .auth-input:focus{outline:none;border-color:rgba(99,102,241,0.65);background:rgba(99,102,241,0.07);box-shadow:0 0 0 3px rgba(99,102,241,0.14),0 0 14px rgba(99,102,241,0.09);}
-        .auth-input-pr{padding-right:2.75rem;}
-        .auth-eye-btn{position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.32);background:none;border:none;cursor:pointer;padding:0.2rem;border-radius:6px;transition:color 0.2s;display:flex;align-items:center;justify-content:center;}
-        .auth-eye-btn:hover{color:rgba(255,255,255,0.75);}
-        .auth-eye-btn:focus-visible{outline:2px solid rgba(99,102,241,0.6);outline-offset:2px;}
-        .auth-error{display:flex;align-items:center;gap:0.5rem;background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.22);border-radius:8px;padding:0.6rem 0.875rem;font-size:0.8125rem;color:#fca5a5;font-weight:500;}
-        .auth-error-dot{width:6px;height:6px;border-radius:50%;background:#f87171;flex-shrink:0;}
-        .auth-submit-btn{display:flex;align-items:center;justify-content:center;gap:0.5rem;width:100%;padding:0.75rem 1.5rem;background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);color:#ffffff;font-weight:700;font-size:0.9375rem;border:none;border-radius:10px;cursor:pointer;margin-top:0.25rem;transition:opacity 0.2s,transform 0.15s,box-shadow 0.2s;box-shadow:0 4px 16px rgba(99,102,241,0.38);letter-spacing:0.01em;}
-        .auth-submit-btn:hover:not(:disabled){opacity:0.91;transform:translateY(-1px);box-shadow:0 7px 22px rgba(99,102,241,0.48);}
-        .auth-submit-btn:active:not(:disabled){transform:translateY(0);}
-        .auth-submit-btn:disabled{opacity:0.52;cursor:not-allowed;}
-        .auth-footer-text{text-align:center;font-size:0.875rem;color:rgba(255,255,255,0.38);margin-top:1.5rem;}
-        .auth-link{color:#818cf8;font-weight:700;text-decoration:none;transition:color 0.2s;}
-        .auth-link:hover{color:#a5b4fc;}
+
+        .bw-page {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1.5rem;
+          background: #f8f8f8;
+          position: relative;
+          font-family: var(--font-sans);
+          overflow: hidden;
+        }
+
+        /* Subtle dot grid */
+        .bw-bg-grid {
+          position: absolute;
+          inset: 0;
+          background-image: radial-gradient(circle, #d4d4d4 1px, transparent 1px);
+          background-size: 28px 28px;
+          opacity: 0.5;
+          pointer-events: none;
+        }
+
+        .bw-wrapper {
+          width: 100%;
+          max-width: 420px;
+          position: relative;
+          z-index: 10;
+        }
+
+        /* Top accent bar — thicker, makes the card look anchored */
+        .bw-accent-bar {
+          height: 3px;
+          background: #000;
+          width: 100%;
+        }
+
+        .bw-card {
+          background: #ffffff;
+          border: 1px solid #000;
+          border-top: none;
+          padding: 2.25rem 2rem 2rem;
+          position: relative;
+        }
+
+        /* 3-px offset shadow strip below card */
+        .bw-shadow-strip {
+          height: 3px;
+          background: #000;
+          width: calc(100% - 6px);
+          margin-left: 6px;
+        }
+
+        /* Logo row */
+        .bw-logo-wrap {
+          display: flex;
+          align-items: center;
+          gap: 0.625rem;
+          margin-bottom: 1.25rem;
+        }
+        .bw-logo-box {
+          width: 40px;
+          height: 40px;
+          background: #000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .bw-logo-img {
+          width: 24px;
+          height: 24px;
+          filter: brightness(0) invert(1);
+        }
+        .bw-brand {
+          font-size: 1.0625rem;
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          color: #000;
+        }
+
+        .bw-divider {
+          height: 1px;
+          background: #e5e5e5;
+          margin-bottom: 1.5rem;
+        }
+
+        .bw-title {
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: #000;
+          letter-spacing: -0.025em;
+          margin-bottom: 0.3rem;
+        }
+        .bw-subtitle {
+          font-size: 0.875rem;
+          color: #6b7280;
+          margin-bottom: 1.75rem;
+        }
+
+        .bw-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1.125rem;
+        }
+
+        .bw-field {
+          display: flex;
+          flex-direction: column;
+          gap: 0.4rem;
+        }
+
+        .bw-label {
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: #000;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+        }
+
+        .bw-input-wrap { position: relative; }
+
+        .bw-input {
+          width: 100%;
+          background: #fff;
+          border: 1.5px solid #d1d5db;
+          border-radius: 0;
+          padding: 0.6rem 0.875rem;
+          font-size: 0.9375rem;
+          color: #000;
+          transition: border-color 0.15s, box-shadow 0.15s;
+          box-sizing: border-box;
+          outline: none;
+        }
+        .bw-input::placeholder { color: #9ca3af; }
+        .bw-input:hover { border-color: #9ca3af; }
+        .bw-input:focus {
+          border-color: #000;
+          box-shadow: 3px 3px 0 0 #000;
+        }
+        .bw-input-pr { padding-right: 2.75rem; }
+
+        .bw-eye-btn {
+          position: absolute;
+          right: 0.75rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #9ca3af;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.15rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: color 0.15s;
+        }
+        .bw-eye-btn:hover { color: #000; }
+        .bw-eye-btn:focus-visible {
+          outline: 2px solid #000;
+          outline-offset: 2px;
+        }
+
+        .bw-error {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          border: 1.5px solid #000;
+          background: #fafafa;
+          padding: 0.55rem 0.75rem;
+          font-size: 0.8125rem;
+          color: #000;
+          font-weight: 500;
+          position: relative;
+        }
+        /* left red accent */
+        .bw-error::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 3px;
+          background: #000;
+        }
+        .bw-error-icon {
+          font-size: 0.75rem;
+          font-weight: 900;
+          width: 18px;
+          height: 18px;
+          background: #000;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          border-radius: 50%;
+        }
+
+        .bw-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          width: 100%;
+          padding: 0.7rem 1.25rem;
+          background: #000;
+          color: #fff;
+          font-weight: 700;
+          font-size: 0.9375rem;
+          border: 1.5px solid #000;
+          border-radius: 0;
+          cursor: pointer;
+          margin-top: 0.25rem;
+          transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.1s;
+          letter-spacing: 0.01em;
+          position: relative;
+          overflow: hidden;
+        }
+        .bw-btn::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: rgba(255,255,255,0);
+          transition: background 0.15s;
+        }
+        .bw-btn:hover:not(:disabled) {
+          background: #fff;
+          color: #000;
+          box-shadow: 4px 4px 0 0 #000;
+          transform: translate(-2px, -2px);
+        }
+        .bw-btn:active:not(:disabled) {
+          transform: translate(0, 0);
+          box-shadow: none;
+        }
+        .bw-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .bw-btn-arrow {
+          font-size: 1rem;
+          transition: transform 0.15s;
+        }
+        .bw-btn:hover:not(:disabled) .bw-btn-arrow {
+          transform: translateX(3px);
+        }
+
+        .bw-footer {
+          text-align: center;
+          font-size: 0.875rem;
+          color: #6b7280;
+          margin-top: 1.5rem;
+        }
+        .bw-link {
+          color: #000;
+          font-weight: 700;
+          text-decoration: underline;
+          text-underline-offset: 2px;
+          transition: opacity 0.15s;
+        }
+        .bw-link:hover { opacity: 0.6; }
       `}</style>
     </div>
   );
